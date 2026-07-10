@@ -85,7 +85,7 @@ const HIGHLIGHTS = [
     title: "Sports Complex",
     desc: "Cricket, football, tennis, athletics.",
     icon: Trophy,
-    image: PANORAMAS[9].panorama,
+    image: PANORAMAS[7].panorama,
   },
   {
     id: "innovation",
