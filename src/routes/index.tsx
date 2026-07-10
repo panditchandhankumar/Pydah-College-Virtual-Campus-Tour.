@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { ArrowRight, Compass, Building2, Users, GraduationCap, Sparkles, MapPin } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
+import { IntroVideoModal } from "@/components/IntroVideoModal";
 import campusAsset from "@/assets/pydah-campus.jpg.asset.json";
+
 
 
 export const Route = createFileRoute("/")({
@@ -28,8 +31,10 @@ const stats = [
 ];
 
 function Landing() {
+  const [introOpen, setIntroOpen] = useState(false);
   return (
     <>
+      <IntroVideoModal open={introOpen} onClose={() => setIntroOpen(false)} />
       {/* Hero */}
       <section className="relative isolate overflow-hidden pb-24 pt-40 min-h-[92vh] flex items-center">
         {/* Campus photo background */}
@@ -72,14 +77,14 @@ function Landing() {
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3">
-              <Link
-                to="/tour"
+              <button
+                onClick={() => setIntroOpen(true)}
                 className="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-glow transition-transform hover:scale-105"
               >
                 <Compass className="h-4 w-4" />
                 Start Virtual Tour
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
+              </button>
               <Link
                 to="/departments"
                 className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/20"

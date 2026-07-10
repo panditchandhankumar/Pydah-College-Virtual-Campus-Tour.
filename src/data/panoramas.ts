@@ -1,3 +1,5 @@
+import adminBlock360 from "@/assets/admin-block-360.jpg.asset.json";
+
 export type Category = "entrance" | "academic" | "facility" | "residential" | "recreation";
 
 export interface Hotspot {
@@ -46,8 +48,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "Home to the Principal's office, admissions, examination cell and finance departments — the operational heart of the college.",
     category: "academic",
-    panorama: `${CDN}/tour/key-biscayne-2.jpg`,
-    thumbnail: `${CDN}/tour/key-biscayne-2-thumb.jpg`,
+    panorama: adminBlock360.url,
+    thumbnail: adminBlock360.url,
     map: { x: 28, y: 68 },
     facilities: ["Principal's office", "Admissions", "Exam cell", "Accounts"],
     hotspots: [
