@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PlacementsRouteImport } from './routes/placements'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as DepartmentsRouteImport } from './routes/departments'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -25,6 +26,11 @@ const TourRoute = TourRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlacementsRoute = PlacementsRouteImport.update({
+  id: '/placements',
+  path: '/placements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GalleryRoute = GalleryRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/departments': typeof DepartmentsRoute
   '/gallery': typeof GalleryRoute
+  '/placements': typeof PlacementsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/departments': typeof DepartmentsRoute
   '/gallery': typeof GalleryRoute
+  '/placements': typeof PlacementsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/departments': typeof DepartmentsRoute
   '/gallery': typeof GalleryRoute
+  '/placements': typeof PlacementsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/departments'
     | '/gallery'
+    | '/placements'
     | '/sitemap.xml'
     | '/tour'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/departments'
     | '/gallery'
+    | '/placements'
     | '/sitemap.xml'
     | '/tour'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/departments'
     | '/gallery'
+    | '/placements'
     | '/sitemap.xml'
     | '/tour'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DepartmentsRoute: typeof DepartmentsRoute
   GalleryRoute: typeof GalleryRoute
+  PlacementsRoute: typeof PlacementsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TourRoute: typeof TourRoute
 }
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/placements': {
+      id: '/placements'
+      path: '/placements'
+      fullPath: '/placements'
+      preLoaderRoute: typeof PlacementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gallery': {
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DepartmentsRoute: DepartmentsRoute,
   GalleryRoute: GalleryRoute,
+  PlacementsRoute: PlacementsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TourRoute: TourRoute,
 }
