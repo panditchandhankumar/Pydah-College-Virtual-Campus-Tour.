@@ -37,7 +37,8 @@ function Landing() {
           <img
             src={campusAsset.url}
             alt="PYDAH College aerial view"
-            className="h-full w-full object-cover scale-105"
+            className="h-full w-full object-cover"
+            loading="eager"
           />
         </div>
         {/* Subtle dark overlay so the campus photo stays crisp and readable */}
