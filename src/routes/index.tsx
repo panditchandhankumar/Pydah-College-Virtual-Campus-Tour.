@@ -40,13 +40,13 @@ function Landing() {
             className="h-full w-full object-cover scale-105"
           />
         </div>
-        {/* Classic collegiate overlay: deep navy → royal blue */}
+        {/* Cinematic dark overlay: subtle cool tint, lets the photo read */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(120deg, oklch(0.24 0.09 258 / 0.95) 0%, oklch(0.30 0.10 258 / 0.82) 55%, oklch(0.18 0.08 250 / 0.88) 100%)",
+              "linear-gradient(120deg, oklch(0.18 0.03 258 / 0.88) 0%, oklch(0.24 0.04 258 / 0.78) 55%, oklch(0.14 0.03 250 / 0.82) 100%)",
           }}
         />
         <div
