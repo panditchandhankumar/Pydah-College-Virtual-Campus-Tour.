@@ -1,6 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X, Compass } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import logoAsset from "@/assets/pydah-logo.png.asset.json";
+
 
 const links = [
   { to: "/", label: "Home" },
@@ -19,11 +21,12 @@ export function Navbar() {
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="mx-auto mt-4 max-w-7xl px-4">
         <nav className="glass flex items-center justify-between rounded-2xl px-4 py-3 shadow-sm">
-          <Link to="/" className="flex items-center gap-2 font-display text-lg font-semibold text-primary">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-elegant">
-              <Compass className="h-5 w-5" />
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logoAsset.url} alt="PYDAH College of Engineering" className="h-11 w-auto" />
+            <span className="hidden sm:flex flex-col leading-tight">
+              <span className="font-display text-base font-bold text-primary">Pydah College of Engineering</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-secondary">An Autonomous Institution</span>
             </span>
-            PYDAH
           </Link>
 
           <ul className="hidden items-center gap-1 md:flex">

@@ -1,16 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import logoAsset from "@/assets/pydah-logo.png.asset.json";
 
 export function Footer() {
   return (
     <footer className="mt-24 bg-primary text-primary-foreground">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-4">
         <div>
-          <div className="flex items-center gap-2 font-display text-xl font-semibold">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10">
-              <Compass className="h-5 w-5" />
+          <div className="flex items-center gap-3">
+            <span className="grid h-12 w-12 place-items-center rounded-xl bg-white p-1">
+              <img src={logoAsset.url} alt="PYDAH" className="h-full w-full object-contain" />
             </span>
-            PYDAH College
+            <span className="font-display text-lg font-semibold">PYDAH College<br/><span className="text-xs font-normal text-white/60">of Engineering</span></span>
           </div>
           <p className="mt-4 text-sm text-white/70">
             An immersive virtual campus experience — explore every corner of PYDAH from anywhere in the world.
