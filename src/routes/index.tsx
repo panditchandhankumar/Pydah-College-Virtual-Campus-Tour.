@@ -41,13 +41,13 @@ function Landing() {
             loading="eager"
           />
         </div>
-        {/* Subtle dark overlay so the campus photo stays crisp and readable */}
+        {/* Very light overlay so the campus photo stays bright and clear */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(120deg, oklch(0.18 0.03 258 / 0.42) 0%, oklch(0.24 0.04 258 / 0.32) 55%, oklch(0.14 0.03 250 / 0.38) 100%)",
+              "linear-gradient(120deg, oklch(0.18 0.03 258 / 0.22) 0%, oklch(0.24 0.04 258 / 0.15) 55%, oklch(0.14 0.03 250 / 0.18) 100%)",
           }}
         />
 
