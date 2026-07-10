@@ -41,32 +41,32 @@ function Landing() {
             loading="eager"
           />
         </div>
-        {/* Subtle dark overlay so the campus photo stays crisp and readable */}
+        {/* Very light overlay so the campus photo stays bright and clear */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(120deg, oklch(0.18 0.03 258 / 0.42) 0%, oklch(0.24 0.04 258 / 0.32) 55%, oklch(0.14 0.03 250 / 0.38) 100%)",
+              "linear-gradient(120deg, oklch(0.18 0.03 258 / 0.22) 0%, oklch(0.24 0.04 258 / 0.15) 55%, oklch(0.14 0.03 250 / 0.18) 100%)",
           }}
         />
 
 
-        <div className="mx-auto max-w-7xl px-6 text-white">
+        <div className="mx-auto max-w-7xl px-6 text-white" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}>
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
             className="max-w-3xl"
           >
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent backdrop-blur">
               <Sparkles className="h-3.5 w-3.5" />
               Immersive 360° experience
             </span>
             <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] md:text-7xl">
               Walk through <span className="gradient-text">PYDAH College</span> without leaving your seat.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
+            <p className="mt-6 max-w-2xl text-lg text-white/90 md:text-xl">
               A cinematic virtual tour of every department, lab and green space —
               built for prospective students, parents and visitors from anywhere in the world.
             </p>
@@ -82,7 +82,7 @@ function Landing() {
               </Link>
               <Link
                 to="/departments"
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/20"
               >
                 Browse Departments
               </Link>
