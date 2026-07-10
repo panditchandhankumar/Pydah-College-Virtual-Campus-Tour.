@@ -44,21 +44,22 @@
 :root {
   --radius: 0.875rem;
 
-  /* Deep navy #002147 */
-  --primary: oklch(0.24 0.09 258);
+  /* Deep Navy #071B44 */
+  --primary: oklch(0.22 0.10 265);
   --primary-foreground: oklch(0.985 0.005 240);
 
-  /* #0E4D92 */
-  --secondary: oklch(0.42 0.14 258);
+  /* Royal Blue #0066FF */
+  --secondary: oklch(0.55 0.22 262);
   --secondary-foreground: oklch(0.99 0.003 240);
 
-  /* Cyan accent #00C2FF */
-  --accent: oklch(0.78 0.16 220);
-  --accent-foreground: oklch(0.18 0.05 258);
+  /* Sky Blue #28C7FA */
+  --accent: oklch(0.78 0.14 230);
+  --accent-foreground: oklch(0.20 0.08 265);
 
-  /* Background #F8FAFC */
-  --background: oklch(0.985 0.004 240);
-  --foreground: oklch(0.19 0.02 258);
+  /* Background near-white */
+  --background: oklch(0.995 0.003 240);
+  --foreground: oklch(0.20 0.06 265);
+
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.19 0.02 258);
@@ -150,3 +151,9 @@
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 70%, transparent); }
   50% { box-shadow: 0 0 0 16px color-mix(in oklab, var(--accent) 0%, transparent); }
 }
+
+@keyframes kenburns {
+  0%   { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-1%, -1.5%); }
+}
+
