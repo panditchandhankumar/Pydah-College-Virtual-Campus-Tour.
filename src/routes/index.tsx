@@ -37,26 +37,17 @@ function Landing() {
           <img
             src={campusAsset.url}
             alt="PYDAH College aerial view"
-            className="h-full w-full object-cover scale-105"
+            className="h-full w-full object-cover"
+            loading="eager"
           />
         </div>
-        {/* Cinematic dark overlay: subtle cool tint, lets the photo read */}
+        {/* Subtle dark overlay so the campus photo stays crisp and readable */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(120deg, oklch(0.18 0.03 258 / 0.88) 0%, oklch(0.24 0.04 258 / 0.78) 55%, oklch(0.14 0.03 250 / 0.82) 100%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 opacity-[0.12]"
-          style={{
-            backgroundImage:
-              "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-            backgroundSize: "72px 72px",
-            maskImage: "radial-gradient(circle at center, black 45%, transparent 80%)",
+              "linear-gradient(120deg, oklch(0.18 0.03 258 / 0.42) 0%, oklch(0.24 0.04 258 / 0.32) 55%, oklch(0.14 0.03 250 / 0.38) 100%)",
           }}
         />
 
