@@ -23,9 +23,11 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
   useEffect(() => {
     let disposed = false;
     (async () => {
-      const [{ Viewer }, { MarkersPlugin }] = await Promise.all([
+      const [{ Viewer }, { MarkersPlugin }, { StereoPlugin }, { GyroscopePlugin }] = await Promise.all([
         import("@photo-sphere-viewer/core"),
         import("@photo-sphere-viewer/markers-plugin"),
+        import("@photo-sphere-viewer/stereo-plugin"),
+        import("@photo-sphere-viewer/gyroscope-plugin"),
       ]);
       if (disposed || !containerRef.current) return;
       const viewer = new Viewer({
@@ -35,8 +37,8 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
         defaultZoomLvl: 20,
         touchmoveTwoFingers: false,
         mousewheelCtrlKey: false,
-        navbar: ["zoom", "fullscreen"],
-        plugins: [[MarkersPlugin, {}]],
+        navbar: ["zoom", "gyroscope", "stereo", "fullscreen"],
+        plugins: [[MarkersPlugin, {}], [GyroscopePlugin, {}], [StereoPlugin, {}]],
       });
       viewer.addEventListener("ready", () => setLoading(false), { once: true });
       viewerRef.current = viewer;
