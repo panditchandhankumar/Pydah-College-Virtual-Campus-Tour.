@@ -40,13 +40,13 @@ function Landing() {
             className="h-full w-full object-cover scale-105"
           />
         </div>
-        {/* Classic collegiate overlay: deep maroon → navy */}
+        {/* Classic collegiate overlay: deep navy → royal blue */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(120deg, oklch(0.24 0.09 258 / 0.92) 0%, oklch(0.32 0.11 340 / 0.78) 55%, oklch(0.22 0.09 30 / 0.85) 100%)",
+              "linear-gradient(120deg, oklch(0.24 0.09 258 / 0.95) 0%, oklch(0.30 0.10 258 / 0.82) 55%, oklch(0.18 0.08 250 / 0.88) 100%)",
           }}
         />
         <div
