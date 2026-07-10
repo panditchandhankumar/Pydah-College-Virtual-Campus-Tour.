@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Compass, Building2, Users, GraduationCap, Sparkles, MapPin } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
+import campusAsset from "@/assets/pydah-campus.jpg.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,26 +31,35 @@ function Landing() {
   return (
     <>
       {/* Hero */}
-      <section className="relative isolate overflow-hidden pb-24 pt-40">
-        <div className="absolute inset-0 -z-10 gradient-hero opacity-95" />
+      <section className="relative isolate overflow-hidden pb-24 pt-40 min-h-[92vh] flex items-center">
+        {/* Campus photo background */}
+        <div className="absolute inset-0 -z-20">
+          <img
+            src={campusAsset.url}
+            alt="PYDAH College aerial view"
+            className="h-full w-full object-cover scale-105"
+          />
+        </div>
+        {/* Classic collegiate overlay: deep maroon → navy */}
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 opacity-30"
+          className="absolute inset-0 -z-10"
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 20%, oklch(0.78 0.16 220 / .6), transparent 40%), radial-gradient(circle at 80% 60%, oklch(0.42 0.14 258 / .6), transparent 40%)",
+            background:
+              "linear-gradient(120deg, oklch(0.24 0.09 258 / 0.92) 0%, oklch(0.32 0.11 340 / 0.78) 55%, oklch(0.22 0.09 30 / 0.85) 100%)",
           }}
         />
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 opacity-[0.15]"
+          className="absolute inset-0 -z-10 opacity-[0.12]"
           style={{
             backgroundImage:
               "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-            maskImage: "radial-gradient(circle at center, black 40%, transparent 75%)",
+            backgroundSize: "72px 72px",
+            maskImage: "radial-gradient(circle at center, black 45%, transparent 80%)",
           }}
         />
+
 
         <div className="mx-auto max-w-7xl px-6 text-white">
           <motion.div
