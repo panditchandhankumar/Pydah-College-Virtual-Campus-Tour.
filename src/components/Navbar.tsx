@@ -46,14 +46,6 @@ export function Navbar() {
           </Link>
 
           <div className="ml-auto hidden flex-col items-end gap-3 md:flex">
-            <div className="flex items-center gap-6 text-sm font-semibold">
-              <button className="flex items-center gap-1.5 text-foreground hover:text-primary">
-                <User className="h-4 w-4" /> Student Login
-              </button>
-              <button className="flex items-center gap-1.5 text-primary hover:opacity-80">
-                <Search className="h-4 w-4" /> Search
-              </button>
-            </div>
             {stamp && <p className="text-xs italic text-muted-foreground">Last Updated on {stamp}</p>}
           </div>
 
