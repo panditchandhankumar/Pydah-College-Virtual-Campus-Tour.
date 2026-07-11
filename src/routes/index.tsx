@@ -222,7 +222,7 @@ function Landing() {
 
         {/* Content */}
         <motion.div
-          style={{ y: contentY, textShadow: "0 2px 28px rgba(0,0,0,0.55)" }}
+          style={{ y: contentY, textShadow: "0 2px 32px rgba(0,0,0,0.65)" }}
           className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24 text-white"
         >
           <motion.span
