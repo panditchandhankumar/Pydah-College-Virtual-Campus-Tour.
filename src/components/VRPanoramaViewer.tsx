@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import * as THREE from "three";
 import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
-import type { Panorama } from "@/data/panoramas";
+import type { Panorama, Hotspot } from "@/data/panoramas";
 import { getPanorama } from "@/data/panoramas";
 
 interface Props {
@@ -293,18 +293,7 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
             dctx.lineWidth = 12;
             dctx.strokeStyle = "#ffffff";
             dctx.stroke();
-            // arrow
-            dctx.strokeStyle = "#ffffff";
-            dctx.lineWidth = 22;
-            dctx.lineCap = "round";
-            dctx.lineJoin = "round";
-            dctx.beginPath();
-            dctx.moveTo(128, 180);
-            dctx.lineTo(128, 78);
-            dctx.moveTo(78, 128);
-            dctx.lineTo(128, 78);
-            dctx.lineTo(178, 128);
-            dctx.stroke();
+            drawArrow(dctx, h.arrow);
             const discTex = new THREE.CanvasTexture(discCanvas);
             discTex.colorSpace = THREE.SRGBColorSpace;
             const discMat = new THREE.MeshBasicMaterial({
