@@ -36,7 +36,7 @@ export const PANORAMAS: Panorama[] = [
     category: "entrance",
     panorama: `${CDN}/tour/key-biscayne-1.jpg`,
     thumbnail: `${CDN}/tour/key-biscayne-1-thumb.jpg`,
-    map: { x: 12, y: 82 },
+    map: { x: 55, y: 12 },
     facilities: ["Security desk", "Visitor parking", "Info kiosk"],
     hotspots: [
       { targetId: "administration", yaw: 40, pitch: -5, label: "Administration" },
