@@ -15,11 +15,9 @@ import {
   Home as HomeIcon,
   Rocket,
   Users,
-  GraduationCap,
   Globe2,
   Star,
   Quote,
-  ChevronRight,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
