@@ -38,15 +38,27 @@ export function IntroVideoModal({ open, onClose }: Props) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] bg-black"
         >
-          {/* Fullscreen background video */}
-          <iframe
-            className="absolute inset-0 h-full w-full"
-            src="https://www.youtube.com/embed/iJyZLRkJuWk?autoplay=1&mute=1&controls=0&loop=1&playlist=iJyZLRkJuWk&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&vq=hd1080"
-            title="PYDAH Campus Flyover"
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
-            style={{ border: 0 }}
-          />
+          {/* Fullscreen background video — scaled to cover to eliminate black bars */}
+          <div className="absolute inset-0 overflow-hidden">
+            <iframe
+              src="https://www.youtube.com/embed/iJyZLRkJuWk?autoplay=1&mute=1&controls=0&loop=1&playlist=iJyZLRkJuWk&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&vq=hd1080"
+              title="PYDAH Campus Flyover"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+              style={{
+                border: 0,
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "100vw",
+                height: "100vh",
+                minWidth: "177.78vh", // 16/9 * 100vh — fill by height on tall/narrow
+                minHeight: "56.25vw", // 9/16 * 100vw — fill by width on wide/short
+                transform: "translate(-50%, -50%)",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
 
           {/* Vignette */}
           <div
