@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowRight,
   Compass,
   Play,
-  MousePointer2,
   Sparkles,
   BookOpen,
   FlaskConical,
@@ -16,8 +15,6 @@ import {
   Rocket,
   Users,
   Globe2,
-  Star,
-  Quote,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
@@ -46,13 +43,6 @@ export const Route = createFileRoute("/")({
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Data
-
-const STATS = [
-  { value: "72", label: "Acres Campus" },
-  { value: "24", label: "Programs" },
-  { value: "310", label: "Faculty" },
-  { value: "94%", label: "Placements" },
-];
 
 const HIGHLIGHTS = [
   {
@@ -110,72 +100,6 @@ const WHY = [
   { icon: Building2, title: "Modern Labs", desc: "Industry-grade equipment across every department." },
   { icon: Globe2, title: "Global Reach", desc: "Exchange programs and international collaborations." },
 ];
-
-const TESTIMONIALS = [
-  {
-    name: "Ananya Rao",
-    role: "CSE '24 · Software Engineer @ Amazon",
-    quote:
-      "PYDAH's project-first curriculum gave me real product thinking. My internship at day 90 was because of what the faculty pushed us to build.",
-  },
-  {
-    name: "Karthik Menon",
-    role: "ECE '23 · VLSI Engineer @ Intel",
-    quote:
-      "The VLSI lab is genuinely industry-grade. I taped out a working chip as an undergrad — that got me the Intel interview.",
-  },
-  {
-    name: "Priya Sharma",
-    role: "M.Tech AI '24 · Research @ IISc",
-    quote:
-      "Research culture, mentorship, and access to compute — everything I needed to publish before graduating.",
-  },
-];
-
-const PLACEMENT_LOGOS = ["TCS", "Infosys", "Wipro", "Amazon", "Microsoft", "Accenture", "Deloitte", "IBM"];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Animated counter
-
-function Counter({ value }: { value: string }) {
-  const numeric = parseInt(value.replace(/\D/g, ""), 10);
-  const suffix = value.replace(/[\d]/g, "");
-  const [n, setN] = useState(0);
-  const ref = useRef<HTMLSpanElement | null>(null);
-  const shown = useRef(false);
-
-  useEffect(() => {
-    if (!ref.current || isNaN(numeric)) {
-      setN(numeric || 0);
-      return;
-    }
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && !shown.current) {
-          shown.current = true;
-          const start = performance.now();
-          const dur = 1400;
-          const tick = (t: number) => {
-            const p = Math.min(1, (t - start) / dur);
-            const eased = 1 - Math.pow(1 - p, 3);
-            setN(Math.round(numeric * eased));
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.4 },
-    );
-    obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [numeric]);
-
-  return (
-    <span ref={ref}>
-      {isNaN(numeric) ? value : `${n}${suffix}`}
-    </span>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Landing
@@ -273,25 +197,6 @@ function Landing() {
             </button>
           </motion.div>
 
-          {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.4, duration: 0.6 }}
-            className="pointer-events-none absolute inset-x-0 bottom-8 flex justify-center"
-          >
-            <div className="flex flex-col items-center gap-2 text-white/70">
-              <MousePointer2 className="h-4 w-4" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.3em]">Scroll</span>
-              <span className="relative block h-8 w-[2px] overflow-hidden rounded-full bg-white/20">
-                <motion.span
-                  animate={{ y: ["-100%", "100%"] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-transparent to-accent"
-                />
-              </span>
-            </div>
-          </motion.div>
         </motion.div>
       </section>
 
@@ -503,48 +408,8 @@ function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════ TESTIMONIALS */}
-      <section className="bg-gradient-to-b from-muted/40 to-transparent py-28 md:py-36">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-12 max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">
-              Student Voices
-            </p>
-            <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">
-              What our graduates say.
-            </h2>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {TESTIMONIALS.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6, delay: i * 0.08 }}
-                className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-8 shadow-[0_20px_60px_-25px_rgba(7,27,68,0.2)] backdrop-blur-xl"
-              >
-                <Quote className="absolute right-6 top-6 h-10 w-10 text-accent/30" />
-                <div className="flex gap-1 text-accent">
-                  {Array.from({ length: 5 }).map((_, k) => (
-                    <Star key={k} className="h-4 w-4 fill-accent" />
-                  ))}
-                </div>
-                <p className="mt-5 text-[15px] leading-relaxed text-foreground/85">"{t.quote}"</p>
-                <div className="mt-6 flex items-center gap-3">
-                  <span className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-secondary to-accent font-display text-sm font-bold text-white">
-                    {t.name.split(" ").map((s) => s[0]).join("")}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-primary">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+
+
 
 
       {/* ═══════════════════════════════════ FINAL CTA */}
