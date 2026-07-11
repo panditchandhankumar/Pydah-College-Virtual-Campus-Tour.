@@ -92,7 +92,7 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
     markers.setMarkers(
       p.hotspots.map((h) => {
         const target = getPanorama(h.targetId);
-        const name = target?.title ?? h.label;
+        const name = target?.title ?? h.label ?? "Location";
         return {
           id: `hs-${h.targetId}`,
           position: { yaw: `${h.yaw}deg`, pitch: `${h.pitch}deg` },

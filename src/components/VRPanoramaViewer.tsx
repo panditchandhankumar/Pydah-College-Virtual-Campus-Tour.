@@ -305,7 +305,7 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
           }
           for (const h of p.hotspots) {
             const target = getPanorama(h.targetId);
-            const name = target?.title ?? h.label;
+            const name = target?.title ?? h.label ?? "Location";
 
             // Blue disc with white up-arrow (canvas → texture on a plane)
             const discCanvas = document.createElement("canvas");

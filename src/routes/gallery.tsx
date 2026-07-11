@@ -3,7 +3,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { PANORAMAS, type Category } from "@/data/panoramas";
 
-const categories: (Category | "all")[] = ["all", "entrance", "academic", "facility", "residential", "recreation"];
+const categories: (Category | "all")[] = ["all", "entrance", "road", "junction", "academic", "facility", "recreation", "parking"];
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({
