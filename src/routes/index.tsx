@@ -367,14 +367,9 @@ function Landing() {
               Move between blocks, look up at the atrium, step into a lab — all in real-time 360°.
               Best experienced on desktop or with a VR headset.
             </p>
-            <button
-              onClick={() => setIntroOpen(true)}
-              className="mt-10 group inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-[17px] font-semibold text-primary shadow-glow transition-transform hover:scale-[1.03]"
-            >
-              <Play className="h-4 w-4 fill-primary" />
-              Enter Virtual Tour
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
+            <p className="mt-6 text-sm text-white/60">
+              Use the virtual tour to move between blocks, look up at the atrium, and step into labs.
+            </p>
           </motion.div>
 
           <motion.div
