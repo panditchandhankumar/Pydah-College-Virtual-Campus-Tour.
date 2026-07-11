@@ -440,8 +440,6 @@ function Landing() {
           </div>
         </div>
       </section>
-    </>
-  );
 
       {/* ═══════════════════════════════════ COLLEGE INFO / DIRECTORY */}
       <section className="bg-primary text-primary-foreground">
