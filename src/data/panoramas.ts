@@ -1,13 +1,20 @@
 import adminBlock360 from "@/assets/admin-block-360.jpg.asset.json";
 import library360 from "@/assets/library-360.jpg.asset.json";
 
-export type Category = "entrance" | "academic" | "facility" | "residential" | "recreation";
+export type Category =
+  | "entrance"
+  | "road"
+  | "junction"
+  | "academic"
+  | "facility"
+  | "recreation"
+  | "parking";
 
 export interface Hotspot {
   targetId: string;
-  yaw: number; // radians or degrees (we use degrees, viewer accepts strings)
+  yaw: number; // degrees
   pitch: number;
-  label: string;
+  label?: string;
   arrow?: "up" | "right" | "down" | "left";
 }
 
@@ -18,198 +25,298 @@ export interface Panorama {
   category: Category;
   panorama: string;
   thumbnail: string;
-  /** position on the mini map, 0-100 percent */
+  /** position on the mini-map, 0-100 percent */
   map: { x: number; y: number };
   facilities: string[];
   hotspots: Hotspot[];
 }
 
-// Placeholder equirectangular panoramas from the open Photo Sphere Viewer demo set.
-// Swap these URLs for real PYDAH campus 360° captures once available.
+// Photo Sphere Viewer public demo panoramas — used as placeholders per node.
+// Swap the URL of any node for a real PYDAH 360° capture without touching UI.
 const CDN = "https://photo-sphere-viewer-data.netlify.app/assets";
+const P = {
+  gate: `${CDN}/tour/key-biscayne-1.jpg`,
+  road: `${CDN}/tour/key-biscayne-2.jpg`,
+  circle: `${CDN}/tour/key-biscayne-3.jpg`,
+  park: `${CDN}/tour/key-biscayne-4.jpg`,
+  open: `${CDN}/tour/key-biscayne-5.jpg`,
+  ground: `${CDN}/tour/key-biscayne-6.jpg`,
+  ece: `${CDN}/tour/key-biscayne-7.jpg`,
+  sphere: `${CDN}/sphere.jpg`,
+  sphereTest: `${CDN}/sphere-test.jpg`,
+  cropped: `${CDN}/sphere-cropped.jpg`,
+};
+const T = {
+  gate: `${CDN}/tour/key-biscayne-1-thumb.jpg`,
+  road: `${CDN}/tour/key-biscayne-2-thumb.jpg`,
+  circle: `${CDN}/tour/key-biscayne-3-thumb.jpg`,
+  park: `${CDN}/tour/key-biscayne-4-thumb.jpg`,
+  open: `${CDN}/tour/key-biscayne-5-thumb.jpg`,
+  ground: `${CDN}/tour/key-biscayne-6-thumb.jpg`,
+  ece: `${CDN}/tour/key-biscayne-7-thumb.jpg`,
+  sphere: `${CDN}/sphere-small.jpg`,
+  sphereTest: `${CDN}/sphere-test.jpg`,
+  cropped: `${CDN}/sphere-cropped.jpg`,
+};
 
 export const PANORAMAS: Panorama[] = [
   {
     id: "main-gate",
     title: "Main Gate",
     description:
-      "The grand entrance to PYDAH campus, framed by manicured lawns and the signature archway welcoming students and visitors.",
+      "The grand entrance to PYDAH campus — signature archway, security desk and visitor drop-off.",
     category: "entrance",
-    panorama: `${CDN}/tour/key-biscayne-1.jpg`,
-    thumbnail: `${CDN}/tour/key-biscayne-1-thumb.jpg`,
-    map: { x: 55, y: 12 },
+    panorama: P.gate,
+    thumbnail: T.gate,
+    map: { x: 45, y: 15 },
     facilities: ["Security desk", "Visitor parking", "Info kiosk"],
     hotspots: [
-      { targetId: "administration", yaw: 40, pitch: -5, label: "Administration" },
-      { targetId: "library", yaw: 130, pitch: -3, label: "Central Library" },
+      { targetId: "straight-road", yaw: 0, pitch: -3, arrow: "up" },
+      { targetId: "main-circle", yaw: 15, pitch: -5, arrow: "up" },
+      { targetId: "ground", yaw: -80, pitch: -3, arrow: "left" },
+      { targetId: "security-office", yaw: 70, pitch: -2, arrow: "right" },
     ],
   },
   {
-    id: "administration",
-    title: "Administration Block",
+    id: "straight-road",
+    title: "Straight Road",
     description:
-      "Home to the Principal's office, admissions, examination cell and finance departments — the operational heart of the college.",
-    category: "academic",
-    panorama: adminBlock360.url,
-    thumbnail: adminBlock360.url,
-    map: { x: 75, y: 22 },
-    facilities: ["Principal's office", "Admissions", "Exam cell", "Accounts"],
+      "The tree-lined arterial road from the main gate leading into the central circle of the campus.",
+    category: "road",
+    panorama: P.road,
+    thumbnail: T.road,
+    map: { x: 45, y: 30 },
+    facilities: ["Pedestrian walk", "Landscaping"],
     hotspots: [
-      { targetId: "main-gate", yaw: -140, pitch: -5, label: "Main Gate" },
-      { targetId: "vice-principal-cabin", yaw: -126, pitch: 12, label: "Vice Principal Cabin" },
-      { targetId: "admission-cell", yaw: -128, pitch: -2, label: "Admission Cell" },
-      { targetId: "aspire-arena", yaw: -104, pitch: 2, label: "Aspire Arena", arrow: "right" },
-      { targetId: "library", yaw: 60, pitch: -3, label: "Library" },
-      { targetId: "cse-block", yaw: 160, pitch: -3, label: "CSE Block" },
+      { targetId: "main-gate", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-circle", yaw: 0, pitch: -3, arrow: "up" },
     ],
   },
   {
-    id: "admission-cell",
-    title: "Admission Cell",
+    id: "main-circle",
+    title: "Main Circle",
     description:
-      "The Admission Cell handles enquiries, applications and counselling for prospective students across all programmes.",
-    category: "academic",
-    panorama: adminBlock360.url,
-    thumbnail: adminBlock360.url,
-    map: { x: 78, y: 20 },
-    facilities: ["Enquiry desk", "Counselling room", "Application processing"],
+      "Central junction of the campus. Roads branch out to every academic and recreational zone from here.",
+    category: "junction",
+    panorama: P.circle,
+    thumbnail: T.circle,
+    map: { x: 45, y: 55 },
+    facilities: ["Central roundabout", "Signage", "Benches"],
     hotspots: [
-      { targetId: "administration", yaw: 0, pitch: -5, label: "Administration" },
+      { targetId: "engineering-block", yaw: 0, pitch: -3, arrow: "up" },
+      { targetId: "sitting-park", yaw: -60, pitch: -3, arrow: "left" },
+      { targetId: "open-ground", yaw: 90, pitch: -3, arrow: "right" },
+      { targetId: "bike-parking", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-gate", yaw: 160, pitch: -3, arrow: "down" },
     ],
   },
   {
-    id: "vice-principal-cabin",
-    title: "Vice Principal Cabin",
+    id: "ground",
+    title: "Ground",
     description:
-      "Office of the Vice Principal — academic leadership, faculty coordination and student mentorship.",
-    category: "academic",
-    panorama: adminBlock360.url,
-    thumbnail: adminBlock360.url,
-    map: { x: 73, y: 24 },
-    facilities: ["Vice Principal's desk", "Meeting area"],
+      "The main sports ground with cricket pitch and athletics track adjoining the entrance road.",
+    category: "recreation",
+    panorama: P.ground,
+    thumbnail: T.ground,
+    map: { x: 13, y: 55 },
+    facilities: ["Cricket pitch", "Athletics track", "Spectator area"],
     hotspots: [
-      { targetId: "administration", yaw: 0, pitch: -5, label: "Administration" },
+      { targetId: "main-gate", yaw: 45, pitch: -3, arrow: "up" },
+      { targetId: "main-circle", yaw: 90, pitch: -3, arrow: "right" },
     ],
   },
   {
-    id: "aspire-arena",
-    title: "Aspire Arena",
+    id: "security-office",
+    title: "Security Office",
     description:
-      "Aspire Arena — the central hall inside the Administration Block for notices, event displays and student assembly.",
+      "24×7 security cabin at the main gate handling visitor entry, vehicle pass and campus surveillance.",
     category: "facility",
+    panorama: P.sphereTest,
+    thumbnail: T.sphereTest,
+    map: { x: 55, y: 10 },
+    facilities: ["Visitor log", "CCTV monitors", "Public address"],
+    hotspots: [{ targetId: "main-gate", yaw: 180, pitch: -3, arrow: "down" }],
+  },
+  {
+    id: "engineering-block",
+    title: "Engineering Block",
+    description:
+      "The engineering academic hub — home to CSE, ECE, principal's office, admissions and administrative rooms.",
+    category: "academic",
     panorama: adminBlock360.url,
     thumbnail: adminBlock360.url,
-    map: { x: 76, y: 26 },
-    facilities: ["Notice boards", "Assembly space"],
+    map: { x: 65, y: 42 },
+    facilities: ["Classrooms", "Labs", "Faculty rooms", "Seminar hall"],
     hotspots: [
-      { targetId: "administration", yaw: 0, pitch: -5, label: "Administration" },
+      { targetId: "cse-department", yaw: -40, pitch: -3, arrow: "left" },
+      { targetId: "ece-department", yaw: 40, pitch: -3, arrow: "right" },
+      { targetId: "admission-block", yaw: -90, pitch: 0, arrow: "left" },
+      { targetId: "principal-office", yaw: 0, pitch: -3, arrow: "up" },
+      { targetId: "office-room", yaw: 90, pitch: -3, arrow: "right" },
+      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
     ],
   },
   {
-    id: "library",
-    title: "Central Library",
+    id: "sitting-park",
+    title: "Sitting Park",
     description:
-      "A quiet, light-filled reading environment with over 80,000 volumes, digital archives, and dedicated research pods.",
-    category: "facility",
-    panorama: library360.url,
-    thumbnail: library360.url,
-    map: { x: 52, y: 42 },
-    facilities: ["Reading hall", "Digital library", "Journal archive", "Discussion rooms"],
+      "A landscaped park with benches and shade — the campus's favourite spot to relax between classes.",
+    category: "recreation",
+    panorama: P.park,
+    thumbnail: T.park,
+    map: { x: 30, y: 55 },
+    facilities: ["Benches", "Gardens", "Walkways"],
     hotspots: [
-      { targetId: "administration", yaw: -60, pitch: -5, label: "Administration" },
-      { targetId: "cse-block", yaw: 90, pitch: -3, label: "CSE Block" },
-      { targetId: "innovation-lab", yaw: 30, pitch: -2, label: "Innovation Lab" },
+      { targetId: "main-circle", yaw: 90, pitch: -3, arrow: "right" },
+      { targetId: "open-ground", yaw: 30, pitch: -3, arrow: "up" },
     ],
   },
   {
-    id: "cse-block",
+    id: "open-ground",
+    title: "Open Ground",
+    description:
+      "Multipurpose open ground used for events, assemblies and outdoor sports next to the Degree Block.",
+    category: "recreation",
+    panorama: P.open,
+    thumbnail: T.open,
+    map: { x: 70, y: 75 },
+    facilities: ["Event stage area", "Flag mast", "Sports lines"],
+    hotspots: [
+      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "degree-block", yaw: 60, pitch: -3, arrow: "right" },
+    ],
+  },
+  {
+    id: "bike-parking",
+    title: "Bike Parking",
+    description:
+      "Covered two-wheeler parking bay for students and staff at the southern end of the campus.",
+    category: "parking",
+    panorama: P.cropped,
+    thumbnail: T.cropped,
+    map: { x: 45, y: 92 },
+    facilities: ["Two-wheeler bays", "Rain cover", "Security patrol"],
+    hotspots: [{ targetId: "main-circle", yaw: 0, pitch: -3, arrow: "up" }],
+  },
+  {
+    id: "cse-department",
     title: "CSE Department",
     description:
-      "Computer Science block featuring modern classrooms, AI/ML lab, cybersecurity range, and collaborative learning spaces.",
+      "Computer Science & Engineering — AI/ML lab, cybersecurity range, project rooms and faculty cabins.",
     category: "academic",
-    panorama: `${CDN}/tour/key-biscayne-4.jpg`,
-    thumbnail: `${CDN}/tour/key-biscayne-4-thumb.jpg`,
-    map: { x: 72, y: 42 },
-    facilities: ["AI/ML lab", "Cybersecurity range", "Seminar hall", "Faculty rooms"],
+    panorama: library360.url,
+    thumbnail: library360.url,
+    map: { x: 58, y: 36 },
+    facilities: ["AI/ML lab", "Cybersecurity lab", "Project studio"],
     hotspots: [
-      { targetId: "library", yaw: -90, pitch: -3, label: "Library" },
-      { targetId: "innovation-lab", yaw: 45, pitch: -3, label: "Innovation Lab" },
-      { targetId: "cafeteria", yaw: 150, pitch: -5, label: "Cafeteria" },
+      { targetId: "engineering-block", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-circle", yaw: 160, pitch: -3, arrow: "down" },
+      { targetId: "labs", yaw: 45, pitch: -3, arrow: "right" },
+      { targetId: "classrooms", yaw: -45, pitch: -3, arrow: "left" },
     ],
   },
   {
-    id: "innovation-lab",
-    title: "Innovation Lab",
+    id: "ece-department",
+    title: "ECE Department",
     description:
-      "A maker space for robotics, IoT prototyping, 3D printing and student startups — where PYDAH's next big ideas take shape.",
-    category: "facility",
-    panorama: `${CDN}/tour/key-biscayne-5.jpg`,
-    thumbnail: `${CDN}/tour/key-biscayne-5-thumb.jpg`,
-    map: { x: 45, y: 55 },
-    facilities: ["3D printing", "Robotics arena", "IoT workbench", "Incubation desks"],
+      "Electronics & Communication — embedded systems lab, VLSI design lab and communication test benches.",
+    category: "academic",
+    panorama: P.ece,
+    thumbnail: T.ece,
+    map: { x: 72, y: 36 },
+    facilities: ["Embedded lab", "VLSI lab", "Communication lab"],
     hotspots: [
-      { targetId: "cse-block", yaw: -135, pitch: -3, label: "CSE Block" },
-      { targetId: "auditorium", yaw: 60, pitch: -3, label: "Auditorium" },
+      { targetId: "engineering-block", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-circle", yaw: 200, pitch: -3, arrow: "down" },
+      { targetId: "labs", yaw: -60, pitch: -3, arrow: "left" },
     ],
   },
   {
-    id: "auditorium",
-    title: "Auditorium",
+    id: "admission-block",
+    title: "Admission Block",
     description:
-      "1,200-seat auditorium hosting convocations, tech fests, guest lectures and cultural performances year round.",
-    category: "facility",
-    panorama: `${CDN}/sphere.jpg`,
-    thumbnail: `${CDN}/sphere-small.jpg`,
-    map: { x: 92, y: 60 },
-    facilities: ["1,200 seats", "Green rooms", "AV control", "Stage lighting"],
+      "The Admission Cell — enquiries, application processing, counselling and document verification.",
+    category: "academic",
+    panorama: adminBlock360.url,
+    thumbnail: adminBlock360.url,
+    map: { x: 76, y: 22 },
+    facilities: ["Enquiry desk", "Counselling", "Document verification"],
     hotspots: [
-      { targetId: "innovation-lab", yaw: -120, pitch: -3, label: "Innovation Lab" },
-      { targetId: "cafeteria", yaw: 100, pitch: -3, label: "Cafeteria" },
+      { targetId: "engineering-block", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-gate", yaw: -90, pitch: -3, arrow: "left" },
     ],
   },
   {
-    id: "cafeteria",
-    title: "Cafeteria",
+    id: "principal-office",
+    title: "Principal Office",
     description:
-      "A vibrant multi-cuisine cafeteria and open-air court — the social crossroads of the campus.",
-    category: "recreation",
-    panorama: `${CDN}/sphere-test.jpg`,
-    thumbnail: `${CDN}/sphere-test.jpg`,
-    map: { x: 70, y: 75 },
-    facilities: ["Multi-cuisine counters", "Barista", "Outdoor seating"],
+      "Office of the Principal — academic leadership and institutional administration.",
+    category: "academic",
+    panorama: adminBlock360.url,
+    thumbnail: adminBlock360.url,
+    map: { x: 60, y: 46 },
+    facilities: ["Principal's desk", "Meeting area"],
     hotspots: [
-      { targetId: "cse-block", yaw: -60, pitch: -3, label: "CSE Block" },
-      { targetId: "hostel", yaw: 90, pitch: -3, label: "Hostel" },
+      { targetId: "engineering-block", yaw: 180, pitch: -3, arrow: "down" },
     ],
   },
   {
-    id: "hostel",
-    title: "Student Hostel",
+    id: "office-room",
+    title: "Office Room",
     description:
-      "Modern residential blocks with 24/7 security, common rooms, high-speed Wi-Fi, gym and study lounges.",
-    category: "residential",
-    panorama: `${CDN}/tour/key-biscayne-6.jpg`,
-    thumbnail: `${CDN}/tour/key-biscayne-6-thumb.jpg`,
-    map: { x: 45, y: 88 },
-    facilities: ["Wi-Fi", "Gym", "Study lounges", "Mess hall"],
+      "General administrative office — accounts, records, examination cell and staff coordination.",
+    category: "academic",
+    panorama: adminBlock360.url,
+    thumbnail: adminBlock360.url,
+    map: { x: 70, y: 46 },
+    facilities: ["Accounts", "Records", "Exam cell"],
     hotspots: [
-      { targetId: "cafeteria", yaw: -90, pitch: -3, label: "Cafeteria" },
-      { targetId: "playground", yaw: 60, pitch: -3, label: "Playground" },
+      { targetId: "engineering-block", yaw: 180, pitch: -3, arrow: "down" },
     ],
   },
   {
-    id: "playground",
-    title: "Sports Ground",
+    id: "labs",
+    title: "Labs",
     description:
-      "Full-size cricket and football ground with athletics track, tennis courts and floodlit basketball court.",
-    category: "recreation",
-    panorama: `${CDN}/sphere.jpg`,
-    thumbnail: `${CDN}/sphere-small.jpg`,
-    map: { x: 10, y: 55 },
-    facilities: ["Cricket ground", "Football pitch", "Tennis court", "Athletics track"],
+      "Shared engineering laboratories used across CSE and ECE for practicals and project work.",
+    category: "academic",
+    panorama: P.park,
+    thumbnail: T.park,
+    map: { x: 55, y: 40 },
+    facilities: ["Workstations", "Instruments", "Server rack"],
     hotspots: [
-      { targetId: "hostel", yaw: -140, pitch: -3, label: "Hostel" },
-      { targetId: "main-gate", yaw: 40, pitch: -3, label: "Main Gate" },
+      { targetId: "cse-department", yaw: 200, pitch: -3, arrow: "down" },
+      { targetId: "ece-department", yaw: 160, pitch: -3, arrow: "down" },
+    ],
+  },
+  {
+    id: "classrooms",
+    title: "Classrooms",
+    description:
+      "Smart classrooms with projectors, whiteboards and tiered seating for lecture sessions.",
+    category: "academic",
+    panorama: P.road,
+    thumbnail: T.road,
+    map: { x: 78, y: 40 },
+    facilities: ["Smart boards", "Projector", "AC halls"],
+    hotspots: [
+      { targetId: "cse-department", yaw: 200, pitch: -3, arrow: "left" },
+    ],
+  },
+  {
+    id: "degree-block",
+    title: "Degree Block",
+    description:
+      "The Degree College block — arts, science and commerce classrooms alongside the open ground.",
+    category: "academic",
+    panorama: P.sphere,
+    thumbnail: T.sphere,
+    map: { x: 90, y: 55 },
+    facilities: ["Lecture halls", "Faculty rooms", "Library annex"],
+    hotspots: [
+      { targetId: "main-circle", yaw: 250, pitch: -3, arrow: "left" },
+      { targetId: "open-ground", yaw: 200, pitch: -3, arrow: "down" },
+      { targetId: "main-gate", yaw: 300, pitch: -3, arrow: "up" },
     ],
   },
 ];
