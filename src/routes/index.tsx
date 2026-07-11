@@ -353,7 +353,7 @@ function Landing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.7, delay: i * 0.06 }}
-              className={`group relative overflow-hidden rounded-3xl bg-primary ${h.span ?? ""}`}
+              className={`group relative overflow-hidden rounded-3xl bg-muted ${h.span ?? ""}`}
             >
               <img
                 src={h.image}
@@ -361,7 +361,8 @@ function Landing() {
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
               <div className="absolute inset-0 flex flex-col justify-end p-6 text-white md:p-7">
                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/15 backdrop-blur-md ring-1 ring-white/25">
                   <h.icon className="h-5 w-5 text-accent" />
