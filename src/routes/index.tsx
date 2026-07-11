@@ -44,13 +44,6 @@ export const Route = createFileRoute("/")({
 // ─────────────────────────────────────────────────────────────────────────────
 // Data
 
-const STATS = [
-  { value: "72", label: "Acres Campus" },
-  { value: "24", label: "Programs" },
-  { value: "310", label: "Faculty" },
-  { value: "94%", label: "Placements" },
-];
-
 const HIGHLIGHTS = [
   {
     id: "drone",
@@ -107,8 +100,6 @@ const WHY = [
   { icon: Building2, title: "Modern Labs", desc: "Industry-grade equipment across every department." },
   { icon: Globe2, title: "Global Reach", desc: "Exchange programs and international collaborations." },
 ];
-
-const PLACEMENT_LOGOS = ["TCS", "Infosys", "Wipro", "Amazon", "Microsoft", "Accenture", "Deloitte", "IBM"];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Animated counter
