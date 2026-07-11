@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowRight,
   Compass,
@@ -100,49 +100,6 @@ const WHY = [
   { icon: Building2, title: "Modern Labs", desc: "Industry-grade equipment across every department." },
   { icon: Globe2, title: "Global Reach", desc: "Exchange programs and international collaborations." },
 ];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Animated counter
-
-function Counter({ value }: { value: string }) {
-  const numeric = parseInt(value.replace(/\D/g, ""), 10);
-  const suffix = value.replace(/[\d]/g, "");
-  const [n, setN] = useState(0);
-  const ref = useRef<HTMLSpanElement | null>(null);
-  const shown = useRef(false);
-
-  useEffect(() => {
-    if (!ref.current || isNaN(numeric)) {
-      setN(numeric || 0);
-      return;
-    }
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && !shown.current) {
-          shown.current = true;
-          const start = performance.now();
-          const dur = 1400;
-          const tick = (t: number) => {
-            const p = Math.min(1, (t - start) / dur);
-            const eased = 1 - Math.pow(1 - p, 3);
-            setN(Math.round(numeric * eased));
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.4 },
-    );
-    obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [numeric]);
-
-  return (
-    <span ref={ref}>
-      {isNaN(numeric) ? value : `${n}${suffix}`}
-    </span>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Landing
