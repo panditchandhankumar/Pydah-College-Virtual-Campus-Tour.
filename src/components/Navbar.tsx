@@ -16,10 +16,15 @@ const links = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [stamp, setStamp] = useState<string>("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const now = new Date();
-  const stamp = `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}  ${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  useEffect(() => {
+    const now = new Date();
+    setStamp(
+      `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}  ${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`,
+    );
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 shadow-sm">
