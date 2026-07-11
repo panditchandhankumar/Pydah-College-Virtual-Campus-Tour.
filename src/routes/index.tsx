@@ -208,13 +208,13 @@ function Landing() {
           />
         </motion.div>
 
-        {/* Soft UI-tinted gradient overlay — text side is readable, image side stays clear */}
+        {/* Soft neutral gradient overlay — text side is readable, image side stays clear */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(100deg, rgba(91,26,91,0.62) 0%, rgba(91,26,91,0.34) 38%, rgba(91,26,91,0.10) 65%, transparent 85%)",
+              "linear-gradient(100deg, rgba(10,20,40,0.55) 0%, rgba(10,20,40,0.28) 38%, rgba(10,20,40,0.08) 65%, transparent 85%)",
           }}
         />
 
@@ -425,7 +425,7 @@ function Landing() {
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-tr from-primary/60 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/50 to-transparent" />
                   <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
                     {d.short}
                   </span>
@@ -464,7 +464,7 @@ function Landing() {
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent opacity-70 transition-opacity group-hover:opacity-90" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-70 transition-opacity group-hover:opacity-90" />
                   <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                     <p className="font-display text-base font-semibold md:text-lg">{p.title}</p>
                   </div>
