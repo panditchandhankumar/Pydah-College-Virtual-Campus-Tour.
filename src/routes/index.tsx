@@ -445,14 +445,9 @@ function Landing() {
       {/* ═══════════════════════════════════ GALLERY MASONRY */}
       <section className="bg-gradient-to-b from-transparent via-muted/40 to-transparent py-28 md:py-36">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-12 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">Gallery</p>
-              <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">Snapshots from campus.</h2>
-            </div>
-            <Link to="/gallery" className="text-sm font-semibold text-secondary hover:text-primary">
-              Full gallery →
-            </Link>
+          <div className="mb-12">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">Gallery</p>
+            <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">Snapshots from campus.</h2>
           </div>
           <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
             {PANORAMAS.slice(0, 8).map((p, i) => (
