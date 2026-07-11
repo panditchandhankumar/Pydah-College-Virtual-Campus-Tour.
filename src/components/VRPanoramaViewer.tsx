@@ -278,37 +278,107 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
             ((c as THREE.Mesh).material as THREE.Material)?.dispose?.();
           }
           for (const h of p.hotspots) {
-            const g = new THREE.SphereGeometry(0.35, 24, 16);
-            const m = new THREE.MeshBasicMaterial({
-              color: 0x28c7fa,
+            const target = getPanorama(h.targetId);
+            const name = target?.title ?? h.label;
+
+            // Blue disc with white up-arrow (canvas → texture on a plane)
+            const discCanvas = document.createElement("canvas");
+            discCanvas.width = 256;
+            discCanvas.height = 256;
+            const dctx = discCanvas.getContext("2d")!;
+            dctx.beginPath();
+            dctx.arc(128, 128, 110, 0, Math.PI * 2);
+            dctx.fillStyle = "#1e5fbf";
+            dctx.fill();
+            dctx.lineWidth = 12;
+            dctx.strokeStyle = "#ffffff";
+            dctx.stroke();
+            // arrow
+            dctx.strokeStyle = "#ffffff";
+            dctx.lineWidth = 22;
+            dctx.lineCap = "round";
+            dctx.lineJoin = "round";
+            dctx.beginPath();
+            dctx.moveTo(128, 180);
+            dctx.lineTo(128, 78);
+            dctx.moveTo(78, 128);
+            dctx.lineTo(128, 78);
+            dctx.lineTo(178, 128);
+            dctx.stroke();
+            const discTex = new THREE.CanvasTexture(discCanvas);
+            discTex.colorSpace = THREE.SRGBColorSpace;
+            const discMat = new THREE.MeshBasicMaterial({
+              map: discTex,
               transparent: true,
-              opacity: 0.9,
+              depthTest: false,
+              depthWrite: false,
             });
-            const mesh = new THREE.Mesh(g, m);
+            const discGeom = new THREE.PlaneGeometry(1.4, 1.4);
+            const disc = new THREE.Mesh(discGeom, discMat);
+
             const yaw = THREE.MathUtils.degToRad(h.yaw);
             const pit = THREE.MathUtils.degToRad(h.pitch);
             const r = 6;
-            mesh.position.set(
+            const pos = new THREE.Vector3(
               r * Math.cos(pit) * Math.sin(yaw),
               r * Math.sin(pit),
               -r * Math.cos(pit) * Math.cos(yaw),
             );
-            mesh.userData.targetId = h.targetId;
-            hotspotGroup.add(mesh);
+            disc.position.copy(pos);
+            disc.lookAt(0, 0, 0);
+            disc.userData.targetId = h.targetId;
+            disc.renderOrder = 10;
+            hotspotGroup.add(disc);
 
-            // ring outline
-            const ringGeom = new THREE.RingGeometry(0.45, 0.55, 32);
-            const ringMat = new THREE.MeshBasicMaterial({
-              color: 0xffffff,
+            // Label plane above the disc
+            const labelCanvas = document.createElement("canvas");
+            labelCanvas.width = 512;
+            labelCanvas.height = 128;
+            const lctx = labelCanvas.getContext("2d")!;
+            lctx.font = "bold 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+            const textW = lctx.measureText(name).width;
+            const padX = 28;
+            const boxW = Math.min(labelCanvas.width, textW + padX * 2);
+            const boxH = 96;
+            const bx = (labelCanvas.width - boxW) / 2;
+            const by = (labelCanvas.height - boxH) / 2;
+            const radius = 14;
+            lctx.fillStyle = "#ffffff";
+            lctx.beginPath();
+            lctx.moveTo(bx + radius, by);
+            lctx.arcTo(bx + boxW, by, bx + boxW, by + boxH, radius);
+            lctx.arcTo(bx + boxW, by + boxH, bx, by + boxH, radius);
+            lctx.arcTo(bx, by + boxH, bx, by, radius);
+            lctx.arcTo(bx, by, bx + boxW, by, radius);
+            lctx.closePath();
+            lctx.fill();
+            lctx.strokeStyle = "rgba(0,33,71,0.2)";
+            lctx.lineWidth = 2;
+            lctx.stroke();
+            lctx.fillStyle = "#002147";
+            lctx.textAlign = "center";
+            lctx.textBaseline = "middle";
+            lctx.fillText(name, labelCanvas.width / 2, labelCanvas.height / 2);
+            const labelTex = new THREE.CanvasTexture(labelCanvas);
+            labelTex.colorSpace = THREE.SRGBColorSpace;
+            const labelMat = new THREE.MeshBasicMaterial({
+              map: labelTex,
               transparent: true,
-              opacity: 0.8,
-              side: THREE.DoubleSide,
+              depthTest: false,
+              depthWrite: false,
             });
-            const ring = new THREE.Mesh(ringGeom, ringMat);
-            ring.position.copy(mesh.position);
-            ring.lookAt(0, 0, 0);
-            hotspotGroup.add(ring);
+            const labelAspect = labelCanvas.width / labelCanvas.height;
+            const labelH = 0.6;
+            const labelGeom = new THREE.PlaneGeometry(labelH * labelAspect, labelH);
+            const label = new THREE.Mesh(labelGeom, labelMat);
+            // Position slightly above the disc, along the same look direction
+            const up = new THREE.Vector3(0, 1.15, 0);
+            label.position.copy(pos).add(up);
+            label.lookAt(0, 0, 0);
+            label.renderOrder = 11;
+            hotspotGroup.add(label);
           }
+
           stateRef.current.currentId = id;
           setStatus("");
           onChange(id);
