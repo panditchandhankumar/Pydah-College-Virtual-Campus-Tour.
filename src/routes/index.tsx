@@ -398,21 +398,13 @@ function Landing() {
 
       {/* ═══════════════════════════════════ DEPARTMENTS */}
       <section className="mx-auto max-w-7xl px-6 py-28 md:py-36">
-        <div className="mb-12 flex items-end justify-between gap-6">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">
-              Departments
-            </p>
-            <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">
-              Nine departments. <br className="hidden md:block" /> One connected campus.
-            </h2>
-          </div>
-          <Link
-            to="/departments"
-            className="hidden shrink-0 rounded-full border border-primary/15 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground md:inline-flex"
-          >
-            View all →
-          </Link>
+        <div className="mb-12">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">
+            Departments
+          </p>
+          <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">
+            Nine departments. <br className="hidden md:block" /> One connected campus.
+          </h2>
         </div>
 
         <div className="space-y-4">
