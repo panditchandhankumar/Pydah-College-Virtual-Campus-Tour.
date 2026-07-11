@@ -44,17 +44,18 @@
 :root {
   --radius: 0.875rem;
 
-  /* Deep Navy #071B44 */
-  --primary: oklch(0.22 0.10 265);
-  --primary-foreground: oklch(0.985 0.005 240);
+  /* PYDAH Deep Purple/Maroon #5B1A5B */
+  --primary: oklch(0.32 0.14 335);
+  --primary-foreground: oklch(0.99 0.003 240);
 
-  /* Royal Blue #0066FF */
-  --secondary: oklch(0.55 0.22 262);
+  /* Secondary maroon-red accent */
+  --secondary: oklch(0.45 0.20 20);
   --secondary-foreground: oklch(0.99 0.003 240);
 
-  /* Sky Blue #28C7FA */
-  --accent: oklch(0.78 0.14 230);
-  --accent-foreground: oklch(0.20 0.08 265);
+  /* Warm orange accent (from logo) */
+  --accent: oklch(0.72 0.17 55);
+  --accent-foreground: oklch(0.20 0.08 335);
+
 
   /* Background near-white */
   --background: oklch(0.995 0.003 240);
