@@ -272,6 +272,32 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
           old?.dispose();
 
           // Rebuild hotspots
+          function drawArrow(ctx: CanvasRenderingContext2D, direction: Hotspot["arrow"] = "up") {
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 22;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.beginPath();
+            if (direction === "right") {
+              ctx.moveTo(78, 128); ctx.lineTo(178, 128);
+              ctx.moveTo(128, 78); ctx.lineTo(178, 128);
+              ctx.moveTo(128, 178); ctx.lineTo(178, 128);
+            } else if (direction === "left") {
+              ctx.moveTo(178, 128); ctx.lineTo(78, 128);
+              ctx.moveTo(128, 78); ctx.lineTo(78, 128);
+              ctx.moveTo(128, 178); ctx.lineTo(78, 128);
+            } else if (direction === "down") {
+              ctx.moveTo(128, 78); ctx.lineTo(128, 178);
+              ctx.moveTo(78, 128); ctx.lineTo(128, 178);
+              ctx.moveTo(178, 128); ctx.lineTo(128, 178);
+            } else {
+              ctx.moveTo(128, 180); ctx.lineTo(128, 78);
+              ctx.moveTo(78, 128); ctx.lineTo(128, 78);
+              ctx.moveTo(178, 128); ctx.lineTo(128, 78);
+            }
+            ctx.stroke();
+          }
+
           while (hotspotGroup.children.length) {
             const c = hotspotGroup.children.pop()!;
             (c as THREE.Mesh).geometry?.dispose?.();
