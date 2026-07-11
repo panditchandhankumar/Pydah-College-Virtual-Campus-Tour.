@@ -55,8 +55,53 @@ export const PANORAMAS: Panorama[] = [
     facilities: ["Principal's office", "Admissions", "Exam cell", "Accounts"],
     hotspots: [
       { targetId: "main-gate", yaw: -140, pitch: -5, label: "Main Gate" },
+      { targetId: "admission-cell", yaw: -2, pitch: 12, label: "Admission Cell" },
+      { targetId: "vice-principal-cabin", yaw: -14, pitch: -6, label: "Vice Principal Cabin" },
+      { targetId: "arena", yaw: 14, pitch: -6, label: "Arena" },
       { targetId: "library", yaw: 60, pitch: -3, label: "Library" },
       { targetId: "cse-block", yaw: 160, pitch: -3, label: "CSE Block" },
+    ],
+  },
+  {
+    id: "admission-cell",
+    title: "Admission Cell",
+    description:
+      "The Admission Cell handles enquiries, applications and counselling for prospective students across all programmes.",
+    category: "academic",
+    panorama: adminBlock360.url,
+    thumbnail: adminBlock360.url,
+    map: { x: 78, y: 20 },
+    facilities: ["Enquiry desk", "Counselling room", "Application processing"],
+    hotspots: [
+      { targetId: "administration", yaw: 0, pitch: -5, label: "Administration" },
+    ],
+  },
+  {
+    id: "vice-principal-cabin",
+    title: "Vice Principal Cabin",
+    description:
+      "Office of the Vice Principal — academic leadership, faculty coordination and student mentorship.",
+    category: "academic",
+    panorama: adminBlock360.url,
+    thumbnail: adminBlock360.url,
+    map: { x: 73, y: 24 },
+    facilities: ["Vice Principal's desk", "Meeting area"],
+    hotspots: [
+      { targetId: "administration", yaw: 0, pitch: -5, label: "Administration" },
+    ],
+  },
+  {
+    id: "arena",
+    title: "Arena",
+    description:
+      "The central arena inside the Administration Block — notice boards, event displays and student assembly space.",
+    category: "facility",
+    panorama: adminBlock360.url,
+    thumbnail: adminBlock360.url,
+    map: { x: 76, y: 26 },
+    facilities: ["Notice boards", "Assembly space"],
+    hotspots: [
+      { targetId: "administration", yaw: 0, pitch: -5, label: "Administration" },
     ],
   },
   {
