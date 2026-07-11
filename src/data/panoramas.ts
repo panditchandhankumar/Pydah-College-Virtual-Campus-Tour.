@@ -55,9 +55,9 @@ export const PANORAMAS: Panorama[] = [
     facilities: ["Principal's office", "Admissions", "Exam cell", "Accounts"],
     hotspots: [
       { targetId: "main-gate", yaw: -140, pitch: -5, label: "Main Gate" },
-      { targetId: "admission-cell", yaw: -2, pitch: 12, label: "Admission Cell" },
-      { targetId: "vice-principal-cabin", yaw: -14, pitch: -6, label: "Vice Principal Cabin" },
-      { targetId: "arena", yaw: 14, pitch: -6, label: "Arena" },
+      { targetId: "admission-cell", yaw: -130, pitch: 6, label: "Admission Cell" },
+      { targetId: "vice-principal-cabin", yaw: -128, pitch: -1, label: "Vice Principal Cabin" },
+      { targetId: "aspire-arena", yaw: -116, pitch: -1, label: "Aspire Arena" },
       { targetId: "library", yaw: 60, pitch: -3, label: "Library" },
       { targetId: "cse-block", yaw: 160, pitch: -3, label: "CSE Block" },
     ],
@@ -91,10 +91,10 @@ export const PANORAMAS: Panorama[] = [
     ],
   },
   {
-    id: "arena",
-    title: "Arena",
+    id: "aspire-arena",
+    title: "Aspire Arena",
     description:
-      "The central arena inside the Administration Block — notice boards, event displays and student assembly space.",
+      "Aspire Arena — the central hall inside the Administration Block for notices, event displays and student assembly.",
     category: "facility",
     panorama: adminBlock360.url,
     thumbnail: adminBlock360.url,
