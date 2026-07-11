@@ -417,7 +417,7 @@ function Landing() {
               transition={{ duration: 0.6, delay: i * 0.05 }}
               className="group relative overflow-hidden rounded-3xl bg-card ring-1 ring-border transition-all hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(0,102,255,0.25)]"
             >
-              <div className="grid gap-6 p-6 md:grid-cols-[220px_1fr_auto] md:items-center md:gap-10 md:p-8">
+              <div className="grid gap-6 p-6 md:grid-cols-[220px_1fr] md:items-center md:gap-10 md:p-8">
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl md:aspect-square md:w-[220px]">
                   <img
                     src={PANORAMAS[(i + 2) % PANORAMAS.length].panorama}
@@ -436,13 +436,6 @@ function Landing() {
                   </h3>
                   <p className="mt-2 max-w-2xl text-[16px] text-muted-foreground">{d.overview}</p>
                 </div>
-                <Link
-                  to="/departments"
-                  className="inline-flex items-center gap-2 self-start rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-elegant transition-all group-hover:bg-secondary md:self-center"
-                >
-                  Explore
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
               </div>
             </motion.div>
           ))}
