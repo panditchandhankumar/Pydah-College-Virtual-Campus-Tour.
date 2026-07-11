@@ -210,13 +210,13 @@ function Landing() {
           />
         </motion.div>
 
-        {/* Left-side dark gradient overlay only */}
+        {/* Soft UI-tinted gradient overlay — keeps the campus photo crisp */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(100deg, rgba(7,27,68,0.85) 0%, rgba(7,27,68,0.55) 35%, rgba(7,27,68,0.15) 60%, transparent 80%)",
+              "linear-gradient(100deg, rgba(91,26,91,0.28) 0%, rgba(91,26,91,0.14) 35%, rgba(91,26,91,0.05) 60%, transparent 80%)",
           }}
         />
 
