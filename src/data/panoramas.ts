@@ -55,9 +55,9 @@ export const PANORAMAS: Panorama[] = [
     facilities: ["Principal's office", "Admissions", "Exam cell", "Accounts"],
     hotspots: [
       { targetId: "main-gate", yaw: -140, pitch: -5, label: "Main Gate" },
-      { targetId: "admission-cell", yaw: -130, pitch: 6, label: "Admission Cell" },
-      { targetId: "vice-principal-cabin", yaw: -128, pitch: -1, label: "Vice Principal Cabin" },
-      { targetId: "aspire-arena", yaw: -116, pitch: -1, label: "Aspire Arena" },
+      { targetId: "admission-cell", yaw: -125, pitch: 22, label: "Admission Cell" },
+      { targetId: "vice-principal-cabin", yaw: -128, pitch: -2, label: "Vice Principal Cabin" },
+      { targetId: "aspire-arena", yaw: -104, pitch: 2, label: "Aspire Arena" },
       { targetId: "library", yaw: 60, pitch: -3, label: "Library" },
       { targetId: "cse-block", yaw: 160, pitch: -3, label: "CSE Block" },
     ],
