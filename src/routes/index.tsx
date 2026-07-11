@@ -304,30 +304,6 @@ function Landing() {
         </motion.div>
       </section>
 
-      {/* ═══════════════════════════════════ FLOATING STATS */}
-      <section className="relative z-10 mx-auto -mt-20 max-w-7xl px-6">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {STATS.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, delay: i * 0.08 }}
-              whileHover={{ y: -6 }}
-              className="group relative overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_20px_60px_-20px_rgba(7,27,68,0.25)] backdrop-blur-xl transition-shadow hover:shadow-[0_30px_80px_-20px_rgba(0,102,255,0.35)] md:p-8"
-            >
-              <p className="font-display text-[34px] font-bold text-primary md:text-[44px]">
-                <Counter value={s.value} />
-              </p>
-              <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary">
-                {s.label}
-              </p>
-              <span className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-accent/20 opacity-0 blur-2xl transition-opacity group-hover:opacity-100" />
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* ═══════════════════════════════════ CAMPUS HIGHLIGHTS BENTO */}
       <section className="mx-auto max-w-7xl px-6 py-28 md:py-36">
