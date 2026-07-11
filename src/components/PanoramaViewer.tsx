@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import type { Panorama } from "@/data/panoramas";
+import type { Panorama, Hotspot } from "@/data/panoramas";
 import { getPanorama } from "@/data/panoramas";
+
+function arrowSvg(direction: Hotspot["arrow"]) {
+  const d =
+    direction === "right"
+      ? "M5 12h14M12 5l7 7-7 7"
+      : direction === "left"
+      ? "M19 12H5M12 5l-7 7 7 7"
+      : direction === "down"
+      ? "M12 5v14M5 12l7 7 7-7"
+      : "M12 19V5M5 12l7-7 7 7";
+  return `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+}
 
 interface Props {
   panorama: Panorama;
@@ -88,7 +100,7 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
             <div class="psv-hotspot">
               <span class="psv-hotspot-name">${name}</span>
               <span class="psv-hotspot-disc">
-                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                ${arrowSvg(h.arrow)}
               </span>
             </div>
           `,

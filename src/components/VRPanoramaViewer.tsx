@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import * as THREE from "three";
 import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
-import type { Panorama } from "@/data/panoramas";
+import type { Panorama, Hotspot } from "@/data/panoramas";
 import { getPanorama } from "@/data/panoramas";
 
 interface Props {
@@ -272,6 +272,32 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
           old?.dispose();
 
           // Rebuild hotspots
+          function drawArrow(ctx: CanvasRenderingContext2D, direction: Hotspot["arrow"] = "up") {
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 22;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.beginPath();
+            if (direction === "right") {
+              ctx.moveTo(78, 128); ctx.lineTo(178, 128);
+              ctx.moveTo(128, 78); ctx.lineTo(178, 128);
+              ctx.moveTo(128, 178); ctx.lineTo(178, 128);
+            } else if (direction === "left") {
+              ctx.moveTo(178, 128); ctx.lineTo(78, 128);
+              ctx.moveTo(128, 78); ctx.lineTo(78, 128);
+              ctx.moveTo(128, 178); ctx.lineTo(78, 128);
+            } else if (direction === "down") {
+              ctx.moveTo(128, 78); ctx.lineTo(128, 178);
+              ctx.moveTo(78, 128); ctx.lineTo(128, 178);
+              ctx.moveTo(178, 128); ctx.lineTo(128, 178);
+            } else {
+              ctx.moveTo(128, 180); ctx.lineTo(128, 78);
+              ctx.moveTo(78, 128); ctx.lineTo(128, 78);
+              ctx.moveTo(178, 128); ctx.lineTo(128, 78);
+            }
+            ctx.stroke();
+          }
+
           while (hotspotGroup.children.length) {
             const c = hotspotGroup.children.pop()!;
             (c as THREE.Mesh).geometry?.dispose?.();
@@ -293,18 +319,7 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
             dctx.lineWidth = 12;
             dctx.strokeStyle = "#ffffff";
             dctx.stroke();
-            // arrow
-            dctx.strokeStyle = "#ffffff";
-            dctx.lineWidth = 22;
-            dctx.lineCap = "round";
-            dctx.lineJoin = "round";
-            dctx.beginPath();
-            dctx.moveTo(128, 180);
-            dctx.lineTo(128, 78);
-            dctx.moveTo(78, 128);
-            dctx.lineTo(128, 78);
-            dctx.lineTo(178, 128);
-            dctx.stroke();
+            drawArrow(dctx, h.arrow);
             const discTex = new THREE.CanvasTexture(discCanvas);
             discTex.colorSpace = THREE.SRGBColorSpace;
             const discMat = new THREE.MeshBasicMaterial({
