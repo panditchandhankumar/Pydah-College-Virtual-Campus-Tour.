@@ -216,7 +216,7 @@ function Landing() {
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(100deg, rgba(91,26,91,0.28) 0%, rgba(91,26,91,0.14) 35%, rgba(91,26,91,0.05) 60%, transparent 80%)",
+              "linear-gradient(100deg, rgba(91,26,91,0.45) 0%, rgba(91,26,91,0.22) 38%, rgba(91,26,91,0.06) 62%, transparent 82%)",
           }}
         />
 
