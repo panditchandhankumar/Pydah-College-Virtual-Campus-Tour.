@@ -273,13 +273,6 @@ function Landing() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </button>
-            <Link
-              to="/departments"
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-8 py-4 text-[17px] font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
-            >
-              Explore Campus
-              <ChevronRight className="h-4 w-4" />
-            </Link>
           </motion.div>
 
           {/* Scroll indicator */}
