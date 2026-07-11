@@ -322,7 +322,7 @@ export const PANORAMAS: Panorama[] = [
       { targetId: "main-gate", yaw: 300, pitch: -3, arrow: "up" },
     ],
   },
-  },
+
   {
     id: "cafeteria",
     title: "Cafeteria",
