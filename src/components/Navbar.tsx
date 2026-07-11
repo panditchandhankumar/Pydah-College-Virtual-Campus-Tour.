@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, X, Search, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/pydah-logo.png.asset.json";
 
@@ -16,10 +16,15 @@ const links = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [stamp, setStamp] = useState<string>("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const now = new Date();
-  const stamp = `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}  ${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+  useEffect(() => {
+    const now = new Date();
+    setStamp(
+      `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}  ${now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`,
+    );
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 shadow-sm">
@@ -51,7 +56,7 @@ export function Navbar() {
                 <Search className="h-4 w-4" /> Search
               </button>
             </div>
-            <p className="text-xs italic text-muted-foreground">Last Updated on {stamp}</p>
+            {stamp && <p className="text-xs italic text-muted-foreground">Last Updated on {stamp}</p>}
           </div>
 
           <button
