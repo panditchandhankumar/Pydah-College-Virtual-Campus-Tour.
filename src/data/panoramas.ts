@@ -1,4 +1,5 @@
 import adminBlock360 from "@/assets/admin-block-360.jpg.asset.json";
+import library360 from "@/assets/library-360.jpg.asset.json";
 
 export type Category = "entrance" | "academic" | "facility" | "residential" | "recreation";
 
