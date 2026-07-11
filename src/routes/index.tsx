@@ -391,15 +391,6 @@ function Landing() {
                 className="h-full w-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute inset-0 grid place-items-center bg-primary/40">
-                <button
-                  onClick={() => setIntroOpen(true)}
-                  className="grid h-24 w-24 place-items-center rounded-full bg-white/95 text-primary shadow-2xl transition-transform hover:scale-110"
-                  aria-label="Play tour"
-                >
-                  <Play className="h-8 w-8 fill-primary" />
-                </button>
-              </div>
             </div>
           </motion.div>
         </div>
