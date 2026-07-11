@@ -15,11 +15,9 @@ import {
   Home as HomeIcon,
   Rocket,
   Users,
-  GraduationCap,
   Globe2,
   Star,
   Quote,
-  ChevronRight,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
@@ -273,13 +271,6 @@ function Landing() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </button>
-            <Link
-              to="/departments"
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-8 py-4 text-[17px] font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
-            >
-              Explore Campus
-              <ChevronRight className="h-4 w-4" />
-            </Link>
           </motion.div>
 
           {/* Scroll indicator */}
@@ -304,30 +295,6 @@ function Landing() {
         </motion.div>
       </section>
 
-      {/* ═══════════════════════════════════ FLOATING STATS */}
-      <section className="relative z-10 mx-auto -mt-20 max-w-7xl px-6">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {STATS.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.6, delay: i * 0.08 }}
-              whileHover={{ y: -6 }}
-              className="group relative overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_20px_60px_-20px_rgba(7,27,68,0.25)] backdrop-blur-xl transition-shadow hover:shadow-[0_30px_80px_-20px_rgba(0,102,255,0.35)] md:p-8"
-            >
-              <p className="font-display text-[34px] font-bold text-primary md:text-[44px]">
-                <Counter value={s.value} />
-              </p>
-              <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary">
-                {s.label}
-              </p>
-              <span className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-accent/20 opacity-0 blur-2xl transition-opacity group-hover:opacity-100" />
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* ═══════════════════════════════════ CAMPUS HIGHLIGHTS BENTO */}
       <section className="mx-auto max-w-7xl px-6 py-28 md:py-36">
@@ -400,14 +367,9 @@ function Landing() {
               Move between blocks, look up at the atrium, step into a lab — all in real-time 360°.
               Best experienced on desktop or with a VR headset.
             </p>
-            <button
-              onClick={() => setIntroOpen(true)}
-              className="mt-10 group inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-[17px] font-semibold text-primary shadow-glow transition-transform hover:scale-[1.03]"
-            >
-              <Play className="h-4 w-4 fill-primary" />
-              Enter Virtual Tour
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
+            <p className="mt-6 text-sm text-white/60">
+              Use the virtual tour to move between blocks, look up at the atrium, and step into labs.
+            </p>
           </motion.div>
 
           <motion.div
@@ -429,15 +391,6 @@ function Landing() {
                 className="h-full w-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute inset-0 grid place-items-center bg-primary/40">
-                <button
-                  onClick={() => setIntroOpen(true)}
-                  className="grid h-24 w-24 place-items-center rounded-full bg-white/95 text-primary shadow-2xl transition-transform hover:scale-110"
-                  aria-label="Play tour"
-                >
-                  <Play className="h-8 w-8 fill-primary" />
-                </button>
-              </div>
             </div>
           </motion.div>
         </div>
@@ -445,21 +398,13 @@ function Landing() {
 
       {/* ═══════════════════════════════════ DEPARTMENTS */}
       <section className="mx-auto max-w-7xl px-6 py-28 md:py-36">
-        <div className="mb-12 flex items-end justify-between gap-6">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">
-              Departments
-            </p>
-            <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">
-              Nine departments. <br className="hidden md:block" /> One connected campus.
-            </h2>
-          </div>
-          <Link
-            to="/departments"
-            className="hidden shrink-0 rounded-full border border-primary/15 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground md:inline-flex"
-          >
-            View all →
-          </Link>
+        <div className="mb-12">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">
+            Departments
+          </p>
+          <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">
+            Nine departments. <br className="hidden md:block" /> One connected campus.
+          </h2>
         </div>
 
         <div className="space-y-4">
@@ -472,7 +417,7 @@ function Landing() {
               transition={{ duration: 0.6, delay: i * 0.05 }}
               className="group relative overflow-hidden rounded-3xl bg-card ring-1 ring-border transition-all hover:-translate-y-1 hover:shadow-[0_30px_80px_-20px_rgba(0,102,255,0.25)]"
             >
-              <div className="grid gap-6 p-6 md:grid-cols-[220px_1fr_auto] md:items-center md:gap-10 md:p-8">
+              <div className="grid gap-6 p-6 md:grid-cols-[220px_1fr] md:items-center md:gap-10 md:p-8">
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl md:aspect-square md:w-[220px]">
                   <img
                     src={PANORAMAS[(i + 2) % PANORAMAS.length].panorama}
@@ -491,13 +436,6 @@ function Landing() {
                   </h3>
                   <p className="mt-2 max-w-2xl text-[16px] text-muted-foreground">{d.overview}</p>
                 </div>
-                <Link
-                  to="/departments"
-                  className="inline-flex items-center gap-2 self-start rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-elegant transition-all group-hover:bg-secondary md:self-center"
-                >
-                  Explore
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
               </div>
             </motion.div>
           ))}
@@ -507,14 +445,9 @@ function Landing() {
       {/* ═══════════════════════════════════ GALLERY MASONRY */}
       <section className="bg-gradient-to-b from-transparent via-muted/40 to-transparent py-28 md:py-36">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-12 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">Gallery</p>
-              <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">Snapshots from campus.</h2>
-            </div>
-            <Link to="/gallery" className="text-sm font-semibold text-secondary hover:text-primary">
-              Full gallery →
-            </Link>
+          <div className="mb-12">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary">Gallery</p>
+            <h2 className="mt-3 font-display text-4xl font-bold text-primary md:text-6xl">Snapshots from campus.</h2>
           </div>
           <div className="columns-2 gap-4 md:columns-3 lg:columns-4">
             {PANORAMAS.slice(0, 8).map((p, i) => (
@@ -613,60 +546,6 @@ function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════ PLACEMENTS */}
-      <section className="relative overflow-hidden bg-primary py-28 text-white md:py-36">
-        <div aria-hidden className="absolute inset-0">
-          <div className="absolute left-1/2 top-0 h-72 w-[600px] -translate-x-1/2 rounded-full bg-secondary/30 blur-[140px]" />
-        </div>
-        <div className="relative mx-auto max-w-7xl px-6">
-          <div className="grid gap-14 md:grid-cols-[1.1fr_1fr] md:items-center">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-accent">Placements</p>
-              <h2 className="mt-3 font-display text-4xl font-bold md:text-6xl">
-                Careers that begin here go everywhere.
-              </h2>
-              <p className="mt-6 max-w-lg text-[17px] text-white/75">
-                180+ recruiting partners visit campus every year — from India's largest IT services firms to global product companies.
-              </p>
-              <div className="mt-10 grid grid-cols-3 gap-6">
-                {[
-                  { v: "94%", l: "Placed" },
-                  { v: "₹42L", l: "Highest" },
-                  { v: "180+", l: "Recruiters" },
-                ].map((s) => (
-                  <div key={s.l}>
-                    <p className="font-display text-4xl font-bold md:text-5xl">{s.v}</p>
-                    <p className="mt-1 text-[11px] font-semibold uppercase tracking-widest text-white/60">
-                      {s.l}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <Link
-                to="/placements"
-                className="mt-10 inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[16px] font-semibold text-accent-foreground shadow-glow transition-transform hover:scale-[1.03]"
-              >
-                <GraduationCap className="h-4 w-4" />
-                See placement report
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {PLACEMENT_LOGOS.map((r, i) => (
-                <motion.div
-                  key={r}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="grid aspect-[3/2] place-items-center rounded-2xl border border-white/10 bg-white/5 font-display text-lg font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-1 hover:bg-white/10"
-                >
-                  {r}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ═══════════════════════════════════ FINAL CTA */}
       <section className="mx-auto max-w-7xl px-6 py-28">
@@ -686,13 +565,6 @@ function Landing() {
             <p className="mx-auto mt-5 max-w-xl text-[18px] text-white/85">
               The full 360° tour takes about ten minutes — or as long as your curiosity lasts.
             </p>
-            <button
-              onClick={() => setIntroOpen(true)}
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-[17px] font-semibold text-primary shadow-2xl transition-transform hover:scale-[1.03]"
-            >
-              <Compass className="h-4 w-4" /> Enter the tour
-              <ArrowRight className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </section>

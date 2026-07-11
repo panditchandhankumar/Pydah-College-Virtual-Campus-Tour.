@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X, Search, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/pydah-logo.png.asset.json";
@@ -7,10 +7,8 @@ import logoAsset from "@/assets/pydah-logo.png.asset.json";
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About us" },
-  { to: "/departments", label: "Academics" },
   { to: "/tour", label: "Virtual Tour" },
   { to: "/gallery", label: "Campus Life" },
-  { to: "/placements", label: "Placements" },
   { to: "/contact", label: "Contact Us" },
 ] as const;
 
@@ -48,14 +46,6 @@ export function Navbar() {
           </Link>
 
           <div className="ml-auto hidden flex-col items-end gap-3 md:flex">
-            <div className="flex items-center gap-6 text-sm font-semibold">
-              <button className="flex items-center gap-1.5 text-foreground hover:text-primary">
-                <User className="h-4 w-4" /> Student Login
-              </button>
-              <button className="flex items-center gap-1.5 text-primary hover:opacity-80">
-                <Search className="h-4 w-4" /> Search
-              </button>
-            </div>
             {stamp && <p className="text-xs italic text-muted-foreground">Last Updated on {stamp}</p>}
           </div>
 
