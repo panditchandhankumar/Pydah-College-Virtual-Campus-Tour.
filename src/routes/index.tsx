@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Compass,
   Play,
-  MousePointer2,
   Sparkles,
   BookOpen,
   FlaskConical,
@@ -16,8 +15,6 @@ import {
   Rocket,
   Users,
   Globe2,
-  Star,
-  Quote,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
