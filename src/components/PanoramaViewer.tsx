@@ -80,18 +80,20 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
     markers.setMarkers(
       p.hotspots.map((h) => {
         const target = getPanorama(h.targetId);
+        const name = target?.title ?? h.label;
         return {
           id: `hs-${h.targetId}`,
           position: { yaw: `${h.yaw}deg`, pitch: `${h.pitch}deg` },
           html: `
             <div class="psv-hotspot">
-              <span class="psv-hotspot-ring"></span>
-              <span class="psv-hotspot-dot"></span>
-              <span class="psv-hotspot-label">${h.label}</span>
+              <span class="psv-hotspot-name">${name}</span>
+              <span class="psv-hotspot-disc">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              </span>
             </div>
           `,
           anchor: "center center",
-          tooltip: target?.title ?? h.label,
+          tooltip: name,
           data: { targetId: h.targetId },
         };
       })
@@ -112,34 +114,34 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
       <style>{`
         .psv-hotspot {
           position: relative;
-          width: 44px; height: 44px;
-          display: grid; place-items: center;
+          display: flex; flex-direction: column; align-items: center; gap: 6px;
           cursor: pointer;
+          transition: transform .2s ease;
         }
-        .psv-hotspot-ring {
-          position: absolute; inset: 0;
+        .psv-hotspot:hover { transform: translateY(-2px) scale(1.05); }
+        .psv-hotspot-name {
+          padding: 4px 12px;
+          border-radius: 6px;
+          background: #ffffff;
+          color: #002147;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: .2px;
+          white-space: nowrap;
+          box-shadow: 0 4px 14px rgba(0,0,0,.35);
+          border: 1px solid rgba(0,33,71,.15);
+        }
+        .psv-hotspot-disc {
+          width: 54px; height: 54px;
+          display: grid; place-items: center;
           border-radius: 9999px;
-          background: color-mix(in oklab, #00C2FF 30%, transparent);
-          animation: hs-pulse 2s ease-out infinite;
+          background: #1e5fbf;
+          box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 0 0 3px rgba(255,255,255,.95);
+          animation: hs-bob 2.4s ease-in-out infinite;
         }
-        .psv-hotspot-dot {
-          width: 16px; height: 16px; border-radius: 9999px;
-          background: #00C2FF;
-          box-shadow: 0 0 0 3px rgba(255,255,255,.9), 0 6px 16px rgba(0,0,0,.35);
-        }
-        .psv-hotspot-label {
-          position: absolute; top: 46px; white-space: nowrap;
-          padding: 4px 10px; border-radius: 9999px;
-          background: rgba(0,33,71,.9); color: #fff; font-size: 12px; font-weight: 600;
-          opacity: 0; transition: opacity .2s ease, transform .2s ease;
-          transform: translateY(-4px);
-        }
-        .psv-hotspot:hover .psv-hotspot-label {
-          opacity: 1; transform: translateY(0);
-        }
-        @keyframes hs-pulse {
-          0% { transform: scale(.6); opacity: .9; }
-          100% { transform: scale(1.8); opacity: 0; }
+        @keyframes hs-bob {
+          0%,100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
         }
       `}</style>
     </div>
