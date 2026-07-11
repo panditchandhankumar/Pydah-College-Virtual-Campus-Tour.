@@ -51,7 +51,7 @@ export const PANORAMAS: Panorama[] = [
     category: "academic",
     panorama: adminBlock360.url,
     thumbnail: adminBlock360.url,
-    map: { x: 28, y: 68 },
+    map: { x: 75, y: 22 },
     facilities: ["Principal's office", "Admissions", "Exam cell", "Accounts"],
     hotspots: [
       { targetId: "main-gate", yaw: -140, pitch: -5, label: "Main Gate" },
@@ -67,7 +67,7 @@ export const PANORAMAS: Panorama[] = [
     category: "facility",
     panorama: library360.url,
     thumbnail: library360.url,
-    map: { x: 46, y: 54 },
+    map: { x: 52, y: 42 },
     facilities: ["Reading hall", "Digital library", "Journal archive", "Discussion rooms"],
     hotspots: [
       { targetId: "administration", yaw: -60, pitch: -5, label: "Administration" },
@@ -83,7 +83,7 @@ export const PANORAMAS: Panorama[] = [
     category: "academic",
     panorama: `${CDN}/tour/key-biscayne-4.jpg`,
     thumbnail: `${CDN}/tour/key-biscayne-4-thumb.jpg`,
-    map: { x: 62, y: 40 },
+    map: { x: 72, y: 42 },
     facilities: ["AI/ML lab", "Cybersecurity range", "Seminar hall", "Faculty rooms"],
     hotspots: [
       { targetId: "library", yaw: -90, pitch: -3, label: "Library" },
@@ -99,7 +99,7 @@ export const PANORAMAS: Panorama[] = [
     category: "facility",
     panorama: `${CDN}/tour/key-biscayne-5.jpg`,
     thumbnail: `${CDN}/tour/key-biscayne-5-thumb.jpg`,
-    map: { x: 74, y: 30 },
+    map: { x: 45, y: 55 },
     facilities: ["3D printing", "Robotics arena", "IoT workbench", "Incubation desks"],
     hotspots: [
       { targetId: "cse-block", yaw: -135, pitch: -3, label: "CSE Block" },
@@ -114,7 +114,7 @@ export const PANORAMAS: Panorama[] = [
     category: "facility",
     panorama: `${CDN}/sphere.jpg`,
     thumbnail: `${CDN}/sphere-small.jpg`,
-    map: { x: 82, y: 48 },
+    map: { x: 92, y: 60 },
     facilities: ["1,200 seats", "Green rooms", "AV control", "Stage lighting"],
     hotspots: [
       { targetId: "innovation-lab", yaw: -120, pitch: -3, label: "Innovation Lab" },
@@ -129,7 +129,7 @@ export const PANORAMAS: Panorama[] = [
     category: "recreation",
     panorama: `${CDN}/sphere-test.jpg`,
     thumbnail: `${CDN}/sphere-test.jpg`,
-    map: { x: 66, y: 68 },
+    map: { x: 70, y: 75 },
     facilities: ["Multi-cuisine counters", "Barista", "Outdoor seating"],
     hotspots: [
       { targetId: "cse-block", yaw: -60, pitch: -3, label: "CSE Block" },
@@ -144,7 +144,7 @@ export const PANORAMAS: Panorama[] = [
     category: "residential",
     panorama: `${CDN}/tour/key-biscayne-6.jpg`,
     thumbnail: `${CDN}/tour/key-biscayne-6-thumb.jpg`,
-    map: { x: 84, y: 78 },
+    map: { x: 45, y: 88 },
     facilities: ["Wi-Fi", "Gym", "Study lounges", "Mess hall"],
     hotspots: [
       { targetId: "cafeteria", yaw: -90, pitch: -3, label: "Cafeteria" },
@@ -159,7 +159,7 @@ export const PANORAMAS: Panorama[] = [
     category: "recreation",
     panorama: `${CDN}/sphere.jpg`,
     thumbnail: `${CDN}/sphere-small.jpg`,
-    map: { x: 50, y: 88 },
+    map: { x: 10, y: 55 },
     facilities: ["Cricket ground", "Football pitch", "Tennis court", "Athletics track"],
     hotspots: [
       { targetId: "hostel", yaw: -140, pitch: -3, label: "Hostel" },
