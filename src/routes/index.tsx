@@ -464,7 +464,7 @@ function Landing() {
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent opacity-70 transition-opacity group-hover:opacity-90" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-70 transition-opacity group-hover:opacity-90" />
                   <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                     <p className="font-display text-base font-semibold md:text-lg">{p.title}</p>
                   </div>
