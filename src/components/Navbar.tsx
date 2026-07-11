@@ -7,10 +7,8 @@ import logoAsset from "@/assets/pydah-logo.png.asset.json";
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About us" },
-  { to: "/departments", label: "Academics" },
   { to: "/tour", label: "Virtual Tour" },
   { to: "/gallery", label: "Campus Life" },
-  { to: "/placements", label: "Placements" },
   { to: "/contact", label: "Contact Us" },
 ] as const;
 
