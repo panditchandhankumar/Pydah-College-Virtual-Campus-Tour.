@@ -153,9 +153,12 @@ export const PANORAMAS: Panorama[] = [
       { targetId: "admission-block", yaw: -90, pitch: 0, arrow: "left" },
       { targetId: "principal-office", yaw: 0, pitch: -3, arrow: "up" },
       { targetId: "office-room", yaw: 90, pitch: -3, arrow: "right" },
+      { targetId: "cafeteria", yaw: 60, pitch: -3, arrow: "right" },
+      { targetId: "seminar-hall", yaw: -120, pitch: -3, arrow: "left" },
       { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
     ],
   },
+
   {
     id: "sitting-park",
     title: "Sitting Park",
