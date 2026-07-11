@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VrRouteImport } from './routes/vr'
 import { Route as TourRouteImport } from './routes/tour'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PlacementsRouteImport } from './routes/placements'
@@ -18,6 +19,11 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VrRoute = VrRouteImport.update({
+  id: '/vr',
+  path: '/vr',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TourRoute = TourRouteImport.update({
   id: '/tour',
   path: '/tour',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/placements': typeof PlacementsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
+  '/vr': typeof VrRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/placements': typeof PlacementsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
+  '/vr': typeof VrRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/placements': typeof PlacementsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
+  '/vr': typeof VrRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/placements'
     | '/sitemap.xml'
     | '/tour'
+    | '/vr'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/placements'
     | '/sitemap.xml'
     | '/tour'
+    | '/vr'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/placements'
     | '/sitemap.xml'
     | '/tour'
+    | '/vr'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,10 +144,18 @@ export interface RootRouteChildren {
   PlacementsRoute: typeof PlacementsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TourRoute: typeof TourRoute
+  VrRoute: typeof VrRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vr': {
+      id: '/vr'
+      path: '/vr'
+      fullPath: '/vr'
+      preLoaderRoute: typeof VrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tour': {
       id: '/tour'
       path: '/tour'
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlacementsRoute: PlacementsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TourRoute: TourRoute,
+  VrRoute: VrRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
