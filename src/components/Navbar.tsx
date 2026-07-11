@@ -56,7 +56,7 @@ export function Navbar() {
                 <Search className="h-4 w-4" /> Search
               </button>
             </div>
-            <p className="text-xs italic text-muted-foreground">Last Updated on {stamp}</p>
+            {stamp && <p className="text-xs italic text-muted-foreground">Last Updated on {stamp}</p>}
           </div>
 
           <button
