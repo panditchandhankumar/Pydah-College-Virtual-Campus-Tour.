@@ -28,21 +28,39 @@ export function MiniMap({ currentId, onSelect }: Props) {
             <pattern id="grid" width="6" height="6" patternUnits="userSpaceOnUse">
               <path d="M 6 0 L 0 0 0 6" fill="none" stroke="white" strokeOpacity="0.06" strokeWidth="0.3" />
             </pattern>
+            <filter id="roadShadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur stdDeviation="0.4" />
+            </filter>
           </defs>
           <rect x="0" y="0" width="100" height="100" fill="url(#grid)" />
 
-          {/* Roads (main circulation) */}
-          <g stroke="#f5f5dc" strokeOpacity="0.55" strokeWidth="2.2" strokeLinecap="round">
-            {/* Top boundary road: crater → security → main gate → admission */}
-            <line x1="8" y1="12" x2="82" y2="12" />
-            {/* Vertical spine road from main gate down to bike parking */}
-            <line x1="45" y1="12" x2="45" y2="92" />
-            {/* Horizontal mid road through central junction */}
-            <line x1="8" y1="55" x2="92" y2="55" />
-            {/* Branch to open ground / degree */}
-            <line x1="70" y1="55" x2="70" y2="80" />
-            {/* Right boundary road */}
-            <line x1="92" y1="12" x2="92" y2="80" />
+          {/* Roads — casing (dark) under surface (light) for a premium look */}
+          <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+            {/* Casings */}
+            <g stroke="#0b1220" strokeOpacity="0.55" strokeWidth="3.6">
+              <path d="M8 12 H82" />
+              <path d="M45 12 V92" />
+              <path d="M8 55 H92" />
+              <path d="M70 55 V80" />
+              <path d="M92 12 V80" />
+              {/* new connector: cafeteria spur */}
+              <path d="M79 42 H86" />
+              {/* new connector: seminar hall spur */}
+              <path d="M45 46 H52" />
+            </g>
+            {/* Surfaces */}
+            <g stroke="#f5f5dc" strokeOpacity="0.75" strokeWidth="2.2">
+              <path d="M8 12 H82" />
+              <path d="M45 12 V92" />
+              <path d="M8 55 H92" />
+              <path d="M70 55 V80" />
+              <path d="M92 12 V80" />
+              <path d="M79 42 H86" />
+              <path d="M45 46 H52" />
+            </g>
+            {/* Dashed centreline on spine road */}
+            <path d="M45 15 V90" stroke="white" strokeOpacity="0.35" strokeWidth="0.35" strokeDasharray="1.4 1.6" />
+            <path d="M10 55 H90" stroke="white" strokeOpacity="0.28" strokeWidth="0.3" strokeDasharray="1.2 1.6" />
           </g>
 
           {/* Building footprints */}
@@ -53,14 +71,22 @@ export function MiniMap({ currentId, onSelect }: Props) {
             <rect x="68" y="17" width="16" height="10" rx="0.8" />
             {/* Engineering college (middle block) */}
             <rect x="55" y="34" width="24" height="16" rx="0.8" />
-            {/* Offer / faculty room */}
+            {/* Faculty room */}
             <rect x="38" y="36" width="10" height="8" rx="0.8" />
             {/* Degree college (far right, tall) */}
             <rect x="86" y="42" width="8" height="30" rx="0.8" />
+            {/* NEW — Cafeteria (right of Engineering) */}
+            <rect x="82" y="34" width="9" height="8" rx="0.8" fill="#f59e0b" fillOpacity="0.22" stroke="#f59e0b" strokeOpacity="0.7" />
+            {/* NEW — Seminar Hall (between Faculty & Engineering) */}
+            <rect x="49" y="44" width="9" height="7" rx="0.8" fill="#38bdf8" fillOpacity="0.22" stroke="#38bdf8" strokeOpacity="0.7" />
           </g>
 
-          {/* Central junction circle */}
-          <circle cx="45" cy="55" r="3.5" fill="none" stroke="#f5f5dc" strokeOpacity="0.6" strokeWidth="0.6" />
+          {/* Central junction — proper roundabout */}
+          <g>
+            <circle cx="45" cy="55" r="4.2" fill="#0b1220" fillOpacity="0.55" />
+            <circle cx="45" cy="55" r="3.4" fill="none" stroke="#f5f5dc" strokeOpacity="0.75" strokeWidth="0.6" />
+            <circle cx="45" cy="55" r="1.4" fill="#22c55e" fillOpacity="0.55" />
+          </g>
 
           {/* Open ground */}
           <ellipse cx="70" cy="75" rx="7" ry="5" fill="#22c55e" fillOpacity="0.18" stroke="white" strokeOpacity="0.3" strokeWidth="0.4" />
@@ -68,7 +94,7 @@ export function MiniMap({ currentId, onSelect }: Props) {
           <rect x="4" y="45" width="18" height="22" rx="1.5" fill="#22c55e" fillOpacity="0.18" stroke="white" strokeOpacity="0.3" strokeWidth="0.4" />
 
           {/* Text labels */}
-          <g fill="white" fillOpacity="0.75" fontSize="2.6" fontFamily="sans-serif">
+          <g fill="white" fillOpacity="0.8" fontSize="2.6" fontFamily="sans-serif">
             <text x="45" y="5" textAnchor="middle">Security</text>
             <text x="76" y="16" textAnchor="middle">Admission</text>
             <text x="67" y="43" textAnchor="middle">Engineering College</text>
@@ -78,8 +104,11 @@ export function MiniMap({ currentId, onSelect }: Props) {
             <text x="70" y="76" textAnchor="middle">Open Ground</text>
             <text x="45" y="97" textAnchor="middle">Staff / Bike Parking</text>
             <text x="10" y="10" fontSize="2.2">Crater</text>
+            <text x="86.5" y="39" textAnchor="middle" fontSize="2.3" fill="#fde68a">Cafeteria</text>
+            <text x="53.5" y="49" textAnchor="middle" fontSize="2.2" fill="#bae6fd">Seminar</text>
           </g>
         </svg>
+
 
         {/* Panorama pins */}
         {PANORAMAS.map((p) => {

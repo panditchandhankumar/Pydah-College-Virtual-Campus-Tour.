@@ -153,9 +153,12 @@ export const PANORAMAS: Panorama[] = [
       { targetId: "admission-block", yaw: -90, pitch: 0, arrow: "left" },
       { targetId: "principal-office", yaw: 0, pitch: -3, arrow: "up" },
       { targetId: "office-room", yaw: 90, pitch: -3, arrow: "right" },
+      { targetId: "cafeteria", yaw: 60, pitch: -3, arrow: "right" },
+      { targetId: "seminar-hall", yaw: -120, pitch: -3, arrow: "left" },
       { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
     ],
   },
+
   {
     id: "sitting-park",
     title: "Sitting Park",
@@ -317,6 +320,37 @@ export const PANORAMAS: Panorama[] = [
       { targetId: "main-circle", yaw: 250, pitch: -3, arrow: "left" },
       { targetId: "open-ground", yaw: 200, pitch: -3, arrow: "down" },
       { targetId: "main-gate", yaw: 300, pitch: -3, arrow: "up" },
+    ],
+  },
+
+  {
+    id: "cafeteria",
+    title: "Cafeteria",
+    description:
+      "Campus cafeteria beside the Engineering College — snacks, meals and student hangout.",
+    category: "facility",
+    panorama: P.park,
+    thumbnail: T.park,
+    map: { x: 86.5, y: 38 },
+    facilities: ["Food counters", "Seating", "Beverages"],
+    hotspots: [
+      { targetId: "engineering-block", yaw: 200, pitch: -3, arrow: "left" },
+      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+    ],
+  },
+  {
+    id: "seminar-hall",
+    title: "Seminar Hall",
+    description:
+      "Seminar Hall near the Faculty Block — hosts guest lectures, workshops and department events.",
+    category: "academic",
+    panorama: P.sphere,
+    thumbnail: T.sphere,
+    map: { x: 53.5, y: 47.5 },
+    facilities: ["Stage", "Projector", "Tiered seating"],
+    hotspots: [
+      { targetId: "engineering-block", yaw: 60, pitch: -3, arrow: "right" },
+      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
     ],
   },
 ];
