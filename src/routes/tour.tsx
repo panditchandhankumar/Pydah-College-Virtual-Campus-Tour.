@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info, Map as MapIcon, X, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Info, X, Search } from "lucide-react";
 import { PANORAMAS, getPanorama } from "@/data/panoramas";
 import { PanoramaViewer } from "@/components/PanoramaViewer";
 import { MiniMap } from "@/components/MiniMap";
+import { TourHUD } from "@/components/TourHUD";
 
 const search = z.object({ id: z.string().optional() });
 
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/tour")({
       {
         name: "description",
         content:
-          "Take a 360° immersive tour of PYDAH campus — jump between the main gate, library, labs, hostels and more.",
+          "Google-Street-View-style 360° campus tour of PYDAH College. Walk between the main gate, engineering block, labs, ground and more.",
       },
     ],
   }),
@@ -33,10 +34,36 @@ function TourPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(true);
   const [query, setQuery] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+  const skipPush = useRef(false);
 
-  const idx = PANORAMAS.findIndex((p) => p.id === activeId);
-  const prev = PANORAMAS[(idx - 1 + PANORAMAS.length) % PANORAMAS.length];
-  const next = PANORAMAS[(idx + 1) % PANORAMAS.length];
+  // Push id into history whenever the active panorama changes (except when
+  // the change was triggered by a Back action).
+  const lastActive = useRef(activeId);
+  useEffect(() => {
+    if (lastActive.current !== activeId) {
+      if (skipPush.current) {
+        skipPush.current = false;
+      } else {
+        setHistory((h) => [...h, lastActive.current]);
+      }
+      lastActive.current = activeId;
+    }
+  }, [activeId]);
+
+  const go = (target: string) =>
+    navigate({ search: { id: target }, replace: true });
+
+  const goBack = () => {
+    setHistory((h) => {
+      if (h.length === 0) return h;
+      const next = h.slice(0, -1);
+      const target = h[h.length - 1];
+      skipPush.current = true;
+      go(target);
+      return next;
+    });
+  };
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
@@ -48,9 +75,6 @@ function TourPage() {
         p.facilities.some((f) => f.toLowerCase().includes(q))
     ).slice(0, 6);
   }, [query]);
-
-  const go = (target: string) =>
-    navigate({ search: { id: target }, replace: true });
 
   return (
     <div className="relative pt-24">
@@ -64,33 +88,17 @@ function TourPage() {
               {active.title}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => go(prev.id)}
-              className="inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm ring-1 ring-border hover:bg-muted"
-              aria-label="Previous location"
-            >
-              <ChevronLeft className="h-4 w-4" /> {prev.title}
-            </button>
-            <button
-              onClick={() => go(next.id)}
-              className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-secondary"
-              aria-label="Next location"
-            >
-              {next.title} <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
         </div>
 
         <div className="relative">
           {/* Viewer */}
-          <div className="h-[70vh] min-h-[520px] w-full">
+          <div className="h-[78vh] min-h-[560px] w-full">
             <PanoramaViewer panorama={active} onNavigate={go} />
           </div>
 
-          {/* Floating toolbar */}
+          {/* Search bar */}
           <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
-            <div className="pointer-events-auto glass-dark flex w-full max-w-xl items-center gap-2 rounded-full px-3 py-2 text-white">
+            <div className="pointer-events-auto flex w-full max-w-xl items-center gap-2 rounded-full border border-white/15 bg-black/50 px-3 py-2 text-white backdrop-blur-xl">
               <Search className="h-4 w-4 shrink-0 text-accent" />
               <input
                 value={query}
@@ -98,12 +106,20 @@ function TourPage() {
                 placeholder="Search buildings, labs, departments…"
                 className="w-full bg-transparent text-sm placeholder:text-white/50 focus:outline-none"
               />
+              <button
+                onClick={() => setInfoOpen(true)}
+                className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+                aria-label="Information"
+                title="Information"
+              >
+                <Info className="h-4 w-4" />
+              </button>
             </div>
           </div>
 
           {results.length > 0 && (
             <div className="absolute left-1/2 top-20 z-10 w-full max-w-xl -translate-x-1/2 px-4">
-              <ul className="glass-dark overflow-hidden rounded-2xl text-white">
+              <ul className="overflow-hidden rounded-2xl border border-white/15 bg-black/70 text-white backdrop-blur-xl">
                 {results.map((r) => (
                   <li key={r.id}>
                     <button
@@ -125,34 +141,24 @@ function TourPage() {
             </div>
           )}
 
-          {/* Right-side actions */}
-          <div className="absolute right-4 top-20 z-10 flex flex-col gap-2">
-            <button
-              onClick={() => setInfoOpen(true)}
-              className="grid h-11 w-11 place-items-center rounded-full bg-primary text-primary-foreground shadow-elegant hover:bg-secondary"
-              aria-label="Information"
-              title="Information"
-            >
-              <Info className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setMapOpen((v) => !v)}
-              className="grid h-11 w-11 place-items-center rounded-full bg-primary text-primary-foreground shadow-elegant hover:bg-secondary"
-              aria-label="Toggle map"
-              title="Toggle map"
-            >
-              <MapIcon className="h-5 w-5" />
-            </button>
-          </div>
+          {/* Floating HUD (bottom) */}
+          <TourHUD
+            active={active}
+            onHome={() => go(PANORAMAS[0].id)}
+            onToggleMap={() => setMapOpen((v) => !v)}
+            mapOpen={mapOpen}
+            onBack={goBack}
+            canBack={history.length > 0}
+          />
 
-          {/* Mini map */}
+          {/* Mini map — always accessible via HUD toggle */}
           <AnimatePresence>
             {mapOpen && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="absolute bottom-4 right-4 z-10 w-72"
+                className="absolute bottom-24 right-4 z-10 w-72"
               >
                 <MiniMap currentId={activeId} onSelect={go} />
               </motion.div>
@@ -177,7 +183,7 @@ function TourPage() {
                   <X className="h-4 w-4" />
                 </button>
                 <img
-                  src={active.panorama}
+                  src={active.thumbnail}
                   alt={active.title}
                   className="h-40 w-full rounded-xl object-cover"
                 />
@@ -240,13 +246,13 @@ function TourPage() {
         <div className="mt-6 -mx-4 overflow-x-auto px-4">
           <div className="flex gap-3">
             {PANORAMAS.map((p) => {
-              const active = p.id === activeId;
+              const isActive = p.id === activeId;
               return (
                 <button
                   key={p.id}
                   onClick={() => go(p.id)}
                   className={`group relative flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl ring-1 transition ${
-                    active
+                    isActive
                       ? "ring-2 ring-accent shadow-elegant"
                       : "ring-border hover:ring-primary"
                   }`}
