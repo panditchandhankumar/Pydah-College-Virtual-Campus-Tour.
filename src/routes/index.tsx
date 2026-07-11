@@ -3,7 +3,6 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
-  Compass,
   Play,
   MousePointer2,
   Sparkles,
