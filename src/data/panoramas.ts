@@ -322,6 +322,37 @@ export const PANORAMAS: Panorama[] = [
       { targetId: "main-gate", yaw: 300, pitch: -3, arrow: "up" },
     ],
   },
+  },
+  {
+    id: "cafeteria",
+    title: "Cafeteria",
+    description:
+      "Campus cafeteria beside the Engineering College — snacks, meals and student hangout.",
+    category: "facility",
+    panorama: P.park,
+    thumbnail: T.park,
+    map: { x: 86.5, y: 38 },
+    facilities: ["Food counters", "Seating", "Beverages"],
+    hotspots: [
+      { targetId: "engineering-block", yaw: 200, pitch: -3, arrow: "left" },
+      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+    ],
+  },
+  {
+    id: "seminar-hall",
+    title: "Seminar Hall",
+    description:
+      "Seminar Hall near the Faculty Block — hosts guest lectures, workshops and department events.",
+    category: "academic",
+    panorama: P.sphere,
+    thumbnail: T.sphere,
+    map: { x: 53.5, y: 47.5 },
+    facilities: ["Stage", "Projector", "Tiered seating"],
+    hotspots: [
+      { targetId: "engineering-block", yaw: 60, pitch: -3, arrow: "right" },
+      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+    ],
+  },
 ];
 
 export const getPanorama = (id: string) => PANORAMAS.find((p) => p.id === id);
