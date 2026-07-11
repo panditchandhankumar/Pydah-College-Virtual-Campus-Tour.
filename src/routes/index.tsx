@@ -108,27 +108,6 @@ const WHY = [
   { icon: Globe2, title: "Global Reach", desc: "Exchange programs and international collaborations." },
 ];
 
-const TESTIMONIALS = [
-  {
-    name: "Ananya Rao",
-    role: "CSE '24 · Software Engineer @ Amazon",
-    quote:
-      "PYDAH's project-first curriculum gave me real product thinking. My internship at day 90 was because of what the faculty pushed us to build.",
-  },
-  {
-    name: "Karthik Menon",
-    role: "ECE '23 · VLSI Engineer @ Intel",
-    quote:
-      "The VLSI lab is genuinely industry-grade. I taped out a working chip as an undergrad — that got me the Intel interview.",
-  },
-  {
-    name: "Priya Sharma",
-    role: "M.Tech AI '24 · Research @ IISc",
-    quote:
-      "Research culture, mentorship, and access to compute — everything I needed to publish before graduating.",
-  },
-];
-
 const PLACEMENT_LOGOS = ["TCS", "Infosys", "Wipro", "Amazon", "Microsoft", "Accenture", "Deloitte", "IBM"];
 
 // ─────────────────────────────────────────────────────────────────────────────
