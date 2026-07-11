@@ -580,60 +580,6 @@ function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════ PLACEMENTS */}
-      <section className="relative overflow-hidden bg-primary py-28 text-white md:py-36">
-        <div aria-hidden className="absolute inset-0">
-          <div className="absolute left-1/2 top-0 h-72 w-[600px] -translate-x-1/2 rounded-full bg-secondary/30 blur-[140px]" />
-        </div>
-        <div className="relative mx-auto max-w-7xl px-6">
-          <div className="grid gap-14 md:grid-cols-[1.1fr_1fr] md:items-center">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-accent">Placements</p>
-              <h2 className="mt-3 font-display text-4xl font-bold md:text-6xl">
-                Careers that begin here go everywhere.
-              </h2>
-              <p className="mt-6 max-w-lg text-[17px] text-white/75">
-                180+ recruiting partners visit campus every year — from India's largest IT services firms to global product companies.
-              </p>
-              <div className="mt-10 grid grid-cols-3 gap-6">
-                {[
-                  { v: "94%", l: "Placed" },
-                  { v: "₹42L", l: "Highest" },
-                  { v: "180+", l: "Recruiters" },
-                ].map((s) => (
-                  <div key={s.l}>
-                    <p className="font-display text-4xl font-bold md:text-5xl">{s.v}</p>
-                    <p className="mt-1 text-[11px] font-semibold uppercase tracking-widest text-white/60">
-                      {s.l}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <Link
-                to="/placements"
-                className="mt-10 inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[16px] font-semibold text-accent-foreground shadow-glow transition-transform hover:scale-[1.03]"
-              >
-                <GraduationCap className="h-4 w-4" />
-                See placement report
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {PLACEMENT_LOGOS.map((r, i) => (
-                <motion.div
-                  key={r}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="grid aspect-[3/2] place-items-center rounded-2xl border border-white/10 bg-white/5 font-display text-lg font-semibold text-white backdrop-blur-md transition-all hover:-translate-y-1 hover:bg-white/10"
-                >
-                  {r}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ═══════════════════════════════════ FINAL CTA */}
       <section className="mx-auto max-w-7xl px-6 py-28">
