@@ -408,10 +408,6 @@ function Landing() {
         </div>
       </section>
 
-
-
-
-
       {/* ═══════════════════════════════════ FINAL CTA */}
       <section className="mx-auto max-w-7xl px-6 py-28">
         <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-secondary to-accent p-12 text-center text-white shadow-[0_40px_120px_-30px_rgba(0,102,255,0.55)] md:p-20">
