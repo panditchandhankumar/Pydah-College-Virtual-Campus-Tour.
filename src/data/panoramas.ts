@@ -1,4 +1,5 @@
 import adminBlock360 from "@/assets/admin-block-360.jpg.asset.json";
+import library360 from "@/assets/library-360.jpg.asset.json";
 
 export type Category = "entrance" | "academic" | "facility" | "residential" | "recreation";
 
@@ -64,8 +65,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "A quiet, light-filled reading environment with over 80,000 volumes, digital archives, and dedicated research pods.",
     category: "facility",
-    panorama: `${CDN}/tour/key-biscayne-3.jpg`,
-    thumbnail: `${CDN}/tour/key-biscayne-3-thumb.jpg`,
+    panorama: library360.url,
+    thumbnail: library360.url,
     map: { x: 46, y: 54 },
     facilities: ["Reading hall", "Digital library", "Journal archive", "Discussion rooms"],
     hotspots: [

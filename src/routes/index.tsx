@@ -22,7 +22,7 @@ import {
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
 import { IntroVideoModal } from "@/components/IntroVideoModal";
-import campusAsset from "@/assets/pydah-campus.jpg.asset.json";
+import campusAsset from "@/assets/pydah-home-hero.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
