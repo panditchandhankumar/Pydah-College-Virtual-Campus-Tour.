@@ -15,6 +15,13 @@ import {
   Rocket,
   Users,
   Globe2,
+  Phone,
+  Mail,
+  MapPin,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
