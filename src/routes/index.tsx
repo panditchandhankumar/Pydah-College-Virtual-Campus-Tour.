@@ -208,13 +208,13 @@ function Landing() {
           />
         </motion.div>
 
-        {/* Soft UI-tinted gradient overlay — text side is readable, image side stays clear */}
+        {/* Soft neutral gradient overlay — text side is readable, image side stays clear */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(100deg, rgba(91,26,91,0.62) 0%, rgba(91,26,91,0.34) 38%, rgba(91,26,91,0.10) 65%, transparent 85%)",
+              "linear-gradient(100deg, rgba(10,20,40,0.55) 0%, rgba(10,20,40,0.28) 38%, rgba(10,20,40,0.08) 65%, transparent 85%)",
           }}
         />
 
