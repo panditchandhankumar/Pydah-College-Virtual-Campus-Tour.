@@ -565,13 +565,6 @@ function Landing() {
             <p className="mx-auto mt-5 max-w-xl text-[18px] text-white/85">
               The full 360° tour takes about ten minutes — or as long as your curiosity lasts.
             </p>
-            <button
-              onClick={() => setIntroOpen(true)}
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-[17px] font-semibold text-primary shadow-2xl transition-transform hover:scale-[1.03]"
-            >
-              <Compass className="h-4 w-4" /> Enter the tour
-              <ArrowRight className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </section>
