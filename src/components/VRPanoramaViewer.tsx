@@ -55,7 +55,8 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
     renderer.xr.enabled = true;
-    renderer.xr.setReferenceSpaceType("local-floor");
+    renderer.xr.setReferenceSpaceType(vrConfig.renderer.referenceSpace as XRReferenceSpaceType);
+    renderer.xr.setFoveation?.(vrConfig.renderer.foveation);
     mount.appendChild(renderer.domElement);
 
     // Enter-VR button (floats bottom-center).
