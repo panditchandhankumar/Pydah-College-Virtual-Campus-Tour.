@@ -1,0 +1,32 @@
+{
+  "$schema": "WebXR / VR runtime config. Tune without touching Three.js code.",
+  "sphere": { "radius": 500, "widthSegments": 96, "heightSegments": 64 },
+  "camera": { "fov": 75, "near": 0.1, "far": 1100 },
+  "renderer": {
+    "antialias": true,
+    "pixelRatioCap": 2,
+    "foveation": 1,
+    "referenceSpace": "local-floor"
+  },
+  "locomotion": {
+    "smoothEnabled": true,
+    "smoothSpeed": 2.2,
+    "snapTurnEnabled": true,
+    "snapTurnDegrees": 30,
+    "teleportEnabled": true,
+    "comfortVignette": true
+  },
+  "hotspot": {
+    "radius": 6,
+    "discSize": 1.4,
+    "labelHeight": 0.6,
+    "arrowColor": "#ffffff",
+    "discColor": "#1e5fbf",
+    "labelBg": "#ffffff",
+    "labelText": "#002147"
+  },
+  "transition": {
+    "fadeSpeed": 1.6,
+    "fadeColor": "#000000"
+  }
+}

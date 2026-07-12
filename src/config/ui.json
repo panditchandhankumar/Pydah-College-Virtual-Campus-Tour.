@@ -1,0 +1,15 @@
+{
+  "$schema": "Tour HUD button config. Reorder / add / remove entries here — no code changes.",
+  "hud": [
+    { "id": "home",       "icon": "Home",       "label": "Main Gate",  "action": "home" },
+    { "id": "map",        "icon": "Map",        "label": "Campus Map", "action": "toggleMap" },
+    { "id": "back",       "icon": "ArrowLeft",  "label": "Back",       "action": "back" },
+    { "id": "next",       "icon": "ArrowRight", "label": "Next",       "action": "next" },
+    { "id": "voice",      "icon": "Volume2",    "label": "Voice Guide","action": "toggleVoice" },
+    { "id": "info",       "icon": "Info",       "label": "Information","action": "toggleInfo" },
+    { "id": "fullscreen", "icon": "Maximize2",  "label": "Fullscreen", "action": "toggleFullscreen" },
+    { "id": "vr",         "icon": "Glasses",    "label": "Enter VR",   "action": "enterVR" },
+    { "id": "settings",   "icon": "Settings",   "label": "Settings",   "action": "toggleSettings" },
+    { "id": "help",       "icon": "HelpCircle", "label": "Help",       "action": "toggleHelp" }
+  ]
+}
