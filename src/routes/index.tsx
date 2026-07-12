@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState } from "react";
+import { motion, useScroll, useTransform, animate, useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Compass,
@@ -15,6 +15,9 @@ import {
   Rocket,
   Users,
   Globe2,
+  Glasses,
+  Map as MapIcon,
+  ChevronDown,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
@@ -102,7 +105,64 @@ const WHY = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Hero Stats
+
+const HERO_STATS: Array<{ value: number; suffix: string; label: string }> = [
+  { value: 15, suffix: "+", label: "Buildings" },
+  { value: 40, suffix: "+", label: "Panorama Locations" },
+  { value: 10, suffix: "+", label: "Departments" },
+  { value: 0, suffix: "", label: "WebXR Ready" },
+];
+
+function Counter({ to, suffix }: { to: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(0, to, {
+      duration: 1.6,
+      ease: "easeOut",
+      onUpdate: (v) => setN(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, to]);
+  return (
+    <span ref={ref}>
+      {n}
+      {suffix}
+    </span>
+  );
+}
+
+function HeroStats() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, delay: 0.85 }}
+      className="mt-10 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4"
+    >
+      {HERO_STATS.map((s) => (
+        <div
+          key={s.label}
+          className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3 backdrop-blur-xl"
+        >
+          <div className="font-display text-2xl font-semibold text-white md:text-3xl">
+            {s.value > 0 ? <Counter to={s.value} suffix={s.suffix} /> : <span>✓</span>}
+          </div>
+          <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Landing
+
 
 function Landing() {
   const [introOpen, setIntroOpen] = useState(false);
@@ -132,71 +192,131 @@ function Landing() {
           />
         </motion.div>
 
-        {/* Soft neutral gradient overlay — text side is readable, image side stays clear */}
+        {/* Dark gradient overlay for readability (40–60%) */}
         <div
           aria-hidden
           className="absolute inset-0 -z-10"
           style={{
             background:
-              "linear-gradient(100deg, rgba(10,20,40,0.55) 0%, rgba(10,20,40,0.28) 38%, rgba(10,20,40,0.08) 65%, transparent 85%)",
+              "linear-gradient(100deg, rgba(5,12,28,0.72) 0%, rgba(5,12,28,0.55) 35%, rgba(5,12,28,0.28) 65%, rgba(5,12,28,0.15) 100%)",
           }}
         />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-black/60 via-transparent to-black/25"
+        />
 
-        {/* Content */}
+        {/* Content — left aligned, restrained size */}
         <motion.div
-          style={{ y: contentY, textShadow: "0 2px 32px rgba(0,0,0,0.65)" }}
-          className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24 text-white"
+          style={{ y: contentY }}
+          className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-center px-6 pt-24 pb-24 text-white md:px-10"
         >
-          <motion.span
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
-            Immersive 360° Experience
-          </motion.span>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.15 }}
-            className="mt-8 max-w-4xl font-display text-[54px] font-bold leading-[1.03] tracking-tight md:text-[78px] lg:text-[90px]"
-          >
-            Walk Through <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-accent to-white bg-clip-text text-transparent">
-              PYDAH College
-            </span>
-            <br className="hidden sm:block" /> Like You're Already Here.
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.35 }}
-            className="mt-8 max-w-xl text-[19px] leading-relaxed text-white/85 md:text-[22px]"
-          >
-            A cinematic 360° tour of every classroom, lab and green space —
-            experienced from anywhere in the world.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-10 flex flex-wrap items-center gap-4"
-          >
-            <button
-              onClick={() => setIntroOpen(true)}
-              className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-secondary to-accent px-8 py-4 text-[17px] font-semibold text-white shadow-[0_20px_50px_-15px_rgba(40,199,250,0.7)] transition-transform hover:scale-[1.03]"
+          <div className="max-w-2xl">
+            <motion.span
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md"
             >
-              <Play className="h-4 w-4 fill-white" />
-              Start Virtual Tour
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-            </button>
-          </motion.div>
+              <Sparkles className="h-3.5 w-3.5 text-accent" />
+              Immersive 360° Experience
+            </motion.span>
 
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.15 }}
+              className="mt-6 font-display text-[36px] font-semibold leading-[1.08] tracking-tight sm:text-[42px] md:text-[54px] lg:text-[64px]"
+              style={{ textShadow: "0 2px 24px rgba(0,0,0,0.55)" }}
+            >
+              Experience{" "}
+              <span className="bg-gradient-to-r from-accent via-white to-accent bg-clip-text text-transparent">
+                PYDAH College
+              </span>
+              <br />
+              in Immersive 360° Virtual Reality
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.35 }}
+              className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/85 md:text-[17px]"
+              style={{ textShadow: "0 2px 16px rgba(0,0,0,0.55)" }}
+            >
+              Explore classrooms, laboratories, departments, green spaces, and campus
+              facilities through an interactive 360° experience — from anywhere in the world.
+            </motion.p>
+
+            {/* Primary CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="mt-8 flex flex-wrap items-center gap-3"
+            >
+              <Link
+                to="/tour"
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-secondary to-accent px-6 py-3 text-[15px] font-semibold text-white shadow-[0_18px_45px_-15px_rgba(40,199,250,0.7)] transition-transform hover:scale-[1.03]"
+              >
+                <Rocket className="h-4 w-4" />
+                Start Virtual Tour
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              </Link>
+
+              <Link
+                to="/vr"
+                className="group inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3 text-[15px] font-semibold text-white backdrop-blur-xl transition-all hover:border-accent/60 hover:bg-white/15"
+              >
+                <Glasses className="h-4 w-4 text-accent" />
+                Enter VR
+              </Link>
+            </motion.div>
+
+            {/* Secondary buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.65 }}
+              className="mt-4 flex flex-wrap items-center gap-3"
+            >
+              <Link
+                to="/tour"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-[13px] font-medium text-white/90 backdrop-blur-xl transition-colors hover:bg-white/10"
+              >
+                <MapIcon className="h-4 w-4 text-accent" />
+                Campus Map
+              </Link>
+              <button
+                onClick={() => setIntroOpen(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-[13px] font-medium text-white/90 backdrop-blur-xl transition-colors hover:bg-white/10"
+              >
+                <Play className="h-4 w-4 fill-white" />
+                Watch Campus Overview
+              </button>
+            </motion.div>
+
+            {/* Stats */}
+            <HeroStats />
+          </div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4, duration: 0.8 }}
+          className="absolute inset-x-0 bottom-6 z-10 flex flex-col items-center gap-2 text-white/70"
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-[0.3em]">Scroll</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-white/5 backdrop-blur-md"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </motion.div>
         </motion.div>
       </section>
 
