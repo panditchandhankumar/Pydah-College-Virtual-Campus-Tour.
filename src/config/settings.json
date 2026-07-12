@@ -1,0 +1,12 @@
+{
+  "$schema": "Default user settings — persisted overrides live in localStorage under `pydah.settings`.",
+  "language": "en",
+  "theme": "system",
+  "volume": 0.8,
+  "vr": {
+    "walkingSpeed": 2.2,
+    "comfortMode": true,
+    "snapTurnDegrees": 30,
+    "dominantHand": "right"
+  }
+}

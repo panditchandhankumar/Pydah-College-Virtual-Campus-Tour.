@@ -5,6 +5,7 @@ import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
 import type { Panorama, Hotspot } from "@/data/panoramas";
 import { getPanorama } from "@/data/panoramas";
+import vrConfig from "@/config/vr.json";
 
 interface Props {
   panorama: Panorama;
@@ -54,7 +55,8 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
     renderer.xr.enabled = true;
-    renderer.xr.setReferenceSpaceType("local-floor");
+    renderer.xr.setReferenceSpaceType(vrConfig.renderer.referenceSpace as XRReferenceSpaceType);
+    renderer.xr.setFoveation?.(vrConfig.renderer.foveation);
     mount.appendChild(renderer.domElement);
 
     // Enter-VR button (floats bottom-center).
@@ -116,21 +118,40 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
       c.addEventListener("selectstart", () => onSelect(c));
     }
 
-    // ---- Snap-turn from right thumbstick ----
+    // ---- Snap-turn + smooth locomotion + teleport (config-driven) ----
+    const loco = vrConfig.locomotion;
     let snapReady = true;
-    function pollControllers() {
+    function pollControllers(dt: number) {
       const session = renderer.xr.getSession();
       if (!session) return;
       for (const source of session.inputSources) {
         const gp = source.gamepad;
         if (!gp) continue;
         const x = gp.axes[2] ?? gp.axes[0] ?? 0;
-        if (source.handedness === "right") {
+        const y = gp.axes[3] ?? gp.axes[1] ?? 0;
+
+        if (source.handedness === "right" && loco.snapTurnEnabled) {
           if (Math.abs(x) > 0.75 && snapReady) {
-            rig.rotation.y -= Math.sign(x) * (Math.PI / 6);
+            rig.rotation.y -= Math.sign(x) * THREE.MathUtils.degToRad(loco.snapTurnDegrees);
             snapReady = false;
           } else if (Math.abs(x) < 0.3) {
             snapReady = true;
+          }
+        }
+
+        if (source.handedness === "left" && loco.smoothEnabled) {
+          // Smooth locomotion: move rig in the direction the camera is facing.
+          const deadzone = 0.2;
+          if (Math.abs(x) > deadzone || Math.abs(y) > deadzone) {
+            const forward = new THREE.Vector3();
+            camera.getWorldDirection(forward);
+            forward.y = 0;
+            forward.normalize();
+            const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0));
+            const move = new THREE.Vector3()
+              .addScaledVector(forward, -y * loco.smoothSpeed * dt)
+              .addScaledVector(right, x * loco.smoothSpeed * dt);
+            rig.position.add(move);
           }
         }
       }
@@ -226,7 +247,7 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
           }
         }
       }
-      pollControllers();
+      pollControllers(dt);
       renderer.render(scene, camera);
     });
 

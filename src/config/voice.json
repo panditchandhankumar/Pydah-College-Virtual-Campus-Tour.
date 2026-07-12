@@ -1,0 +1,20 @@
+{
+  "$schema": "Per-panorama narration. `text` is spoken via Web Speech API; optional `audioUrl` overrides.",
+  "lang": "en-IN",
+  "rate": 1,
+  "pitch": 1,
+  "voice": null,
+  "scripts": {
+    "main-gate": "Welcome to PYDAH College. You are standing at the main gate, our grand entrance. Straight ahead lies the tree-lined avenue leading to the central circle.",
+    "straight-road": "This tree-lined arterial road connects the main gate to the central campus. Take a moment to enjoy the greenery.",
+    "main-circle": "You have reached the main circle — the heart of the campus. From here, every academic block, ground and facility is a short walk away.",
+    "engineering-block": "This is the Engineering Block, home to CSE, ECE, the Principal's office, and the administrative wing.",
+    "cse-department": "Welcome to the Computer Science and Engineering department, featuring an AI and ML lab, cybersecurity range, and full-stack project studio.",
+    "ece-department": "The Electronics and Communication Engineering department houses embedded systems, VLSI and communication labs.",
+    "admission-block": "Welcome to the Admission Cell. Our team handles enquiries, counselling and document verification for new students.",
+    "cafeteria": "This is our campus cafeteria — a lively hub for meals, snacks and conversations between classes.",
+    "seminar-hall": "The Seminar Hall hosts guest lectures, workshops and department events throughout the year.",
+    "open-ground": "The Open Ground hosts our biggest events — sports days, cultural festivals and community gatherings.",
+    "degree-block": "This is the Degree Block — home to arts, science and commerce classrooms."
+  }
+}

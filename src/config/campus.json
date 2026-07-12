@@ -1,0 +1,51 @@
+{
+  "$schema": "Config-driven campus map. Every road, building and label is data.",
+  "viewBox": "0 0 100 100",
+  "roads": {
+    "casingColor": "#0b1220",
+    "casingOpacity": 0.55,
+    "casingWidth": 3.6,
+    "surfaceColor": "#f5f5dc",
+    "surfaceOpacity": 0.75,
+    "surfaceWidth": 2.2,
+    "paths": [
+      "M8 12 H82",
+      "M45 12 V92",
+      "M8 55 H92",
+      "M70 55 V80",
+      "M92 12 V80",
+      "M79 42 H86",
+      "M45 46 H52"
+    ],
+    "centerlines": [
+      { "d": "M45 15 V90", "opacity": 0.35, "width": 0.35, "dash": "1.4 1.6" },
+      { "d": "M10 55 H90", "opacity": 0.28, "width": 0.3, "dash": "1.2 1.6" }
+    ]
+  },
+  "roundabout": { "cx": 45, "cy": 55, "r": 4.2 },
+  "buildings": [
+    { "id": "security",      "shape": "rect", "x": 40, "y": 6,  "w": 10, "h": 5  },
+    { "id": "admission",     "shape": "rect", "x": 68, "y": 17, "w": 16, "h": 10 },
+    { "id": "engineering",   "shape": "rect", "x": 55, "y": 34, "w": 24, "h": 16 },
+    { "id": "faculty",       "shape": "rect", "x": 38, "y": 36, "w": 10, "h": 8  },
+    { "id": "degree",        "shape": "rect", "x": 86, "y": 42, "w": 8,  "h": 30 },
+    { "id": "cafeteria",     "shape": "rect", "x": 82, "y": 34, "w": 9,  "h": 8,  "fill": "#f59e0b", "stroke": "#f59e0b" },
+    { "id": "seminar-hall",  "shape": "rect", "x": 49, "y": 44, "w": 9,  "h": 7,  "fill": "#38bdf8", "stroke": "#38bdf8" }
+  ],
+  "greens": [
+    { "shape": "ellipse", "cx": 70, "cy": 75, "rx": 7, "ry": 5 },
+    { "shape": "rect",    "x": 4,  "y": 45, "w": 18, "h": 22 }
+  ],
+  "labels": [
+    { "x": 45,   "y": 5,  "text": "Security" },
+    { "x": 76,   "y": 16, "text": "Admission" },
+    { "x": 67,   "y": 43, "text": "Engineering College" },
+    { "x": 43,   "y": 41, "text": "Faculty" },
+    { "x": 90,   "y": 40, "text": "Degree Block", "rotate": 90 },
+    { "x": 13,   "y": 57, "text": "Play Ground" },
+    { "x": 70,   "y": 76, "text": "Open Ground" },
+    { "x": 45,   "y": 97, "text": "Staff / Bike Parking" },
+    { "x": 86.5, "y": 39, "text": "Cafeteria", "color": "#fde68a" },
+    { "x": 53.5, "y": 49, "text": "Seminar",   "color": "#bae6fd" }
+  ]
+}
