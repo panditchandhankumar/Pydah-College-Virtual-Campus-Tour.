@@ -246,7 +246,7 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
           }
         }
       }
-      pollControllers();
+      pollControllers(dt);
       renderer.render(scene, camera);
     });
 
