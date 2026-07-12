@@ -105,7 +105,64 @@ const WHY = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Hero Stats
+
+const HERO_STATS: Array<{ value: number; suffix: string; label: string }> = [
+  { value: 15, suffix: "+", label: "Buildings" },
+  { value: 40, suffix: "+", label: "Panorama Locations" },
+  { value: 10, suffix: "+", label: "Departments" },
+  { value: 0, suffix: "", label: "WebXR Ready" },
+];
+
+function Counter({ to, suffix }: { to: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(0, to, {
+      duration: 1.6,
+      ease: "easeOut",
+      onUpdate: (v) => setN(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, to]);
+  return (
+    <span ref={ref}>
+      {n}
+      {suffix}
+    </span>
+  );
+}
+
+function HeroStats() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, delay: 0.85 }}
+      className="mt-10 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4"
+    >
+      {HERO_STATS.map((s) => (
+        <div
+          key={s.label}
+          className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3 backdrop-blur-xl"
+        >
+          <div className="font-display text-2xl font-semibold text-white md:text-3xl">
+            {s.value > 0 ? <Counter to={s.value} suffix={s.suffix} /> : <span>✓</span>}
+          </div>
+          <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Landing
+
 
 function Landing() {
   const [introOpen, setIntroOpen] = useState(false);
