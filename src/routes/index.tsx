@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState } from "react";
+import { motion, useScroll, useTransform, animate, useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Compass,
@@ -15,6 +15,9 @@ import {
   Rocket,
   Users,
   Globe2,
+  Glasses,
+  Map as MapIcon,
+  ChevronDown,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
