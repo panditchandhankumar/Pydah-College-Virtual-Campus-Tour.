@@ -149,6 +149,12 @@ function TourPage() {
             mapOpen={mapOpen}
             onBack={goBack}
             canBack={history.length > 0}
+            onNext={() => {
+              const i = PANORAMAS.findIndex((p) => p.id === activeId);
+              const next = PANORAMAS[(i + 1) % PANORAMAS.length];
+              go(next.id);
+            }}
+            onToggleInfo={() => setInfoOpen((v) => !v)}
           />
 
           {/* Mini map — always accessible via HUD toggle */}
