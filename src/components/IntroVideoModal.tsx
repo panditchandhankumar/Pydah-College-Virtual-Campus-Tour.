@@ -1,9 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Compass, ExternalLink, Building2, BookOpen, GraduationCap, Home, Trophy, Loader2 } from "lucide-react";
+import { X, Compass, ExternalLink, Building2, BookOpen, GraduationCap, Home, Trophy } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import campusTourVideo from "@/assets/campus-tour.mp4.asset.json";
-import pydahCampusPoster from "@/assets/pydah-campus.jpg.asset.json";
 
 interface Props {
   open: boolean;
@@ -20,24 +17,12 @@ const QUICK_LINKS = [
 ];
 
 /**
- * Full-screen cinematic intro that plays the campus flyover locally, with a vertical
+ * Full-screen cinematic intro that plays the campus flyover, with a vertical
  * stack of circular navigation buttons on the right — inspired by VIT's
  * virtual tour landing.
  */
 export function IntroVideoModal({ open, onClose }: Props) {
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [status, setStatus] = useState<"loading" | "playing" | "buffering" | "error">("loading");
-
-  useEffect(() => {
-    if (!open) {
-      setStatus("loading");
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-      }
-    }
-  }, [open]);
 
   const openTour = (id: string) => {
     onClose();
@@ -53,59 +38,27 @@ export function IntroVideoModal({ open, onClose }: Props) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] bg-black"
         >
-          {/* Fullscreen background video — served from the project CDN so it plays smoothly even on slower networks. */}
+          {/* Fullscreen background video — full 16:9 visible (no cropping) with slight scale to hide YouTube chrome */}
           <div className="absolute inset-0 overflow-hidden bg-black">
-            <video
-              ref={videoRef}
-              src={campusTourVideo.url}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster={pydahCampusPoster.url}
-              className="absolute inset-0 h-full w-full object-cover"
-              aria-label="PYDAH Campus Flyover"
-              onCanPlay={() => setStatus((s) => (s === "error" ? "error" : "playing"))}
-              onWaiting={() => setStatus("buffering")}
-              onPlaying={() => setStatus("playing")}
-              onStalled={() => setStatus("buffering")}
-              onError={() => setStatus("error")}
+            <iframe
+              src="https://www.youtube.com/embed/jsCWzShBfcI?autoplay=1&mute=1&controls=0&loop=1&playlist=jsCWzShBfcI&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&vq=hd1080&disablekb=1&fs=0&cc_load_policy=0"
+              title="PYDAH Campus Flyover"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+              style={{
+                border: 0,
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                // Fit the whole 16:9 frame inside the viewport (no cropping of the video),
+                // then apply a small scale so YouTube's title/watermark sit just off-screen.
+                width: "min(100vw, 177.78vh)",
+                height: "min(56.25vw, 100vh)",
+                transform: "translate(-50%, -50%) scale(1.1)",
+                transformOrigin: "center center",
+                pointerEvents: "none",
+              }}
             />
-
-            {/* Loading / buffering indicator */}
-            {(status === "loading" || status === "buffering") && (
-              <div className="absolute inset-0 z-10 grid place-items-center bg-black/60 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3 text-white">
-                  <Loader2 className="h-10 w-10 animate-spin" />
-                  <p className="text-sm font-medium tracking-wide">
-                    {status === "loading" ? "Loading campus experience…" : "Buffering…"}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Error fallback */}
-            {status === "error" && (
-              <div className="absolute inset-0 z-10 grid place-items-center bg-black/70 px-6 text-center">
-                <div className="max-w-md text-white">
-                  <p className="text-lg font-semibold">Unable to play the campus video</p>
-                  <p className="mt-2 text-sm text-white/80">
-                    Your network may be too slow. Please try again or start the 360° tour below.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setStatus("loading");
-                      videoRef.current?.load();
-                    }}
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-bold text-accent-foreground"
-                  >
-                    <Loader2 className="h-4 w-4" />
-                    Retry
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Vignette */}
