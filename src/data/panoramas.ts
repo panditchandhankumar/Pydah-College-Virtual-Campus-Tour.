@@ -109,7 +109,7 @@ export const PANORAMAS: Panorama[] = [
     map: { x: 45, y: 55 },
     facilities: ["Central roundabout", "Signage", "Benches"],
     hotspots: [
-      { targetId: "engineering-block", yaw: 0, pitch: -12, arrow: "up" },
+      { targetId: "engineering-block", yaw: 0, pitch: -6, label: "Engineering Block", arrow: "up" },
       { targetId: "sitting-park", yaw: -60, pitch: -3, arrow: "left" },
       { targetId: "open-ground", yaw: 90, pitch: -3, arrow: "right" },
       { targetId: "bike-parking", yaw: 180, pitch: -3, arrow: "down" },
@@ -161,7 +161,8 @@ export const PANORAMAS: Panorama[] = [
       { targetId: "office-room", yaw: 90, pitch: -3, arrow: "right" },
       { targetId: "cafeteria", yaw: 60, pitch: -3, arrow: "right" },
       { targetId: "seminar-hall", yaw: -120, pitch: -3, arrow: "left" },
-      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-circle", yaw: 180, pitch: -3, label: "Main Circle (Back)", arrow: "down" },
+      { targetId: "main-gate", yaw: 200, pitch: -5, label: "Main Gate", arrow: "down" },
     ],
   },
 
