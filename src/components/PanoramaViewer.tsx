@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Panorama, Hotspot } from "@/data/panoramas";
-import { getPanorama } from "@/data/panoramas";
+import { getPanorama, PANORAMAS } from "@/data/panoramas";
 
 function arrowSvg(direction: Hotspot["arrow"]) {
   const d =
@@ -14,22 +14,61 @@ function arrowSvg(direction: Hotspot["arrow"]) {
   return `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
 }
 
+const RAD2DEG = 180 / Math.PI;
+
+interface ContextMenuPayload {
+  index: number;
+  screenX: number;
+  screenY: number;
+}
+
 interface Props {
   panorama: Panorama;
+  hotspots: Hotspot[];
+  editMode?: boolean;
   onNavigate: (id: string) => void;
+  onHotspotsChange?: (next: Hotspot[]) => void;
+  onAddRequest?: (yaw: number, pitch: number) => void;
+  onHotspotContextMenu?: (payload: ContextMenuPayload) => void;
 }
 
 /**
  * Client-only Photo Sphere Viewer wrapper.
- * Loads the viewer dynamically so SSR bundles never touch `window`.
+ * Supports view mode + a visual edit mode: drag markers, double-click to add,
+ * right-click for a context menu. All positions stay in panorama spherical
+ * coords (yaw/pitch in degrees).
  */
-export function PanoramaViewer({ panorama, onNavigate }: Props) {
+export function PanoramaViewer({
+  panorama,
+  hotspots,
+  editMode = false,
+  onNavigate,
+  onHotspotsChange,
+  onAddRequest,
+  onHotspotContextMenu,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const markersRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
-  const onNavigateRef = useRef(onNavigate);
-  onNavigateRef.current = onNavigate;
+
+  // Keep latest callbacks/props in refs so the viewer effect stays stable.
+  const cbRef = useRef({
+    onNavigate,
+    onHotspotsChange,
+    onAddRequest,
+    onHotspotContextMenu,
+    editMode,
+    hotspots,
+  });
+  cbRef.current = {
+    onNavigate,
+    onHotspotsChange,
+    onAddRequest,
+    onHotspotContextMenu,
+    editMode,
+    hotspots,
+  };
 
   // Create viewer once
   useEffect(() => {
@@ -55,12 +94,26 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
       viewer.addEventListener("ready", () => setLoading(false), { once: true });
       viewerRef.current = viewer;
       markersRef.current = viewer.getPlugin(MarkersPlugin);
-      renderMarkers(panorama);
+      renderMarkers(cbRef.current.hotspots);
 
       markersRef.current.addEventListener("select-marker", (e: any) => {
+        // In edit mode a click selects but does not navigate.
+        if (cbRef.current.editMode) return;
         const targetId = e.marker?.data?.targetId as string | undefined;
-        if (targetId) onNavigateRef.current(targetId);
+        if (targetId) cbRef.current.onNavigate(targetId);
       });
+
+      // Double-click to add a hotspot in edit mode.
+      viewer.addEventListener("dblclick", (e: any) => {
+        if (!cbRef.current.editMode) return;
+        const { onAddRequest } = cbRef.current;
+        if (!onAddRequest) return;
+        const yaw = ((e.data.yaw ?? 0) * RAD2DEG + 360) % 360;
+        const pitch = (e.data.pitch ?? 0) * RAD2DEG;
+        onAddRequest(yaw, pitch);
+      });
+
+      installEditHandlers();
     })();
     return () => {
       disposed = true;
@@ -80,41 +133,134 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
       .setPanorama(panorama.panorama, { transition: 1000, showLoader: false })
       .then(() => {
         setLoading(false);
-        renderMarkers(panorama);
+        renderMarkers(cbRef.current.hotspots);
       })
       .catch(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [panorama.id]);
 
-  function renderMarkers(p: Panorama) {
+  // Re-render markers whenever the hotspot list or edit mode changes.
+  useEffect(() => {
+    if (!markersRef.current) return;
+    renderMarkers(hotspots);
+    // toggle body class for edit-mode cursor
+  }, [hotspots, editMode, panorama.id]);
+
+  function renderMarkers(list: Hotspot[]) {
     const markers = markersRef.current;
     if (!markers) return;
     markers.setMarkers(
-      p.hotspots.map((h) => {
+      list.map((h, i) => {
         const target = getPanorama(h.targetId);
-        const name = target?.title ?? h.label ?? "Location";
+        const name = h.label ?? target?.title ?? "Location";
         return {
-          id: `hs-${h.targetId}`,
+          id: `hs-${i}-${h.targetId}`,
           position: { yaw: `${h.yaw}deg`, pitch: `${h.pitch}deg` },
           html: `
-            <div class="psv-hotspot">
-              <span class="psv-hotspot-name">${name}</span>
-              <span class="psv-hotspot-disc">
-                ${arrowSvg(h.arrow)}
-              </span>
+            <div class="psv-hotspot ${editMode ? "psv-hotspot--edit" : ""}" data-idx="${i}">
+              <span class="psv-hotspot-name">${escapeHtml(name)}</span>
+              <span class="psv-hotspot-disc">${arrowSvg(h.arrow)}</span>
             </div>
           `,
           anchor: "center center",
-          tooltip: name,
-          data: { targetId: h.targetId },
+          tooltip: editMode ? `${name} (drag to move)` : name,
+          data: { targetId: h.targetId, idx: i },
         };
       })
     );
   }
 
+  function installEditHandlers() {
+    const container = containerRef.current;
+    const viewer = viewerRef.current;
+    if (!container || !viewer) return;
+
+    let dragging: { idx: number } | null = null;
+
+    const findIdx = (el: EventTarget | null): number | null => {
+      if (!(el instanceof Element)) return null;
+      const node = el.closest("[data-idx]") as HTMLElement | null;
+      if (!node) return null;
+      const v = node.dataset.idx;
+      return v != null ? Number(v) : null;
+    };
+
+    container.addEventListener("pointerdown", (ev) => {
+      if (!cbRef.current.editMode) return;
+      const idx = findIdx(ev.target);
+      if (idx == null) return;
+      ev.stopPropagation();
+      ev.preventDefault();
+      dragging = { idx };
+      (ev.target as Element).setPointerCapture?.(ev.pointerId);
+    });
+
+    container.addEventListener("pointermove", (ev) => {
+      if (!dragging) return;
+      const rect = container.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      const sphere = viewer.dataHelper?.viewerCoordsToSphericalCoords({ x, y });
+      if (!sphere) return;
+      const yaw = ((sphere.yaw * RAD2DEG) + 360) % 360;
+      const pitch = sphere.pitch * RAD2DEG;
+      const markers = markersRef.current;
+      const list = cbRef.current.hotspots;
+      const h = list[dragging.idx];
+      if (!h) return;
+      const id = `hs-${dragging.idx}-${h.targetId}`;
+      try {
+        markers.updateMarker({
+          id,
+          position: { yaw: `${yaw}deg`, pitch: `${pitch}deg` },
+        });
+      } catch {
+        /* ignore mid-drag update errors */
+      }
+    });
+
+    const endDrag = (ev: PointerEvent) => {
+      if (!dragging) return;
+      const rect = container.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+      const sphere = viewer.dataHelper?.viewerCoordsToSphericalCoords({ x, y });
+      const list = cbRef.current.hotspots.slice();
+      const h = list[dragging.idx];
+      if (h && sphere) {
+        list[dragging.idx] = {
+          ...h,
+          yaw: Number((((sphere.yaw * RAD2DEG) + 360) % 360).toFixed(2)),
+          pitch: Number((sphere.pitch * RAD2DEG).toFixed(2)),
+        };
+        cbRef.current.onHotspotsChange?.(list);
+      }
+      dragging = null;
+    };
+    container.addEventListener("pointerup", endDrag);
+    container.addEventListener("pointercancel", endDrag);
+
+    container.addEventListener("contextmenu", (ev) => {
+      if (!cbRef.current.editMode) return;
+      const idx = findIdx(ev.target);
+      if (idx == null) return;
+      ev.preventDefault();
+      cbRef.current.onHotspotContextMenu?.({
+        index: idx,
+        screenX: ev.clientX,
+        screenY: ev.clientY,
+      });
+    });
+  }
+
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl bg-primary">
+    <div className={`relative h-full w-full overflow-hidden rounded-2xl bg-primary ${editMode ? "psv-edit-mode" : ""}`}>
       <div ref={containerRef} className="h-full w-full" />
+      {editMode && (
+        <div className="pointer-events-none absolute left-4 top-20 z-10 rounded-full bg-accent/90 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+          EDIT MODE — drag hotspots · double-click to add · right-click to edit
+        </div>
+      )}
       {loading && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-primary/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3 text-white">
@@ -131,6 +277,12 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
           transition: transform .2s ease;
         }
         .psv-hotspot:hover { transform: translateY(-2px) scale(1.05); }
+        .psv-hotspot--edit { cursor: grab; }
+        .psv-hotspot--edit:active { cursor: grabbing; }
+        .psv-hotspot--edit .psv-hotspot-disc {
+          background: #f97316 !important;
+          box-shadow: 0 0 0 3px rgba(255,255,255,.95), 0 0 22px rgba(249,115,22,.7) !important;
+        }
         .psv-hotspot-name {
           padding: 4px 12px;
           border-radius: 6px;
@@ -159,3 +311,12 @@ export function PanoramaViewer({ panorama, onNavigate }: Props) {
     </div>
   );
 }
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!)
+  );
+}
+
+// Re-export list of panorama ids for editor pickers if needed elsewhere.
+export const PANO_OPTIONS = PANORAMAS.map((p) => ({ id: p.id, title: p.title }));
