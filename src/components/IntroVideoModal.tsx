@@ -38,8 +38,8 @@ export function IntroVideoModal({ open, onClose }: Props) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] bg-black"
         >
-          {/* Fullscreen background video — scaled up so YouTube's title/controls overflow outside the viewport */}
-          <div className="absolute inset-0 overflow-hidden">
+          {/* Fullscreen background video — full 16:9 visible (no cropping) with slight scale to hide YouTube chrome */}
+          <div className="absolute inset-0 overflow-hidden bg-black">
             <iframe
               src="https://www.youtube.com/embed/jsCWzShBfcI?autoplay=1&mute=1&controls=0&loop=1&playlist=jsCWzShBfcI&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&vq=hd1080&disablekb=1&fs=0&cc_load_policy=0"
               title="PYDAH Campus Flyover"
@@ -50,12 +50,12 @@ export function IntroVideoModal({ open, onClose }: Props) {
                 position: "absolute",
                 top: "50%",
                 left: "50%",
-                // Oversize so 16:9 fully covers AND YouTube's chrome (title bar, watermark, progress) sits outside the visible area
-                width: "calc(100vw + 400px)",
-                height: "calc(100vh + 400px)",
-                minWidth: "calc(177.78vh + 400px)",
-                minHeight: "calc(56.25vw + 400px)",
-                transform: "translate(-50%, -50%)",
+                // Fit the whole 16:9 frame inside the viewport (no cropping of the video),
+                // then apply a small scale so YouTube's title/watermark sit just off-screen.
+                width: "min(100vw, 177.78vh)",
+                height: "min(56.25vw, 100vh)",
+                transform: "translate(-50%, -50%) scale(1.1)",
+                transformOrigin: "center center",
                 pointerEvents: "none",
               }}
             />
