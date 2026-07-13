@@ -1,5 +1,11 @@
 import adminBlock360 from "@/assets/admin-block-360.jpg.asset.json";
 import library360 from "@/assets/library-360.jpg.asset.json";
+import cafeteria360 from "@/assets/cafeteria-360.jpg.asset.json";
+import mainCircle360 from "@/assets/main-circle-360.jpg.asset.json";
+import ground360 from "@/assets/ground-360.jpg.asset.json";
+import sittingGround360 from "@/assets/sitting-ground-360.jpg.asset.json";
+import collegeFront360 from "@/assets/college-front-360.jpg.asset.json";
+import engineeringMiddle360 from "@/assets/engineering-middle-360.jpg.asset.json";
 
 export type Category =
   | "entrance"
