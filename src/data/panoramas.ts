@@ -104,8 +104,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "Central junction of the campus. Roads branch out to every academic and recreational zone from here.",
     category: "junction",
-    panorama: P.circle,
-    thumbnail: T.circle,
+    panorama: mainCircle360.url,
+    thumbnail: mainCircle360.url,
     map: { x: 45, y: 55 },
     facilities: ["Central roundabout", "Signage", "Benches"],
     hotspots: [
