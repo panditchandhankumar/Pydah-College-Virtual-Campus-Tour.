@@ -2,9 +2,22 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info, X, Search, Wrench, Save, Download, Upload, Lock, RotateCcw } from "lucide-react";
-import { PANORAMAS, getPanorama, type Hotspot } from "@/data/panoramas";
-import { PanoramaViewer, PANO_OPTIONS } from "@/components/PanoramaViewer";
+import {
+  Info,
+  X,
+  Search,
+  Wrench,
+  Save,
+  Download,
+  Upload,
+  Lock,
+  RotateCcw,
+  Plus,
+  Copy,
+  Trash2,
+} from "lucide-react";
+import { PANORAMAS, getPanorama, type Hotspot, type HotspotIcon } from "@/data/panoramas";
+import { PanoramaViewer, PANO_OPTIONS, HOTSPOT_ICONS } from "@/components/PanoramaViewer";
 import { MiniMap } from "@/components/MiniMap";
 import { TourHUD } from "@/components/TourHUD";
 import { useHotspotStore, withOverrides } from "@/lib/hotspotStore";
@@ -32,6 +45,24 @@ interface CtxMenu {
   y: number;
 }
 
+const DEFAULT_HOTSPOT: Omit<Hotspot, "targetId" | "yaw" | "pitch"> = {
+  arrow: "up",
+  icon: "arrow",
+  size: 54,
+  background: "#1e5fbf",
+  textColor: "#ffffff",
+  borderColor: "rgba(255,255,255,0.95)",
+  borderWidth: 3,
+  opacity: 1,
+  style: "circle",
+  display: "iconText",
+  animation: "bob",
+  glow: false,
+  shadow: true,
+  visible: true,
+  enabled: true,
+};
+
 function TourPage() {
   const navigate = useNavigate({ from: "/tour" });
   const { id } = Route.useSearch();
@@ -56,8 +87,9 @@ function TourPage() {
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [ctxMenu, setCtxMenu] = useState<CtxMenu | null>(null);
-  const [editing, setEditing] = useState<{ index: number; hotspot: Hotspot } | null>(null);
-  const [adding, setAdding] = useState<{ yaw: number; pitch: number } | null>(null);
+  const [addMode, setAddMode] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const skipPush = useRef(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -67,8 +99,17 @@ function TourPage() {
       if (skipPush.current) skipPush.current = false;
       else setHistory((h) => [...h, lastActive.current]);
       lastActive.current = activeId;
+      setSelectedIdx(null);
     }
   }, [activeId]);
+
+  // Turning edit mode off = lock
+  useEffect(() => {
+    if (!editMode) {
+      setAddMode(false);
+      setSelectedIdx(null);
+    }
+  }, [editMode]);
 
   const go = (target: string) => navigate({ search: { id: target }, replace: true });
 
@@ -95,19 +136,38 @@ function TourPage() {
 
   const updateHotspots = (next: Hotspot[]) => setHotspots(activeId, next);
 
+  const patchSelected = (patch: Partial<Hotspot>) => {
+    if (selectedIdx == null) return;
+    const next = currentHotspots.slice();
+    next[selectedIdx] = { ...next[selectedIdx], ...patch };
+    updateHotspots(next);
+  };
+
   const handleDelete = (idx: number) => {
     updateHotspots(currentHotspots.filter((_, i) => i !== idx));
     setCtxMenu(null);
+    setConfirmDelete(null);
+    if (selectedIdx === idx) setSelectedIdx(null);
   };
   const handleDuplicate = (idx: number) => {
     const h = currentHotspots[idx];
     const dup: Hotspot = { ...h, yaw: (h.yaw + 8) % 360 };
     updateHotspots([...currentHotspots, dup]);
     setCtxMenu(null);
+    setSelectedIdx(currentHotspots.length);
   };
-  const openEdit = (idx: number) => {
-    setEditing({ index: idx, hotspot: { ...currentHotspots[idx] } });
-    setCtxMenu(null);
+
+  const handleAddAt = (yaw: number, pitch: number) => {
+    const fresh: Hotspot = {
+      ...DEFAULT_HOTSPOT,
+      targetId: PANO_OPTIONS[0].id,
+      yaw: Number(yaw.toFixed(2)),
+      pitch: Number(pitch.toFixed(2)),
+      label: "New Hotspot",
+    };
+    updateHotspots([...currentHotspots, fresh]);
+    setSelectedIdx(currentHotspots.length);
+    setAddMode(false);
   };
 
   const handleExport = () => {
@@ -129,6 +189,8 @@ function TourPage() {
     e.target.value = "";
   };
 
+  const selected = selectedIdx != null ? currentHotspots[selectedIdx] : null;
+
   return (
     <div className="relative pt-24">
       <div className="mx-auto max-w-[1600px] px-4 pb-8">
@@ -138,30 +200,37 @@ function TourPage() {
             <h1 className="font-display text-3xl font-bold text-primary md:text-4xl">{active.title}</h1>
           </div>
 
-          {/* Editor toolbar */}
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setEditMode(!editMode)}
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold shadow ${
                 editMode ? "bg-orange-500 text-white" : "bg-primary text-white hover:bg-primary/90"
               }`}
-              title="Toggle Edit Mode"
             >
               {editMode ? <Lock className="h-4 w-4" /> : <Wrench className="h-4 w-4" />}
               {editMode ? "Lock Hotspots" : "Edit Hotspots"}
             </button>
+            {editMode && (
+              <button
+                onClick={() => setAddMode((v) => !v)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold shadow ${
+                  addMode ? "bg-emerald-500 text-white" : "bg-accent text-white hover:bg-accent/90"
+                }`}
+              >
+                <Plus className="h-4 w-4" />
+                {addMode ? "Click on Panorama…" : "Add Hotspot"}
+              </button>
+            )}
             <button
               onClick={save}
               disabled={!dirty}
               className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-40"
-              title="Save hotspot positions"
             >
               <Save className="h-4 w-4" /> Save{dirty ? " *" : ""}
             </button>
             <button
               onClick={() => resetPanorama(activeId)}
               className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-sm font-semibold text-primary ring-1 ring-border hover:bg-white/20"
-              title="Reset this panorama's hotspots to defaults"
             >
               <RotateCcw className="h-4 w-4" /> Reset
             </button>
@@ -193,9 +262,12 @@ function TourPage() {
               panorama={active}
               hotspots={currentHotspots}
               editMode={editMode}
+              addMode={addMode}
+              selectedIndex={selectedIdx}
               onNavigate={go}
               onHotspotsChange={updateHotspots}
-              onAddRequest={(yaw, pitch) => setAdding({ yaw, pitch })}
+              onAddRequest={handleAddAt}
+              onSelect={setSelectedIdx}
               onHotspotContextMenu={({ index, screenX, screenY }) =>
                 setCtxMenu({ index, x: screenX, y: screenY })
               }
@@ -262,7 +334,7 @@ function TourPage() {
           />
 
           <AnimatePresence>
-            {mapOpen && (
+            {mapOpen && !(editMode && selected) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -279,13 +351,26 @@ function TourPage() {
             <>
               <div className="fixed inset-0 z-30" onClick={() => setCtxMenu(null)} />
               <div
-                className="fixed z-40 w-48 overflow-hidden rounded-xl border border-border bg-card text-sm shadow-xl"
+                className="fixed z-40 w-52 overflow-hidden rounded-xl border border-border bg-card text-sm shadow-xl"
                 style={{ left: ctxMenu.x, top: ctxMenu.y }}
               >
                 {[
-                  { label: "Rename / Edit", fn: () => openEdit(ctxMenu.index) },
+                  {
+                    label: "Edit Properties",
+                    fn: () => {
+                      setSelectedIdx(ctxMenu.index);
+                      setCtxMenu(null);
+                    },
+                  },
                   { label: "Duplicate", fn: () => handleDuplicate(ctxMenu.index) },
-                  { label: "Delete", fn: () => handleDelete(ctxMenu.index), danger: true },
+                  {
+                    label: "Delete",
+                    fn: () => {
+                      setConfirmDelete(ctxMenu.index);
+                      setCtxMenu(null);
+                    },
+                    danger: true,
+                  },
                 ].map((it) => (
                   <button
                     key={it.label}
@@ -299,39 +384,16 @@ function TourPage() {
             </>
           )}
 
-          {/* Edit / Add modal */}
+          {/* Properties panel */}
           <AnimatePresence>
-            {(editing || adding) && (
-              <HotspotForm
-                title={editing ? "Edit Hotspot" : "Add Hotspot"}
-                initial={
-                  editing
-                    ? editing.hotspot
-                    : { targetId: PANO_OPTIONS[0].id, yaw: adding!.yaw, pitch: adding!.pitch, arrow: "up" }
-                }
-                onCancel={() => {
-                  setEditing(null);
-                  setAdding(null);
-                }}
-                onSubmit={(h) => {
-                  if (editing) {
-                    const next = currentHotspots.slice();
-                    next[editing.index] = h;
-                    updateHotspots(next);
-                    setEditing(null);
-                  } else {
-                    updateHotspots([...currentHotspots, h]);
-                    setAdding(null);
-                  }
-                }}
-                onDelete={
-                  editing
-                    ? () => {
-                        handleDelete(editing.index);
-                        setEditing(null);
-                      }
-                    : undefined
-                }
+            {editMode && selected && (
+              <PropertiesPanel
+                key={selectedIdx}
+                hotspot={selected}
+                onChange={patchSelected}
+                onClose={() => setSelectedIdx(null)}
+                onDuplicate={() => handleDuplicate(selectedIdx!)}
+                onDelete={() => setConfirmDelete(selectedIdx!)}
               />
             )}
           </AnimatePresence>
@@ -370,6 +432,45 @@ function TourPage() {
               </motion.aside>
             )}
           </AnimatePresence>
+
+          {/* Delete confirmation */}
+          <AnimatePresence>
+            {confirmDelete != null && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"
+                onClick={() => setConfirmDelete(null)}
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-sm rounded-2xl bg-card p-6 text-foreground shadow-elegant"
+                >
+                  <h3 className="font-display text-lg font-bold text-primary">Delete this hotspot?</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    This removes it from the panorama. You can undo by pressing Reset before saving.
+                  </p>
+                  <div className="mt-5 flex justify-end gap-2">
+                    <button
+                      onClick={() => setConfirmDelete(null)}
+                      className="rounded-full bg-muted px-4 py-2 text-sm font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleDelete(confirmDelete)}
+                      className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Location strip */}
@@ -400,129 +501,340 @@ function TourPage() {
   );
 }
 
-function HotspotForm({
-  title,
-  initial,
-  onSubmit,
-  onCancel,
+/** Slide-out live-editing panel for the currently selected hotspot. */
+function PropertiesPanel({
+  hotspot,
+  onChange,
+  onClose,
+  onDuplicate,
   onDelete,
 }: {
-  title: string;
-  initial: Hotspot;
-  onSubmit: (h: Hotspot) => void;
-  onCancel: () => void;
-  onDelete?: () => void;
+  hotspot: Hotspot;
+  onChange: (patch: Partial<Hotspot>) => void;
+  onClose: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
 }) {
-  const [label, setLabel] = useState(initial.label ?? "");
-  const [targetId, setTargetId] = useState(initial.targetId);
-  const [arrow, setArrow] = useState<Hotspot["arrow"]>(initial.arrow ?? "up");
-  const [yaw, setYaw] = useState(initial.yaw);
-  const [pitch, setPitch] = useState(initial.pitch);
+  const set = <K extends keyof Hotspot>(k: K, v: Hotspot[K]) => onChange({ [k]: v } as Partial<Hotspot>);
+  const sizePresets: { label: string; value: number }[] = [
+    { label: "S", value: 40 },
+    { label: "M", value: 54 },
+    { label: "L", value: 72 },
+    { label: "XL", value: 96 },
+  ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"
-      onClick={onCancel}
+    <motion.aside
+      initial={{ x: "100%", opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: "100%", opacity: 0 }}
+      transition={{ type: "spring", stiffness: 260, damping: 30 }}
+      className="absolute inset-y-0 right-0 z-30 flex w-full max-w-sm flex-col overflow-y-auto border-l border-border bg-card/95 backdrop-blur-xl shadow-elegant"
     >
-      <motion.div
-        initial={{ scale: 0.95, y: 10 }}
-        animate={{ scale: 1, y: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-2xl bg-card p-6 text-foreground shadow-elegant"
-      >
-        <h3 className="mb-4 font-display text-xl font-bold text-primary">{title}</h3>
-        <div className="space-y-3 text-sm">
-          <label className="block">
-            <span className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">Name (label)</span>
-            <input
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="Optional custom label"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">Target Panorama</span>
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 px-4 py-3 backdrop-blur">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-accent">Selected</p>
+          <h3 className="font-display text-base font-bold text-primary">Hotspot Properties</h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="grid h-8 w-8 place-items-center rounded-full bg-muted hover:bg-primary hover:text-primary-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="space-y-5 p-4 text-sm">
+        <Field label="Name">
+          <input
+            value={hotspot.label ?? ""}
+            placeholder="e.g. Engineering Block"
+            onChange={(e) => set("label", e.target.value || undefined)}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2"
+          />
+        </Field>
+
+        <Field label="Target Panorama">
+          <select
+            value={hotspot.targetId}
+            onChange={(e) => set("targetId", e.target.value)}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2"
+          >
+            {PANO_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.title}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Description / Tooltip">
+          <textarea
+            rows={2}
+            value={hotspot.tooltip ?? ""}
+            onChange={(e) => set("tooltip", e.target.value || undefined)}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2"
+          />
+        </Field>
+
+        <Field label="Icon">
+          <div className="grid grid-cols-6 gap-1.5">
+            {HOTSPOT_ICONS.map((ic) => (
+              <button
+                key={ic.key}
+                onClick={() => set("icon", ic.key as HotspotIcon)}
+                title={ic.label}
+                className={`grid aspect-square place-items-center rounded-lg border text-lg transition ${
+                  hotspot.icon === ic.key
+                    ? "border-accent bg-accent/10"
+                    : "border-border bg-background hover:bg-muted"
+                }`}
+              >
+                {ic.glyph}
+              </button>
+            ))}
+          </div>
+          {hotspot.icon === "arrow" && (
             <select
-              value={targetId}
-              onChange={(e) => setTargetId(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2"
-            >
-              {PANO_OPTIONS.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">Icon / Arrow</span>
-            <select
-              value={arrow ?? "up"}
-              onChange={(e) => setArrow(e.target.value as Hotspot["arrow"])}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2"
+              value={hotspot.arrow ?? "up"}
+              onChange={(e) => set("arrow", e.target.value as Hotspot["arrow"])}
+              className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2"
             >
               <option value="up">↑ Up</option>
               <option value="right">→ Right</option>
               <option value="down">↓ Down</option>
               <option value="left">← Left</option>
             </select>
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">Yaw°</span>
-              <input
-                type="number"
-                step="0.1"
-                value={yaw}
-                onChange={(e) => setYaw(Number(e.target.value))}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-xs font-semibold uppercase text-muted-foreground">Pitch°</span>
-              <input
-                type="number"
-                step="0.1"
-                value={pitch}
-                onChange={(e) => setPitch(Number(e.target.value))}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2"
-              />
-            </label>
-          </div>
-        </div>
-        <div className="mt-6 flex items-center justify-between gap-2">
-          {onDelete ? (
-            <button onClick={onDelete} className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white">
-              Delete
-            </button>
-          ) : (
-            <span />
           )}
-          <div className="flex gap-2">
-            <button onClick={onCancel} className="rounded-full bg-muted px-4 py-2 text-sm font-semibold">
-              Cancel
-            </button>
-            <button
-              onClick={() =>
-                onSubmit({
-                  targetId,
-                  yaw: Number(yaw.toFixed(2)),
-                  pitch: Number(pitch.toFixed(2)),
-                  arrow,
-                  label: label.trim() || undefined,
-                })
-              }
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              Save
-            </button>
+        </Field>
+
+        <Field label="Button Style">
+          <div className="grid grid-cols-3 gap-1.5">
+            {(["circle", "rounded", "pill", "glass", "floating"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => set("style", s)}
+                className={`rounded-lg border px-2 py-1.5 text-xs font-semibold capitalize ${
+                  (hotspot.style ?? "circle") === s
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-background"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
+        </Field>
+
+        <Field label="Display">
+          <div className="grid grid-cols-3 gap-1.5">
+            {(["icon", "iconText", "text"] as const).map((d) => (
+              <button
+                key={d}
+                onClick={() => set("display", d)}
+                className={`rounded-lg border px-2 py-1.5 text-xs font-semibold ${
+                  (hotspot.display ?? "iconText") === d
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-background"
+                }`}
+              >
+                {d === "iconText" ? "Icon + Text" : d === "icon" ? "Icon Only" : "Text Only"}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        <Field label={`Size (${hotspot.size ?? 54}px)`}>
+          <div className="mb-2 flex gap-1.5">
+            {sizePresets.map((p) => (
+              <button
+                key={p.label}
+                onClick={() => set("size", p.value)}
+                className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-semibold ${
+                  (hotspot.size ?? 54) === p.value
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-background"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="range"
+            min={24}
+            max={140}
+            step={2}
+            value={hotspot.size ?? 54}
+            onChange={(e) => set("size", Number(e.target.value))}
+            className="w-full"
+          />
+        </Field>
+
+        <div className="grid grid-cols-3 gap-3">
+          <ColorField label="Background" value={hotspot.background ?? "#1e5fbf"} onChange={(v) => set("background", v)} />
+          <ColorField label="Text" value={hotspot.textColor ?? "#ffffff"} onChange={(v) => set("textColor", v)} />
+          <ColorField
+            label="Border"
+            value={hexOrDefault(hotspot.borderColor, "#ffffff")}
+            onChange={(v) => set("borderColor", v)}
+          />
         </div>
-      </motion.div>
-    </motion.div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={`Border Width (${hotspot.borderWidth ?? 3}px)`}>
+            <input
+              type="range"
+              min={0}
+              max={10}
+              value={hotspot.borderWidth ?? 3}
+              onChange={(e) => set("borderWidth", Number(e.target.value))}
+              className="w-full"
+            />
+          </Field>
+          <Field label={`Opacity (${Math.round((hotspot.opacity ?? 1) * 100)}%)`}>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round((hotspot.opacity ?? 1) * 100)}
+              onChange={(e) => set("opacity", Number(e.target.value) / 100)}
+              className="w-full"
+            />
+          </Field>
+        </div>
+
+        <Field label="Animation">
+          <select
+            value={hotspot.animation ?? "bob"}
+            onChange={(e) => set("animation", e.target.value as Hotspot["animation"])}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2"
+          >
+            <option value="none">None</option>
+            <option value="bob">Bob</option>
+            <option value="pulse">Pulse</option>
+            <option value="spin">Spin</option>
+          </select>
+        </Field>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Toggle label="Shadow" value={hotspot.shadow !== false} onChange={(v) => set("shadow", v)} />
+          <Toggle label="Glow" value={!!hotspot.glow} onChange={(v) => set("glow", v)} />
+          <Toggle label="Visible" value={hotspot.visible !== false} onChange={(v) => set("visible", v)} />
+          <Toggle label="Enabled" value={hotspot.enabled !== false} onChange={(v) => set("enabled", v)} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Yaw°">
+            <input
+              type="number"
+              step={0.1}
+              value={hotspot.yaw}
+              onChange={(e) => set("yaw", Number(e.target.value))}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2"
+            />
+          </Field>
+          <Field label="Pitch°">
+            <input
+              type="number"
+              step={0.1}
+              value={hotspot.pitch}
+              onChange={(e) => set("pitch", Number(e.target.value))}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2"
+            />
+          </Field>
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={onDuplicate}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"
+          >
+            <Copy className="h-4 w-4" /> Duplicate
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-3 py-2 text-sm font-semibold text-white"
+          >
+            <Trash2 className="h-4 w-4" /> Delete
+          </button>
+        </div>
+      </div>
+    </motion.aside>
   );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-2 py-1.5">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-6 w-8 shrink-0 cursor-pointer rounded border border-border bg-transparent"
+        />
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-transparent text-xs focus:outline-none"
+        />
+      </div>
+    </label>
+  );
+}
+
+function Toggle({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <button
+      onClick={() => onChange(!value)}
+      className={`flex items-center justify-between rounded-lg border px-3 py-2 text-xs font-semibold transition ${
+        value ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-muted-foreground"
+      }`}
+    >
+      <span>{label}</span>
+      <span
+        className={`grid h-4 w-7 items-center rounded-full px-0.5 ${value ? "bg-accent" : "bg-muted"}`}
+      >
+        <span
+          className={`h-3 w-3 rounded-full bg-white transition ${value ? "translate-x-3" : "translate-x-0"}`}
+        />
+      </span>
+    </button>
+  );
+}
+
+function hexOrDefault(v: string | undefined, d: string) {
+  if (!v) return d;
+  return /^#[0-9a-fA-F]{6}$/.test(v) ? v : d;
 }
