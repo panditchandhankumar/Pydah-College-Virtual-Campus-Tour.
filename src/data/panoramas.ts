@@ -122,8 +122,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "The main sports ground with cricket pitch and athletics track adjoining the entrance road.",
     category: "recreation",
-    panorama: P.ground,
-    thumbnail: T.ground,
+    panorama: ground360.url,
+    thumbnail: ground360.url,
     map: { x: 13, y: 55 },
     facilities: ["Cricket pitch", "Athletics track", "Spectator area"],
     hotspots: [
