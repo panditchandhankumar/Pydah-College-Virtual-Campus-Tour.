@@ -373,7 +373,7 @@ export function PanoramaViewer({
   );
 }
 
-function buildHotspotHtml(h: Hotspot, name: string, selected: boolean, editMode: boolean) {
+function buildHotspotHtml(h: Hotspot, name: string, idx: number, selected: boolean, editMode: boolean) {
   const size = h.size ?? 54;
   const bg = h.background ?? "#1e5fbf";
   const fg = h.textColor ?? "#ffffff";
@@ -404,16 +404,15 @@ function buildHotspotHtml(h: Hotspot, name: string, selected: boolean, editMode:
   const showText = display !== "icon";
   const showIcon = display !== "text";
   const label = escapeHtml(name);
-  const idx = 0; // idx is set via data attribute on outer wrapper; we use CSS classes via a wrapper span
+  const _em = editMode ? "1" : "0";
   return `
-    <div class="psv-hotspot ${selected ? "psv-hotspot--selected" : ""}" data-idx="${idx}">
+    <div class="psv-hotspot ${selected ? "psv-hotspot--selected" : ""}" data-idx="${idx}" data-em="${_em}">
       ${showText ? `<span class="psv-hotspot-name" data-idx="${idx}">${label}</span>` : ""}
       ${
         showIcon
           ? `<span class="${discClasses}" data-idx="${idx}" style="${styleVars}width:${size}px;height:${size}px;">${iconHtml}</span>`
           : ""
       }
-      ${editMode ? "" : ""}
     </div>
   `;
 }
