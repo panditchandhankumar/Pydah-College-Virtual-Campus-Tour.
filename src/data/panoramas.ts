@@ -149,8 +149,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "The engineering academic hub — home to CSE, ECE, principal's office, admissions and administrative rooms.",
     category: "academic",
-    panorama: adminBlock360.url,
-    thumbnail: adminBlock360.url,
+    panorama: engineeringMiddle360.url,
+    thumbnail: engineeringMiddle360.url,
     map: { x: 65, y: 42 },
     facilities: ["Classrooms", "Labs", "Faculty rooms", "Seminar hall"],
     hotspots: [
