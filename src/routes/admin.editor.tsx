@@ -16,7 +16,7 @@ import { PANORAMAS, getPanorama, type Panorama, type Hotspot } from "@/data/pano
 
 const search = z.object({ id: z.string().optional() });
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/editor")({
   validateSearch: search,
   head: () => ({
     meta: [

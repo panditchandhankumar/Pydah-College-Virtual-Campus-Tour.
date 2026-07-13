@@ -17,9 +17,9 @@ import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as DepartmentsRouteImport } from './routes/departments'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminEditorRouteImport } from './routes/admin.editor'
 
 const VrRoute = VrRouteImport.update({
   id: '/vr',
@@ -61,11 +61,6 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -76,11 +71,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEditorRoute = AdminEditorRouteImport.update({
+  id: '/admin/editor',
+  path: '/admin/editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/contact': typeof ContactRoute
   '/departments': typeof DepartmentsRoute
@@ -89,11 +88,11 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
   '/vr': typeof VrRoute
+  '/admin/editor': typeof AdminEditorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/contact': typeof ContactRoute
   '/departments': typeof DepartmentsRoute
@@ -102,12 +101,12 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
   '/vr': typeof VrRoute
+  '/admin/editor': typeof AdminEditorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
   '/contact': typeof ContactRoute
   '/departments': typeof DepartmentsRoute
@@ -116,13 +115,13 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tour': typeof TourRoute
   '/vr': typeof VrRoute
+  '/admin/editor': typeof AdminEditorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/admin'
     | '/admin-login'
     | '/contact'
     | '/departments'
@@ -131,11 +130,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/tour'
     | '/vr'
+    | '/admin/editor'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/admin-login'
     | '/contact'
     | '/departments'
@@ -144,11 +143,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/tour'
     | '/vr'
+    | '/admin/editor'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/admin'
     | '/admin-login'
     | '/contact'
     | '/departments'
@@ -157,12 +156,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/tour'
     | '/vr'
+    | '/admin/editor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ContactRoute: typeof ContactRoute
   DepartmentsRoute: typeof DepartmentsRoute
@@ -171,6 +170,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TourRoute: typeof TourRoute
   VrRoute: typeof VrRoute
+  AdminEditorRoute: typeof AdminEditorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -231,13 +231,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -252,13 +245,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/editor': {
+      id: '/admin/editor'
+      path: '/admin/editor'
+      fullPath: '/admin/editor'
+      preLoaderRoute: typeof AdminEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRoute,
   AdminLoginRoute: AdminLoginRoute,
   ContactRoute: ContactRoute,
   DepartmentsRoute: DepartmentsRoute,
@@ -267,6 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TourRoute: TourRoute,
   VrRoute: VrRoute,
+  AdminEditorRoute: AdminEditorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
