@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { Lock, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/pydah-logo.png.asset.json";
@@ -46,13 +46,29 @@ export function Navbar() {
             </div>
           </Link>
 
-          <div className="ml-auto hidden flex-col items-end gap-3 md:flex">
+          <div className="ml-auto hidden flex-col items-end gap-2 md:flex">
             {stamp && <p className="text-xs italic text-muted-foreground">Last Updated on {stamp}</p>}
+            <Link
+              to="/admin-login"
+              aria-label="Admin login"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-white/70 px-3 py-1 text-xs font-semibold text-primary/80 shadow-sm backdrop-blur transition duration-200 hover:scale-105 hover:border-primary/60 hover:bg-white hover:text-primary hover:shadow-[0_0_16px_rgba(91,26,91,0.35)]"
+            >
+              <Lock className="h-3 w-3" />
+              Admin
+            </Link>
           </div>
+
+          <Link
+            to="/admin-login"
+            aria-label="Admin login"
+            className="ml-auto mr-2 grid h-9 w-9 place-items-center rounded-full border border-primary/20 bg-white/80 text-primary shadow-sm backdrop-blur transition hover:scale-105 hover:bg-white hover:shadow-[0_0_14px_rgba(91,26,91,0.35)] md:hidden"
+          >
+            <Lock className="h-4 w-4" />
+          </Link>
 
           <button
             onClick={() => setOpen((v) => !v)}
-            className="ml-auto grid h-11 w-11 place-items-center rounded-md bg-primary text-white lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-md bg-primary text-white lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
