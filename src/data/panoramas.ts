@@ -182,17 +182,19 @@ export const PANORAMAS: Panorama[] = [
   },
   {
     id: "open-ground",
-    title: "Open Ground",
+    title: "Sitting Ground",
     description:
-      "Multipurpose open ground used for events, assemblies and outdoor sports next to the Degree Block.",
+      "Sitting ground in front of the Engineering and Degree blocks — a wide open lawn used for gatherings and relaxation.",
     category: "recreation",
-    panorama: P.open,
-    thumbnail: T.open,
+    panorama: sittingGround360.url,
+    thumbnail: sittingGround360.url,
     map: { x: 70, y: 75 },
-    facilities: ["Event stage area", "Flag mast", "Sports lines"],
+    facilities: ["Open lawn", "Building views", "Seating edges"],
     hotspots: [
       { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
       { targetId: "degree-block", yaw: 60, pitch: -3, arrow: "right" },
+      { targetId: "engineering-block", yaw: -60, pitch: -3, arrow: "left" },
+      { targetId: "main-gate", yaw: 210, pitch: -3, arrow: "down" },
     ],
   },
   {
