@@ -1,5 +1,11 @@
 import adminBlock360 from "@/assets/admin-block-360.jpg.asset.json";
 import library360 from "@/assets/library-360.jpg.asset.json";
+import cafeteria360 from "@/assets/cafeteria-360.jpg.asset.json";
+import mainCircle360 from "@/assets/main-circle-360.jpg.asset.json";
+import ground360 from "@/assets/ground-360.jpg.asset.json";
+import sittingGround360 from "@/assets/sitting-ground-360.jpg.asset.json";
+import collegeFront360 from "@/assets/college-front-360.jpg.asset.json";
+import engineeringMiddle360 from "@/assets/engineering-middle-360.jpg.asset.json";
 
 export type Category =
   | "entrance"
@@ -98,8 +104,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "Central junction of the campus. Roads branch out to every academic and recreational zone from here.",
     category: "junction",
-    panorama: P.circle,
-    thumbnail: T.circle,
+    panorama: mainCircle360.url,
+    thumbnail: mainCircle360.url,
     map: { x: 45, y: 55 },
     facilities: ["Central roundabout", "Signage", "Benches"],
     hotspots: [
@@ -116,8 +122,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "The main sports ground with cricket pitch and athletics track adjoining the entrance road.",
     category: "recreation",
-    panorama: P.ground,
-    thumbnail: T.ground,
+    panorama: ground360.url,
+    thumbnail: ground360.url,
     map: { x: 13, y: 55 },
     facilities: ["Cricket pitch", "Athletics track", "Spectator area"],
     hotspots: [
@@ -143,8 +149,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "The engineering academic hub — home to CSE, ECE, principal's office, admissions and administrative rooms.",
     category: "academic",
-    panorama: adminBlock360.url,
-    thumbnail: adminBlock360.url,
+    panorama: engineeringMiddle360.url,
+    thumbnail: engineeringMiddle360.url,
     map: { x: 65, y: 42 },
     facilities: ["Classrooms", "Labs", "Faculty rooms", "Seminar hall"],
     hotspots: [
@@ -176,17 +182,19 @@ export const PANORAMAS: Panorama[] = [
   },
   {
     id: "open-ground",
-    title: "Open Ground",
+    title: "Sitting Ground",
     description:
-      "Multipurpose open ground used for events, assemblies and outdoor sports next to the Degree Block.",
+      "Sitting ground in front of the Engineering and Degree blocks — a wide open lawn used for gatherings and relaxation.",
     category: "recreation",
-    panorama: P.open,
-    thumbnail: T.open,
+    panorama: sittingGround360.url,
+    thumbnail: sittingGround360.url,
     map: { x: 70, y: 75 },
-    facilities: ["Event stage area", "Flag mast", "Sports lines"],
+    facilities: ["Open lawn", "Building views", "Seating edges"],
     hotspots: [
       { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
       { targetId: "degree-block", yaw: 60, pitch: -3, arrow: "right" },
+      { targetId: "engineering-block", yaw: -60, pitch: -3, arrow: "left" },
+      { targetId: "main-gate", yaw: 210, pitch: -3, arrow: "down" },
     ],
   },
   {
@@ -310,13 +318,14 @@ export const PANORAMAS: Panorama[] = [
     id: "degree-block",
     title: "Degree Block",
     description:
-      "The Degree College block — arts, science and commerce classrooms alongside the open ground.",
+      "Frontal view showing both the Engineering block (left) and the Degree block (right) — arts, science and commerce classrooms.",
     category: "academic",
-    panorama: P.sphere,
-    thumbnail: T.sphere,
+    panorama: collegeFront360.url,
+    thumbnail: collegeFront360.url,
     map: { x: 90, y: 55 },
     facilities: ["Lecture halls", "Faculty rooms", "Library annex"],
     hotspots: [
+      { targetId: "engineering-block", yaw: -90, pitch: -3, arrow: "left" },
       { targetId: "main-circle", yaw: 250, pitch: -3, arrow: "left" },
       { targetId: "open-ground", yaw: 200, pitch: -3, arrow: "down" },
       { targetId: "main-gate", yaw: 300, pitch: -3, arrow: "up" },
@@ -329,13 +338,14 @@ export const PANORAMAS: Panorama[] = [
     description:
       "Campus cafeteria beside the Engineering College — snacks, meals and student hangout.",
     category: "facility",
-    panorama: P.park,
-    thumbnail: T.park,
+    panorama: cafeteria360.url,
+    thumbnail: cafeteria360.url,
     map: { x: 86.5, y: 38 },
     facilities: ["Food counters", "Seating", "Beverages"],
     hotspots: [
       { targetId: "engineering-block", yaw: 200, pitch: -3, arrow: "left" },
       { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-gate", yaw: 220, pitch: -3, arrow: "down" },
     ],
   },
   {
