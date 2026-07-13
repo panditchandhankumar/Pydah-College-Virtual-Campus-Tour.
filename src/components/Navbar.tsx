@@ -68,7 +68,7 @@ export function Navbar() {
 
           <button
             onClick={() => setOpen((v) => !v)}
-            className="ml-auto grid h-11 w-11 place-items-center rounded-md bg-primary text-white lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-md bg-primary text-white lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
