@@ -16,12 +16,48 @@ export type Category =
   | "recreation"
   | "parking";
 
+export type HotspotIcon =
+  | "arrow"
+  | "building"
+  | "gate"
+  | "cse"
+  | "ece"
+  | "cafeteria"
+  | "seminar"
+  | "library"
+  | "parking"
+  | "ground"
+  | "garden"
+  | "info"
+  | "nav";
+
+export type HotspotStyle = "circle" | "rounded" | "pill" | "glass" | "floating";
+export type HotspotDisplay = "icon" | "iconText" | "text";
+export type HotspotAnimation = "none" | "bob" | "pulse" | "spin";
+
 export interface Hotspot {
   targetId: string;
   yaw: number; // degrees
   pitch: number;
   label?: string;
   arrow?: "up" | "right" | "down" | "left";
+  /** Visual appearance — all optional, sensible defaults applied at render */
+  icon?: HotspotIcon;
+  size?: number; // px, default 54
+  background?: string;
+  textColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  glow?: boolean;
+  shadow?: boolean;
+  opacity?: number; // 0-1
+  style?: HotspotStyle;
+  display?: HotspotDisplay;
+  tooltip?: string;
+  description?: string;
+  animation?: HotspotAnimation;
+  visible?: boolean;
+  enabled?: boolean;
 }
 
 export interface Panorama {
