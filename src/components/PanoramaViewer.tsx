@@ -199,7 +199,7 @@ export function PanoramaViewer({
           return {
             id: `hs-${i}-${h.targetId}`,
             position: { yaw: `${h.yaw}deg`, pitch: `${h.pitch}deg` },
-            html: buildHotspotHtml(h, name, i === selectedIndex, editMode),
+            html: buildHotspotHtml(h, name, i, i === selectedIndex, editMode),
             anchor: "center center",
             tooltip: h.tooltip || (editMode ? `${name} (drag to move)` : name),
             data: { targetId: h.targetId, idx: i },
