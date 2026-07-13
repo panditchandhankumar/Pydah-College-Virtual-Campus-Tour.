@@ -161,7 +161,8 @@ export const PANORAMAS: Panorama[] = [
       { targetId: "office-room", yaw: 90, pitch: -3, arrow: "right" },
       { targetId: "cafeteria", yaw: 60, pitch: -3, arrow: "right" },
       { targetId: "seminar-hall", yaw: -120, pitch: -3, arrow: "left" },
-      { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-circle", yaw: 180, pitch: -3, label: "Main Circle (Back)", arrow: "down" },
+      { targetId: "main-gate", yaw: 200, pitch: -5, label: "Main Gate", arrow: "down" },
     ],
   },
 
