@@ -41,7 +41,7 @@ export function IntroVideoModal({ open, onClose }: Props) {
           {/* Fullscreen background video — scaled up so YouTube's title/controls overflow outside the viewport */}
           <div className="absolute inset-0 overflow-hidden">
             <iframe
-              src="https://www.youtube.com/embed/iJyZLRkJuWk?autoplay=1&mute=1&controls=0&loop=1&playlist=iJyZLRkJuWk&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&vq=hd1080&disablekb=1&fs=0&cc_load_policy=0"
+              src="https://www.youtube.com/embed/jsCWzShBfcI?autoplay=1&mute=1&controls=0&loop=1&playlist=jsCWzShBfcI&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&playsinline=1&vq=hd1080&disablekb=1&fs=0&cc_load_policy=0"
               title="PYDAH Campus Flyover"
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
