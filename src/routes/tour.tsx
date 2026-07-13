@@ -465,11 +465,10 @@ function HotspotForm({
               onChange={(e) => setArrow(e.target.value as Hotspot["arrow"])}
               className="w-full rounded-lg border border-border bg-background px-3 py-2"
             >
-              {(["up", "right", "down", "left"] as const).map((a) => (
-                <option key={a} value={a}>
-                  ↑→↓←"[{a}]"
-                </option>
-              ))}
+              <option value="up">↑ Up</option>
+              <option value="right">→ Right</option>
+              <option value="down">↓ Down</option>
+              <option value="left">← Left</option>
             </select>
           </label>
           <div className="grid grid-cols-2 gap-3">
