@@ -318,13 +318,14 @@ export const PANORAMAS: Panorama[] = [
     id: "degree-block",
     title: "Degree Block",
     description:
-      "The Degree College block — arts, science and commerce classrooms alongside the open ground.",
+      "Frontal view showing both the Engineering block (left) and the Degree block (right) — arts, science and commerce classrooms.",
     category: "academic",
-    panorama: P.sphere,
-    thumbnail: T.sphere,
+    panorama: collegeFront360.url,
+    thumbnail: collegeFront360.url,
     map: { x: 90, y: 55 },
     facilities: ["Lecture halls", "Faculty rooms", "Library annex"],
     hotspots: [
+      { targetId: "engineering-block", yaw: -90, pitch: -3, arrow: "left" },
       { targetId: "main-circle", yaw: 250, pitch: -3, arrow: "left" },
       { targetId: "open-ground", yaw: 200, pitch: -3, arrow: "down" },
       { targetId: "main-gate", yaw: 300, pitch: -3, arrow: "up" },
@@ -337,13 +338,14 @@ export const PANORAMAS: Panorama[] = [
     description:
       "Campus cafeteria beside the Engineering College — snacks, meals and student hangout.",
     category: "facility",
-    panorama: P.park,
-    thumbnail: T.park,
+    panorama: cafeteria360.url,
+    thumbnail: cafeteria360.url,
     map: { x: 86.5, y: 38 },
     facilities: ["Food counters", "Seating", "Beverages"],
     hotspots: [
       { targetId: "engineering-block", yaw: 200, pitch: -3, arrow: "left" },
       { targetId: "main-circle", yaw: 180, pitch: -3, arrow: "down" },
+      { targetId: "main-gate", yaw: 220, pitch: -3, arrow: "down" },
     ],
   },
   {
