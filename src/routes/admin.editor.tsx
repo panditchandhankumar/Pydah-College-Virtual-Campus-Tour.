@@ -1,18 +1,12 @@
 /**
- * @file /admin — dev-only Admin Configuration Mode.
- *
- * Purpose: click anywhere on a live 360° panorama to place / rename / move /
- * delete hotspots and export the updated locations JSON. Runtime writes to
- * disk aren't possible from the browser; the "Export JSON" button downloads
- * the file so a developer commits it to `src/data/panoramas.ts`.
- *
- * Gated by `import.meta.env.DEV` — the page 404s in production builds.
+ * @file /admin/editor — Visual hotspot editor.
+ * Auth-gated by the parent /admin layout (see admin.tsx).
  */
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { Trash2, Download, Plus, ArrowLeft } from "lucide-react";
-import { PANORAMAS, getPanorama, type Panorama, type Hotspot } from "@/data/panoramas";
+import { PANORAMAS, getPanorama, type Hotspot } from "@/data/panoramas";
 
 const search = z.object({ id: z.string().optional() });
 
@@ -20,33 +14,17 @@ export const Route = createFileRoute("/admin/editor")({
   validateSearch: search,
   head: () => ({
     meta: [
-      { title: "Admin — PYDAH Virtual Tour" },
-      { name: "description", content: "Developer-only visual hotspot editor." },
+      { title: "Hotspot Editor — PYDAH Admin" },
+      { name: "description", content: "Visual hotspot editor for the campus tour." },
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: AdminPage,
+  component: AdminInner,
 });
-
-function AdminPage() {
-  if (!import.meta.env.DEV) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-background text-foreground">
-        <div className="max-w-md text-center">
-          <h1 className="font-display text-2xl font-bold text-primary">Admin mode is disabled</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            The visual hotspot editor only runs in development builds.
-          </p>
-        </div>
-      </div>
-    );
-  }
-  return <AdminInner />;
-}
 
 function AdminInner() {
   const { id } = Route.useSearch();
-  const navigate = useNavigate({ from: "/admin" });
+  const navigate = useNavigate({ from: "/admin/editor" });
   const initialId = id && getPanorama(id) ? id : PANORAMAS[0].id;
   const [activeId, setActiveId] = useState(initialId);
   const active = getPanorama(activeId)!;
