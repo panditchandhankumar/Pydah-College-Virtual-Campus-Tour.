@@ -139,10 +139,10 @@ function AdminInner() {
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-black text-white">
       <div className="flex items-center justify-between border-b border-white/10 bg-black/80 px-4 py-3">
-        <button onClick={() => navigate({ to: "/tour" })} className="flex items-center gap-2 text-sm text-white/80 hover:text-white">
-          <ArrowLeft className="h-4 w-4" /> Exit editor
+        <button onClick={() => navigate({ to: "/admin" })} className="flex items-center gap-2 text-sm text-white/80 hover:text-white">
+          <ArrowLeft className="h-4 w-4" /> Back to dashboard
         </button>
-        <p className="text-xs uppercase tracking-widest text-accent">Admin — Hotspot Editor (dev only)</p>
+        <p className="text-xs uppercase tracking-widest text-accent">Admin — Hotspot Editor</p>
         <button onClick={download} className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold text-black hover:brightness-110">
           <Download className="h-4 w-4" /> Export locations.json
         </button>
