@@ -110,8 +110,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "The grand entrance to PYDAH campus — signature archway, security desk and visitor drop-off.",
     category: "entrance",
-    panorama: P.gate,
-    thumbnail: T.gate,
+    panorama: mainGate360.url,
+    thumbnail: mainGate360.url,
     map: { x: 45, y: 15 },
     facilities: ["Security desk", "Visitor parking", "Info kiosk"],
     hotspots: [
@@ -393,8 +393,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "Seminar Hall near the Faculty Block — hosts guest lectures, workshops and department events.",
     category: "academic",
-    panorama: P.sphere,
-    thumbnail: T.sphere,
+    panorama: seminarHall360.url,
+    thumbnail: seminarHall360.url,
     map: { x: 53.5, y: 47.5 },
     facilities: ["Stage", "Projector", "Tiered seating"],
     hotspots: [
