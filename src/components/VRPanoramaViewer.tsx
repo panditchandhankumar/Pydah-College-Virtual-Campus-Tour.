@@ -395,12 +395,16 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
         const discGeom = new THREE.PlaneGeometry(discSize, discSize);
         const disc = new THREE.Mesh(discGeom, discMat);
 
+        // Shared spherical → world formula, identical to Photo Sphere Viewer
+        // (desktop). Keeping the sign convention matched guarantees a hotspot
+        // sits on the exact same real-world pixel of the panorama in both
+        // Desktop, Mobile, Fullscreen and WebXR / Meta Quest sessions.
         const yaw = THREE.MathUtils.degToRad(h.yaw);
         const pit = THREE.MathUtils.degToRad(h.pitch);
         const r = 6;
         const pos = new THREE.Vector3(
-          r * Math.cos(pit) * Math.sin(yaw),
-          r * Math.sin(pit),
+          -r * Math.cos(pit) * Math.sin(yaw),
+           r * Math.sin(pit),
           -r * Math.cos(pit) * Math.cos(yaw),
         );
         if (display !== "text") {
