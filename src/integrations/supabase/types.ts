@@ -14,7 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      hotspot_overrides: {
+        Row: {
+          hotspots: Json
+          scene_id: string
+          updated_at: string
+        }
+        Insert: {
+          hotspots?: Json
+          scene_id: string
+          updated_at?: string
+        }
+        Update: {
+          hotspots?: Json
+          scene_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
