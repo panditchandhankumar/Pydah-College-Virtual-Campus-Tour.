@@ -295,130 +295,171 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
           (sphere.material as THREE.MeshBasicMaterial).needsUpdate = true;
           old?.dispose();
 
-          // Rebuild hotspots
-          function drawArrow(ctx: CanvasRenderingContext2D, direction: Hotspot["arrow"] = "up") {
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 22;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.beginPath();
-            if (direction === "right") {
-              ctx.moveTo(78, 128); ctx.lineTo(178, 128);
-              ctx.moveTo(128, 78); ctx.lineTo(178, 128);
-              ctx.moveTo(128, 178); ctx.lineTo(178, 128);
-            } else if (direction === "left") {
-              ctx.moveTo(178, 128); ctx.lineTo(78, 128);
-              ctx.moveTo(128, 78); ctx.lineTo(78, 128);
-              ctx.moveTo(128, 178); ctx.lineTo(78, 128);
-            } else if (direction === "down") {
-              ctx.moveTo(128, 78); ctx.lineTo(128, 178);
-              ctx.moveTo(78, 128); ctx.lineTo(128, 178);
-              ctx.moveTo(178, 128); ctx.lineTo(128, 178);
-            } else {
-              ctx.moveTo(128, 180); ctx.lineTo(128, 78);
-              ctx.moveTo(78, 128); ctx.lineTo(128, 78);
-              ctx.moveTo(178, 128); ctx.lineTo(128, 78);
-            }
-            ctx.stroke();
-          }
+          stateRef.current.rebuildHotspots(p.id);
 
-          while (hotspotGroup.children.length) {
-            const c = hotspotGroup.children.pop()!;
-            (c as THREE.Mesh).geometry?.dispose?.();
-            ((c as THREE.Mesh).material as THREE.Material)?.dispose?.();
-          }
-          const overrides = useHotspotStore.getState().overrides[p.id];
-          const activeHotspots = overrides ?? p.hotspots;
-          for (const h of activeHotspots) {
-            const target = getPanorama(h.targetId);
-            const name = target?.title ?? h.label ?? "Location";
+          stateRef.current.currentId = id;
+          setStatus("");
+          onChange(id);
+        },
+        undefined,
+        () => setStatus("Failed to load panorama."),
+      );
+    };
 
-            // Blue disc with white up-arrow (canvas → texture on a plane)
-            const discCanvas = document.createElement("canvas");
-            discCanvas.width = 256;
-            discCanvas.height = 256;
-            const dctx = discCanvas.getContext("2d")!;
-            dctx.beginPath();
-            dctx.arc(128, 128, 110, 0, Math.PI * 2);
-            dctx.fillStyle = "#1e5fbf";
-            dctx.fill();
-            dctx.lineWidth = 12;
-            dctx.strokeStyle = "#ffffff";
-            dctx.stroke();
-            drawArrow(dctx, h.arrow);
-            const discTex = new THREE.CanvasTexture(discCanvas);
-            discTex.colorSpace = THREE.SRGBColorSpace;
-            const discMat = new THREE.MeshBasicMaterial({
-              map: discTex,
-              transparent: true,
-              depthTest: false,
-              depthWrite: false,
-            });
-            const discGeom = new THREE.PlaneGeometry(1.4, 1.4);
-            const disc = new THREE.Mesh(discGeom, discMat);
+    // ---- Hotspot rebuild (called on panorama load AND on override changes) ----
+    const ICON_GLYPH: Record<string, string> = {
+      arrow: "", building: "🏫", gate: "🏠", cse: "💻", ece: "📡",
+      cafeteria: "🍽", seminar: "🎤", library: "📚", parking: "🚲",
+      ground: "⚽", garden: "🌳", info: "ℹ", nav: "➡",
+    };
+    function drawArrow(ctx: CanvasRenderingContext2D, direction: Hotspot["arrow"] = "up", color = "#ffffff") {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 22;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      if (direction === "right") {
+        ctx.moveTo(78, 128); ctx.lineTo(178, 128);
+        ctx.moveTo(128, 78); ctx.lineTo(178, 128);
+        ctx.moveTo(128, 178); ctx.lineTo(178, 128);
+      } else if (direction === "left") {
+        ctx.moveTo(178, 128); ctx.lineTo(78, 128);
+        ctx.moveTo(128, 78); ctx.lineTo(78, 128);
+        ctx.moveTo(128, 178); ctx.lineTo(78, 128);
+      } else if (direction === "down") {
+        ctx.moveTo(128, 78); ctx.lineTo(128, 178);
+        ctx.moveTo(78, 128); ctx.lineTo(128, 178);
+        ctx.moveTo(178, 128); ctx.lineTo(128, 178);
+      } else {
+        ctx.moveTo(128, 180); ctx.lineTo(128, 78);
+        ctx.moveTo(78, 128); ctx.lineTo(128, 78);
+        ctx.moveTo(178, 128); ctx.lineTo(128, 78);
+      }
+      ctx.stroke();
+    }
 
-            const yaw = THREE.MathUtils.degToRad(h.yaw);
-            const pit = THREE.MathUtils.degToRad(h.pitch);
-            const r = 6;
-            const pos = new THREE.Vector3(
-              r * Math.cos(pit) * Math.sin(yaw),
-              r * Math.sin(pit),
-              -r * Math.cos(pit) * Math.cos(yaw),
-            );
-            disc.position.copy(pos);
-            disc.lookAt(0, 0, 0);
-            disc.userData.targetId = h.targetId;
-            disc.renderOrder = 10;
-            hotspotGroup.add(disc);
+    stateRef.current = stateRef.current || {};
+    (stateRef.current as any).rebuildHotspots = (panoId: string) => {
+      const p = getPanorama(panoId);
+      if (!p) return;
+      while (hotspotGroup.children.length) {
+        const c = hotspotGroup.children.pop()!;
+        (c as THREE.Mesh).geometry?.dispose?.();
+        const m = (c as THREE.Mesh).material as any;
+        m?.map?.dispose?.();
+        m?.dispose?.();
+      }
+      const overrides = useHotspotStore.getState().overrides[p.id];
+      const activeHotspots = overrides ?? p.hotspots;
+      for (const h of activeHotspots) {
+        if (h.visible === false) continue;
+        const target = getPanorama(h.targetId);
+        const name = h.label ?? target?.title ?? "Location";
+        const bg = h.background ?? "#1e5fbf";
+        const fg = h.textColor ?? "#ffffff";
+        const border = h.borderColor ?? "#ffffff";
+        const borderW = h.borderWidth ?? 12;
+        const opacity = h.opacity ?? 1;
+        const sizeScale = (h.size ?? 54) / 54;
+        const display = h.display ?? "iconText";
+        const iconKey = h.icon ?? "arrow";
 
-            // Label plane above the disc
-            const labelCanvas = document.createElement("canvas");
-            labelCanvas.width = 512;
-            labelCanvas.height = 128;
-            const lctx = labelCanvas.getContext("2d")!;
-            lctx.font = "bold 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-            const textW = lctx.measureText(name).width;
-            const padX = 28;
-            const boxW = Math.min(labelCanvas.width, textW + padX * 2);
-            const boxH = 96;
-            const bx = (labelCanvas.width - boxW) / 2;
-            const by = (labelCanvas.height - boxH) / 2;
-            const radius = 14;
-            lctx.fillStyle = "#ffffff";
-            lctx.beginPath();
-            lctx.moveTo(bx + radius, by);
-            lctx.arcTo(bx + boxW, by, bx + boxW, by + boxH, radius);
-            lctx.arcTo(bx + boxW, by + boxH, bx, by + boxH, radius);
-            lctx.arcTo(bx, by + boxH, bx, by, radius);
-            lctx.arcTo(bx, by, bx + boxW, by, radius);
-            lctx.closePath();
-            lctx.fill();
-            lctx.strokeStyle = "rgba(0,33,71,0.2)";
-            lctx.lineWidth = 2;
-            lctx.stroke();
-            lctx.fillStyle = "#002147";
-            lctx.textAlign = "center";
-            lctx.textBaseline = "middle";
-            lctx.fillText(name, labelCanvas.width / 2, labelCanvas.height / 2);
-            const labelTex = new THREE.CanvasTexture(labelCanvas);
-            labelTex.colorSpace = THREE.SRGBColorSpace;
-            const labelMat = new THREE.MeshBasicMaterial({
-              map: labelTex,
-              transparent: true,
-              depthTest: false,
-              depthWrite: false,
-            });
-            const labelAspect = labelCanvas.width / labelCanvas.height;
-            const labelH = 0.6;
-            const labelGeom = new THREE.PlaneGeometry(labelH * labelAspect, labelH);
-            const label = new THREE.Mesh(labelGeom, labelMat);
-            // Position slightly above the disc, along the same look direction
-            const up = new THREE.Vector3(0, 1.15, 0);
-            label.position.copy(pos).add(up);
-            label.lookAt(0, 0, 0);
-            label.renderOrder = 11;
-            hotspotGroup.add(label);
-          }
+        // Disc canvas
+        const discCanvas = document.createElement("canvas");
+        discCanvas.width = 256;
+        discCanvas.height = 256;
+        const dctx = discCanvas.getContext("2d")!;
+        dctx.beginPath();
+        dctx.arc(128, 128, 110, 0, Math.PI * 2);
+        dctx.fillStyle = bg;
+        dctx.fill();
+        dctx.lineWidth = borderW;
+        dctx.strokeStyle = border;
+        dctx.stroke();
+        if (iconKey === "arrow") {
+          drawArrow(dctx, h.arrow, fg);
+        } else {
+          dctx.fillStyle = fg;
+          dctx.font = "bold 130px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+          dctx.textAlign = "center";
+          dctx.textBaseline = "middle";
+          dctx.fillText(ICON_GLYPH[iconKey] ?? "•", 128, 138);
+        }
+        const discTex = new THREE.CanvasTexture(discCanvas);
+        discTex.colorSpace = THREE.SRGBColorSpace;
+        const discMat = new THREE.MeshBasicMaterial({
+          map: discTex, transparent: true, opacity,
+          depthTest: false, depthWrite: false,
+        });
+        const discSize = 1.4 * sizeScale;
+        const discGeom = new THREE.PlaneGeometry(discSize, discSize);
+        const disc = new THREE.Mesh(discGeom, discMat);
+
+        const yaw = THREE.MathUtils.degToRad(h.yaw);
+        const pit = THREE.MathUtils.degToRad(h.pitch);
+        const r = 6;
+        const pos = new THREE.Vector3(
+          r * Math.cos(pit) * Math.sin(yaw),
+          r * Math.sin(pit),
+          -r * Math.cos(pit) * Math.cos(yaw),
+        );
+        if (display !== "text") {
+          disc.position.copy(pos);
+          disc.lookAt(0, 0, 0);
+          disc.userData.targetId = h.targetId;
+          disc.renderOrder = 10;
+          hotspotGroup.add(disc);
+        }
+
+        if (display !== "icon") {
+          const labelCanvas = document.createElement("canvas");
+          labelCanvas.width = 512;
+          labelCanvas.height = 128;
+          const lctx = labelCanvas.getContext("2d")!;
+          lctx.font = "bold 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+          const textW = lctx.measureText(name).width;
+          const padX = 28;
+          const boxW = Math.min(labelCanvas.width, textW + padX * 2);
+          const boxH = 96;
+          const bx = (labelCanvas.width - boxW) / 2;
+          const by = (labelCanvas.height - boxH) / 2;
+          const radius = 14;
+          lctx.fillStyle = "#ffffff";
+          lctx.beginPath();
+          lctx.moveTo(bx + radius, by);
+          lctx.arcTo(bx + boxW, by, bx + boxW, by + boxH, radius);
+          lctx.arcTo(bx + boxW, by + boxH, bx, by + boxH, radius);
+          lctx.arcTo(bx, by + boxH, bx, by, radius);
+          lctx.arcTo(bx, by, bx + boxW, by, radius);
+          lctx.closePath();
+          lctx.fill();
+          lctx.strokeStyle = "rgba(0,33,71,0.2)";
+          lctx.lineWidth = 2;
+          lctx.stroke();
+          lctx.fillStyle = "#002147";
+          lctx.textAlign = "center";
+          lctx.textBaseline = "middle";
+          lctx.fillText(name, labelCanvas.width / 2, labelCanvas.height / 2);
+          const labelTex = new THREE.CanvasTexture(labelCanvas);
+          labelTex.colorSpace = THREE.SRGBColorSpace;
+          const labelMat = new THREE.MeshBasicMaterial({
+            map: labelTex, transparent: true, opacity,
+            depthTest: false, depthWrite: false,
+          });
+          const labelAspect = labelCanvas.width / labelCanvas.height;
+          const labelH = 0.6 * sizeScale;
+          const labelGeom = new THREE.PlaneGeometry(labelH * labelAspect, labelH);
+          const label = new THREE.Mesh(labelGeom, labelMat);
+          const up = new THREE.Vector3(0, 1.15 * sizeScale, 0);
+          label.position.copy(pos).add(up);
+          label.lookAt(0, 0, 0);
+          label.userData.targetId = h.targetId;
+          label.renderOrder = 11;
+          hotspotGroup.add(label);
+        }
+      }
+    };
+
 
           stateRef.current.currentId = id;
           setStatus("");
