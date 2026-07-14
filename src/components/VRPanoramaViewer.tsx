@@ -325,7 +325,9 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
             (c as THREE.Mesh).geometry?.dispose?.();
             ((c as THREE.Mesh).material as THREE.Material)?.dispose?.();
           }
-          for (const h of p.hotspots) {
+          const overrides = useHotspotStore.getState().overrides[p.id];
+          const activeHotspots = overrides ?? p.hotspots;
+          for (const h of activeHotspots) {
             const target = getPanorama(h.targetId);
             const name = target?.title ?? h.label ?? "Location";
 
