@@ -112,13 +112,14 @@ function AdminEditor() {
   }, [activeId]);
 
   // ─── Actions ─────────────────────────────────────────────────────────
-  const doSave = useCallback(() => {
-    save();
-    toast.success("Changes saved successfully");
+  const doSave = useCallback(async () => {
+    const res = await save();
+    if (res.ok) toast.success("✓ Changes saved to database");
+    else toast.error(`❌ Failed to save: ${res.error ?? "unknown error"}`);
   }, [save]);
 
-  const doReset = () => {
-    resetPano(activeId);
+  const doReset = async () => {
+    await resetPano(activeId);
     setSelectedIdx(null);
     toast("Scene reset to defaults");
   };
@@ -194,7 +195,7 @@ function AdminEditor() {
     const f = e.target.files?.[0];
     if (!f) return;
     const text = await f.text();
-    const ok = importJSON(text);
+    const ok = await importJSON(text);
     toast[ok ? "success" : "error"](ok ? "Hotspots imported" : "Invalid JSON file");
     e.target.value = "";
   };
