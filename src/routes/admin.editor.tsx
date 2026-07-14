@@ -37,6 +37,8 @@ function AdminInner() {
   const storeSave = useHotspotStore((s) => s.save);
   const storeReset = useHotspotStore((s) => s.resetPanorama);
   const dirty = useHotspotStore((s) => s.dirty);
+  const autosave = useHotspotStore((s) => s.autosave);
+  const setAutosave = useHotspotStore((s) => s.setAutosave);
   const [drafts, setDrafts] = useState<Record<string, Hotspot[]>>(() =>
     Object.fromEntries(PANORAMAS.map((p) => [p.id, storeGet(p.id).map((h) => ({ ...h }))])),
   );
