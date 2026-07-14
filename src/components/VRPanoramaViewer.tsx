@@ -5,6 +5,7 @@ import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
 import type { Panorama, Hotspot } from "@/data/panoramas";
 import { getPanorama } from "@/data/panoramas";
+import { useHotspotStore } from "@/lib/hotspotStore";
 import vrConfig from "@/config/vr.json";
 
 interface Props {
