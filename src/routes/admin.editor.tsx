@@ -30,11 +30,35 @@ function AdminInner() {
   const [activeId, setActiveId] = useState(initialId);
   const active = getPanorama(activeId)!;
 
-  // Editable working copy of hotspots for the active panorama.
+  // Editable working copy — seeded from persisted overrides so previously
+  // saved hotspots reappear across sessions and across the whole project.
+  const storeGet = useHotspotStore((s) => s.getHotspots);
+  const storeSet = useHotspotStore((s) => s.setHotspots);
+  const storeSave = useHotspotStore((s) => s.save);
+  const storeReset = useHotspotStore((s) => s.resetPanorama);
+  const dirty = useHotspotStore((s) => s.dirty);
   const [drafts, setDrafts] = useState<Record<string, Hotspot[]>>(() =>
-    Object.fromEntries(PANORAMAS.map((p) => [p.id, p.hotspots.map((h) => ({ ...h }))])),
+    Object.fromEntries(PANORAMAS.map((p) => [p.id, storeGet(p.id).map((h) => ({ ...h }))])),
   );
   const hotspots = drafts[activeId] ?? [];
+
+  // Push draft edits into the store on every change so the tour viewer
+  // reflects them live; `Save` then persists to localStorage.
+  useEffect(() => {
+    storeSet(activeId, drafts[activeId] ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drafts, activeId]);
+
+  function saveAll() {
+    // Flush every panorama's drafts (in case some were edited then user switched away)
+    for (const p of PANORAMAS) storeSet(p.id, drafts[p.id] ?? []);
+    storeSave();
+  }
+
+  function resetActive() {
+    storeReset(activeId);
+    setDrafts((d) => ({ ...d, [activeId]: getPanorama(activeId)!.hotspots.map((h) => ({ ...h })) }));
+  }
 
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
