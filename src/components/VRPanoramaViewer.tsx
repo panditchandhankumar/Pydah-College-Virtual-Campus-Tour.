@@ -461,14 +461,6 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
     };
 
 
-          stateRef.current.currentId = id;
-          setStatus("");
-          onChange(id);
-        },
-        undefined,
-        () => setStatus("Failed to load panorama."),
-      );
-    };
 
     // Initial load
     stateRef.current.applyPanorama(panorama.id);
