@@ -6,6 +6,8 @@ import ground360 from "@/assets/ground-360.jpg.asset.json";
 import sittingGround360 from "@/assets/sitting-ground-360.jpg.asset.json";
 import collegeFront360 from "@/assets/college-front-360.jpg.asset.json";
 import engineeringMiddle360 from "@/assets/engineering-middle-360.jpg.asset.json";
+import seminarHall360 from "@/assets/seminar-hall-360.jpg.asset.json";
+import mainGate360 from "@/assets/main-gate-360.jpg.asset.json";
 
 export type Category =
   | "entrance"
