@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { useState } from "react";
 import { PANORAMAS, getPanorama } from "@/data/panoramas";
+import { useHotspotStore, withOverrides } from "@/lib/hotspotStore";
 import { VRPanoramaViewer } from "@/components/VRPanoramaViewer";
 
 const search = z.object({ id: z.string().optional() });
