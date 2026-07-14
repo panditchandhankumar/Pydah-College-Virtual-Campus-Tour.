@@ -170,9 +170,18 @@ function AdminInner() {
           <ArrowLeft className="h-4 w-4" /> Back to dashboard
         </button>
         <p className="text-xs uppercase tracking-widest text-accent">
-          Admin — Hotspot Editor {dirty && <span className="ml-2 rounded-full bg-orange-500/80 px-2 py-0.5 text-[10px] text-black">unsaved</span>}
+          Admin — Hotspot Editor
+          {autosave ? (
+            <span className="ml-2 rounded-full bg-emerald-500/80 px-2 py-0.5 text-[10px] text-black">autosaving</span>
+          ) : dirty ? (
+            <span className="ml-2 rounded-full bg-orange-500/80 px-2 py-0.5 text-[10px] text-black">unsaved</span>
+          ) : null}
         </p>
         <div className="flex items-center gap-2">
+          <label className="flex cursor-pointer items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs text-white hover:bg-white/20">
+            <input type="checkbox" checked={autosave} onChange={(e) => setAutosave(e.target.checked)} className="accent-emerald-400" />
+            Autosave
+          </label>
           <button onClick={resetActive} title="Revert this panorama to defaults" className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs text-white hover:bg-white/20">
             <RotateCcw className="h-4 w-4" /> Reset
           </button>
