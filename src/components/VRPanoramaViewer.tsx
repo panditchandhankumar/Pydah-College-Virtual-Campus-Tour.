@@ -60,12 +60,14 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
     renderer.xr.setFoveation?.(vrConfig.renderer.foveation);
     mount.appendChild(renderer.domElement);
 
-    // Enter-VR button (floats bottom-center).
+    // Enter-VR button (floats bottom-center, above all overlays).
     const vrButton = VRButton.createButton(renderer);
-    vrButton.style.position = "absolute";
-    vrButton.style.bottom = "24px";
-    vrButton.style.left = "50%";
-    vrButton.style.transform = "translateX(-50%)";
+    vrButton.style.setProperty("position", "absolute", "important");
+    vrButton.style.setProperty("bottom", "28px", "important");
+    vrButton.style.setProperty("left", "50%", "important");
+    vrButton.style.setProperty("right", "auto", "important");
+    vrButton.style.setProperty("transform", "translateX(-50%)", "important");
+    vrButton.style.setProperty("z-index", "50", "important");
     mount.appendChild(vrButton);
 
     if ("xr" in navigator) {
