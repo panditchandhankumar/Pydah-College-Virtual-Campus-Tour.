@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { useState } from "react";
 import { PANORAMAS, getPanorama } from "@/data/panoramas";
+import { useHotspotStore, withOverrides } from "@/lib/hotspotStore";
 import { VRPanoramaViewer } from "@/components/VRPanoramaViewer";
 
 const search = z.object({ id: z.string().optional() });
@@ -25,7 +26,8 @@ function VRPage() {
   const { id } = Route.useSearch();
   const navigate = useNavigate({ from: "/vr" });
   const activeId = id && getPanorama(id) ? id : PANORAMAS[0].id;
-  const active = getPanorama(activeId)!;
+  const overrides = useHotspotStore((s) => s.overrides);
+  const active = withOverrides(getPanorama(activeId)!, overrides);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const go = (target: string) =>
