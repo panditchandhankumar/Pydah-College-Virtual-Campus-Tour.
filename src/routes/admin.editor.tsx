@@ -167,10 +167,20 @@ function AdminInner() {
         <button onClick={() => navigate({ to: "/admin" })} className="flex items-center gap-2 text-sm text-white/80 hover:text-white">
           <ArrowLeft className="h-4 w-4" /> Back to dashboard
         </button>
-        <p className="text-xs uppercase tracking-widest text-accent">Admin — Hotspot Editor</p>
-        <button onClick={download} className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold text-black hover:brightness-110">
-          <Download className="h-4 w-4" /> Export locations.json
-        </button>
+        <p className="text-xs uppercase tracking-widest text-accent">
+          Admin — Hotspot Editor {dirty && <span className="ml-2 rounded-full bg-orange-500/80 px-2 py-0.5 text-[10px] text-black">unsaved</span>}
+        </p>
+        <div className="flex items-center gap-2">
+          <button onClick={resetActive} title="Revert this panorama to defaults" className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-xs text-white hover:bg-white/20">
+            <RotateCcw className="h-4 w-4" /> Reset
+          </button>
+          <button onClick={saveAll} className="flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-xs font-bold text-black hover:brightness-110">
+            <Save className="h-4 w-4" /> Save to Project
+          </button>
+          <button onClick={download} className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold text-black hover:brightness-110">
+            <Download className="h-4 w-4" /> Export JSON
+          </button>
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1">
