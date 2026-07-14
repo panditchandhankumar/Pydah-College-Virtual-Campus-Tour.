@@ -6,6 +6,8 @@ import ground360 from "@/assets/ground-360.jpg.asset.json";
 import sittingGround360 from "@/assets/sitting-ground-360.jpg.asset.json";
 import collegeFront360 from "@/assets/college-front-360.jpg.asset.json";
 import engineeringMiddle360 from "@/assets/engineering-middle-360.jpg.asset.json";
+import seminarHall360 from "@/assets/seminar-hall-360.jpg.asset.json";
+import mainGate360 from "@/assets/main-gate-360.jpg.asset.json";
 
 export type Category =
   | "entrance"
@@ -108,8 +110,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "The grand entrance to PYDAH campus — signature archway, security desk and visitor drop-off.",
     category: "entrance",
-    panorama: P.gate,
-    thumbnail: T.gate,
+    panorama: mainGate360.url,
+    thumbnail: mainGate360.url,
     map: { x: 45, y: 15 },
     facilities: ["Security desk", "Visitor parking", "Info kiosk"],
     hotspots: [
@@ -391,8 +393,8 @@ export const PANORAMAS: Panorama[] = [
     description:
       "Seminar Hall near the Faculty Block — hosts guest lectures, workshops and department events.",
     category: "academic",
-    panorama: P.sphere,
-    thumbnail: T.sphere,
+    panorama: seminarHall360.url,
+    thumbnail: seminarHall360.url,
     map: { x: 53.5, y: 47.5 },
     facilities: ["Stage", "Projector", "Tiered seating"],
     hotspots: [
