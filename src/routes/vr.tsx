@@ -26,7 +26,8 @@ function VRPage() {
   const { id } = Route.useSearch();
   const navigate = useNavigate({ from: "/vr" });
   const activeId = id && getPanorama(id) ? id : PANORAMAS[0].id;
-  const active = getPanorama(activeId)!;
+  const overrides = useHotspotStore((s) => s.overrides);
+  const active = withOverrides(getPanorama(activeId)!, overrides);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const go = (target: string) =>
