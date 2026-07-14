@@ -28,7 +28,9 @@ interface State {
   overrides: Overrides;
   dirty: boolean;
   editMode: boolean;
+  autosave: boolean;
   setEditMode: (v: boolean) => void;
+  setAutosave: (v: boolean) => void;
   getHotspots: (panoId: string) => Hotspot[];
   setHotspots: (panoId: string, hs: Hotspot[]) => void;
   save: () => void;
@@ -37,21 +39,41 @@ interface State {
   exportJSON: () => string;
 }
 
+const AUTOSAVE_KEY = "pydah-hotspot-autosave-v1";
+const loadAutosave = () => {
+  if (typeof window === "undefined") return true;
+  const v = window.localStorage.getItem(AUTOSAVE_KEY);
+  return v === null ? true : v === "1";
+};
+
 export const useHotspotStore = create<State>((set, get) => ({
   overrides: load(),
   dirty: false,
   editMode: false,
+  autosave: loadAutosave(),
   setEditMode: (v) => set({ editMode: v }),
+  setAutosave: (v) => {
+    if (typeof window !== "undefined") window.localStorage.setItem(AUTOSAVE_KEY, v ? "1" : "0");
+    set({ autosave: v });
+    if (v) {
+      persist(get().overrides);
+      set({ dirty: false });
+    }
+  },
   getHotspots: (panoId) => {
     const o = get().overrides[panoId];
     if (o) return o;
     return PANORAMAS.find((p) => p.id === panoId)?.hotspots ?? [];
   },
   setHotspots: (panoId, hs) =>
-    set((s) => ({
-      overrides: { ...s.overrides, [panoId]: hs },
-      dirty: true,
-    })),
+    set((s) => {
+      const overrides = { ...s.overrides, [panoId]: hs };
+      if (s.autosave) {
+        persist(overrides);
+        return { overrides, dirty: false };
+      }
+      return { overrides, dirty: true };
+    }),
   save: () => {
     const { overrides } = get();
     persist(overrides);
