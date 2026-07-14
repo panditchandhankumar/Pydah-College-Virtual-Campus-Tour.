@@ -194,7 +194,7 @@ function AdminEditor() {
     const f = e.target.files?.[0];
     if (!f) return;
     const text = await f.text();
-    const ok = importJSON(text);
+    const ok = await importJSON(text);
     toast[ok ? "success" : "error"](ok ? "Hotspots imported" : "Invalid JSON file");
     e.target.value = "";
   };
