@@ -112,13 +112,14 @@ function AdminEditor() {
   }, [activeId]);
 
   // ─── Actions ─────────────────────────────────────────────────────────
-  const doSave = useCallback(() => {
-    save();
-    toast.success("Changes saved successfully");
+  const doSave = useCallback(async () => {
+    const res = await save();
+    if (res.ok) toast.success("✓ Changes saved to database");
+    else toast.error(`❌ Failed to save: ${res.error ?? "unknown error"}`);
   }, [save]);
 
-  const doReset = () => {
-    resetPano(activeId);
+  const doReset = async () => {
+    await resetPano(activeId);
     setSelectedIdx(null);
     toast("Scene reset to defaults");
   };
