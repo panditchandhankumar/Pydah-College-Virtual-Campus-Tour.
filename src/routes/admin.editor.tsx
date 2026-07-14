@@ -5,8 +5,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
-import { Trash2, Download, Plus, ArrowLeft } from "lucide-react";
+import { Trash2, Download, Plus, ArrowLeft, Save, RotateCcw } from "lucide-react";
 import { PANORAMAS, getPanorama, type Hotspot } from "@/data/panoramas";
+import { useHotspotStore } from "@/lib/hotspotStore";
 
 const search = z.object({ id: z.string().optional() });
 
