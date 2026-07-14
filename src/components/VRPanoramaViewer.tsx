@@ -487,6 +487,17 @@ export function VRPanoramaViewer({ panorama, onChange }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [panorama.id]);
 
+  // Live-rebuild hotspots when admin edits change the store.
+  useEffect(() => {
+    const unsub = useHotspotStore.subscribe((s, prev) => {
+      if (s.overrides === prev.overrides) return;
+      const st = stateRef.current;
+      if (st?.rebuildHotspots && st.currentId) st.rebuildHotspots(st.currentId);
+    });
+    return () => unsub();
+  }, []);
+
+
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl bg-black">
       <div ref={mountRef} className="h-full w-full" />
