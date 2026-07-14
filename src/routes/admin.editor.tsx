@@ -33,7 +33,7 @@ import {
   type Hotspot,
   type HotspotIcon,
 } from "@/data/panoramas";
-import { PanoramaViewer, HOTSPOT_ICONS } from "@/components/PanoramaViewer";
+import { TourViewer as PanoramaViewer, HOTSPOT_ICONS } from "@/components/TourViewer";
 import { useHotspotStore, withOverrides } from "@/lib/hotspotStore";
 
 const search = z.object({ id: z.string().optional() });

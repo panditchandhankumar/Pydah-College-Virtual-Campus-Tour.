@@ -3,7 +3,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { PANORAMAS, getPanorama } from "@/data/panoramas";
 import { useHotspotStore, withOverrides } from "@/lib/hotspotStore";
-import { VRPanoramaViewer } from "@/components/VRPanoramaViewer";
+import { VRTourViewer as VRPanoramaViewer } from "@/components/VRTourViewer";
 
 const search = z.object({ id: z.string().optional() });
 

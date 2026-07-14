@@ -4,7 +4,7 @@ import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Info, X, Search } from "lucide-react";
 import { PANORAMAS, getPanorama } from "@/data/panoramas";
-import { PanoramaViewer } from "@/components/PanoramaViewer";
+import { TourViewer as PanoramaViewer } from "@/components/TourViewer";
 import { MiniMap } from "@/components/MiniMap";
 import { TourHUD } from "@/components/TourHUD";
 import { useHotspotStore, withOverrides } from "@/lib/hotspotStore";
