@@ -173,7 +173,16 @@ export const useHotspotStore = create<State>((set, get) => ({
     set({ loading: true });
     try {
       const remote = await fetchOverridesFromDB();
-      // Remote is source of truth on refresh; also cache to LS.
+      const local = get().overrides;
+      // First-run migration: if DB is empty but this browser has local
+      // customizations, push them up so nothing is lost. Otherwise DB wins.
+      if (Object.keys(remote).length === 0 && Object.keys(local).length > 0) {
+        await Promise.all(
+          Object.entries(local).map(([id, hs]) => upsertSceneToDB(id, hs).catch((e) => console.error(e))),
+        );
+        set({ loaded: true, loading: false, syncError: null, pendingIds: new Set(), dirty: false });
+        return;
+      }
       persistLocal(remote);
       set({ overrides: remote, loaded: true, loading: false, syncError: null, pendingIds: new Set(), dirty: false });
     } catch (e: any) {
