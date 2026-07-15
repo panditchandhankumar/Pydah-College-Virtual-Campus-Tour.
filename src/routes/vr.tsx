@@ -45,10 +45,11 @@ function VRPage() {
       >
         <button
           onClick={() => setDrawerOpen((v) => !v)}
-          className="mx-auto mb-2 mt-3 block rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur hover:bg-white/20"
+          className="mb-2 ml-4 mt-3 block rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur hover:bg-white/20"
         >
           {drawerOpen ? "Hide locations" : "Show locations"}
         </button>
+
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 p-4 sm:grid-cols-3 md:grid-cols-5">
           {PANORAMAS.map((p) => (
             <button
