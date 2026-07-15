@@ -67,7 +67,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
 
     // Create the official Three.js VR button but keep it hidden. We render our
     // own styled button and proxy clicks to it, so Three.js can't clobber our UI.
-    const hiddenBtn = VRButton.createButton(engine.renderer);
+    const hiddenBtn = VRButton.createButton(engine.renderer) as HTMLButtonElement;
     hiddenBtnRef.current = hiddenBtn;
     hiddenBtn.style.setProperty("display", "none", "important");
     hiddenBtn.style.setProperty("position", "fixed", "important");
