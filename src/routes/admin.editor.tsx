@@ -766,6 +766,36 @@ function HotspotForm({
         </div>
       </Field>
 
+      <Field label={`Size (${hotspot.size ?? 54}px)`}>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onChange({ size: Math.max(20, (hotspot.size ?? 54) - 4) })}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/5 text-lg font-bold ring-1 ring-white/10 hover:bg-white/10"
+            title="Decrease size"
+          >
+            −
+          </button>
+          <input
+            type="range"
+            min={20}
+            max={160}
+            step={2}
+            value={hotspot.size ?? 54}
+            onChange={(e) => onChange({ size: Number(e.target.value) })}
+            className="flex-1 accent-fuchsia-400"
+          />
+          <button
+            type="button"
+            onClick={() => onChange({ size: Math.min(160, (hotspot.size ?? 54) + 4) })}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/5 text-lg font-bold ring-1 ring-white/10 hover:bg-white/10"
+            title="Increase size"
+          >
+            +
+          </button>
+        </div>
+      </Field>
+
       <div className="grid grid-cols-2 gap-2">
         <Field label="Yaw°">
           <input
