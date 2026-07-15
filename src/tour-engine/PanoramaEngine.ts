@@ -133,13 +133,17 @@ export class PanoramaEngine {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(mount.clientWidth, mount.clientHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // NoToneMapping for equirect panoramas — ACES darkens them heavily in
+    // WebXR (Quest 3 / 3S) framebuffers and can render as a black view.
+    this.renderer.toneMapping = THREE.NoToneMapping;
+    this.renderer.toneMappingExposure = 1;
     if (this.xr) {
       this.renderer.xr.enabled = true;
-      try {
-        this.renderer.xr.setReferenceSpaceType("local-floor");
-        this.renderer.xr.setFoveation?.(1);
-      } catch { /* ignore */ }
+      // Prefer local-floor; if the runtime rejects it (some Quest browser
+      // builds), fall back to "local" so the session still renders.
+      try { this.renderer.xr.setReferenceSpaceType("local-floor"); }
+      catch { try { this.renderer.xr.setReferenceSpaceType("local"); } catch { /* ignore */ } }
+      try { this.renderer.xr.setFoveation?.(1); } catch { /* ignore */ }
       // Reset all view state at the moment the headset session starts so we
       // never enter with a stale desktop rotation / rig offset / opaque fade
       // overlay (any of which would show as a "black screen" in VR).
