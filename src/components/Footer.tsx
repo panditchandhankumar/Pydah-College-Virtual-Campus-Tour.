@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
+import type { MouseEvent } from "react";
 
 const SOCIAL_LINKS = [
   { Icon: Facebook, href: "https://www.facebook.com/PydahCollegeOfEngineering", label: "Facebook" },
@@ -11,6 +12,39 @@ const SOCIAL_LINKS = [
   { Icon: Linkedin, href: "https://www.linkedin.com/company/pydahengineering/", label: "LinkedIn" },
   { Icon: Youtube, href: "https://youtube.com/@pydahgroupkakinada?si=clu6RvdjVrrDsCso", label: "YouTube" },
 ];
+
+function openExternalLink(event: MouseEvent<HTMLAnchorElement>, href: string) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const features = "noopener,noreferrer";
+
+  try {
+    if (window.top && window.top !== window.self) {
+      const popup = window.top.open(href, "_blank", features);
+      if (popup) {
+        popup.opener = null;
+        popup.focus();
+        return;
+      }
+
+      window.open(href, "_top");
+      return;
+    }
+  } catch {
+    window.open(href, "_top");
+    return;
+  }
+
+  const popup = window.open(href, "_blank", features);
+  if (popup) {
+    popup.opener = null;
+    popup.focus();
+    return;
+  }
+
+  window.location.assign(href);
+}
 
 export function Footer() {
   return (
@@ -112,8 +146,10 @@ export function Footer() {
                 <a
                   key={label}
                   href={href}
-                  target="_blank"
+                  target="_top"
                   rel="noopener noreferrer nofollow"
+                  referrerPolicy="no-referrer"
+                  onClick={(event) => openExternalLink(event, href)}
                   aria-label={label}
                   className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-accent hover:text-accent-foreground"
                 >
