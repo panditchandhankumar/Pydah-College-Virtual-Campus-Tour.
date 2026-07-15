@@ -90,6 +90,14 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   return (
     <div className="relative h-full w-full">
       <div ref={mountRef} className="h-full w-full" />
+
+      {/* Dedicated, always-centered VR button container kept above the locations drawer. */}
+      <div
+        ref={vrButtonRef}
+        className="pointer-events-auto absolute bottom-3 left-1/2 z-50 -translate-x-1/2"
+        aria-label="VR button container"
+      />
+
       {status && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black/50 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3 text-white">
@@ -101,6 +109,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       <DebugHUD open={debugOn} onToggle={() => setDebugOn(!debugOn)} state={debugState} />
     </div>
   );
+
 }
 
 // Back-compat alias for the old import name.
