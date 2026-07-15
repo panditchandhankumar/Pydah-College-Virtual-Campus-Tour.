@@ -18,6 +18,10 @@ import {
   Glasses,
   Map as MapIcon,
   ChevronDown,
+  Youtube,
+  Instagram,
+  Facebook,
+  Linkedin,
 } from "lucide-react";
 import { PANORAMAS } from "@/data/panoramas";
 import { DEPARTMENTS } from "@/data/departments";
