@@ -43,14 +43,17 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     // Mount the official Three.js Enter-VR button into its own dedicated container
     // so it stays centered and never overlaps with the locations drawer.
     const vrButton = VRButton.createButton(engine.renderer);
+    vrButton.classList.add("vr-entry-btn");
     vrButton.style.setProperty("position", "static", "important");
-    vrButton.style.setProperty("display", "inline-block", "important");
+    vrButton.style.setProperty("display", "inline-flex", "important");
+    vrButton.style.setProperty("align-items", "center", "important");
+    vrButton.style.setProperty("justify-content", "center", "important");
     vrButton.style.setProperty("width", "auto", "important");
     vrButton.style.setProperty("min-width", "auto", "important");
     vrButton.style.setProperty("max-width", "min(90vw, 360px)", "important");
     vrButton.style.setProperty("font-size", "15px", "important");
     vrButton.style.setProperty("font-weight", "700", "important");
-    vrButton.style.setProperty("padding", "12px 22px", "important");
+    vrButton.style.setProperty("padding", "12px 24px 12px 18px", "important");
     vrButton.style.setProperty("border-radius", "9999px", "important");
     vrButton.style.setProperty("background", "rgba(0, 33, 71, 0.92)", "important");
     vrButton.style.setProperty("color", "#ffffff", "important");
@@ -64,6 +67,31 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     vrButton.style.setProperty("text-align", "center", "important");
     vrButton.style.setProperty("line-height", "1.25", "important");
     vrButton.style.setProperty("cursor", "pointer", "important");
+    vrButton.style.setProperty("gap", "10px", "important");
+
+    // Inject a VR headset icon via ::before so it survives Three.js textContent updates.
+    if (!document.getElementById("vr-entry-btn-style")) {
+      const style = document.createElement("style");
+      style.id = "vr-entry-btn-style";
+      const svg = encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v11a2 2 0 0 0 2 2h2.5a2 2 0 0 0 2-1.7l.5-2.3h3l.5 2.3a2 2 0 0 0 2 1.7H19a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><circle cx="8" cy="12" r="2.2" fill="%23ffffff" stroke="none"/><circle cx="16" cy="12" r="2.2" fill="%23ffffff" stroke="none"/></svg>'
+      );
+      style.textContent = `
+        .vr-entry-btn::before {
+          content: "";
+          display: inline-block;
+          width: 22px;
+          height: 22px;
+          flex: 0 0 22px;
+          background-image: url("data:image/svg+xml,${svg}");
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     vrButtonRef.current?.appendChild(vrButton);
 
 
