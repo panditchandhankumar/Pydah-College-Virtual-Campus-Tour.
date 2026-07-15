@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform, animate, useInView } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import {
   ArrowRight,
   Compass,
@@ -107,6 +107,39 @@ const WHY = [
   { icon: Building2, title: "Modern Labs", desc: "Industry-grade equipment across every department." },
   { icon: Globe2, title: "Global Reach", desc: "Exchange programs and international collaborations." },
 ];
+
+function openExternalLink(event: MouseEvent<HTMLAnchorElement>, href: string) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const features = "noopener,noreferrer";
+
+  try {
+    if (window.top && window.top !== window.self) {
+      const popup = window.top.open(href, "_blank", features);
+      if (popup) {
+        popup.opener = null;
+        popup.focus();
+        return;
+      }
+
+      window.open(href, "_top");
+      return;
+    }
+  } catch {
+    window.open(href, "_top");
+    return;
+  }
+
+  const popup = window.open(href, "_blank", features);
+  if (popup) {
+    popup.opener = null;
+    popup.focus();
+    return;
+  }
+
+  window.location.assign(href);
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Hero Stats
@@ -568,8 +601,10 @@ function Landing() {
                 <a
                   key={label}
                   href={href}
-                  target="_blank"
+                  target="_top"
                   rel="noopener noreferrer nofollow"
+                  referrerPolicy="no-referrer"
+                  onClick={(event) => openExternalLink(event, href)}
                   aria-label={`Open PYDAH ${label} in a new tab`}
                   className="group inline-flex cursor-pointer items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-primary"
                 >
