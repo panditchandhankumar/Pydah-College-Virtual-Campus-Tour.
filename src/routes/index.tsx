@@ -532,6 +532,58 @@ function Landing() {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════ CONNECT WITH US */}
+      <section className="mx-auto max-w-7xl px-6 py-28 md:py-36">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-secondary to-accent p-10 text-center text-white shadow-[0_30px_90px_-25px_rgba(0,102,255,0.45)] md:p-16"
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-25"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4), transparent 45%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.3), transparent 45%)",
+            }}
+          />
+          <div className="relative">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-accent">Connect with us</p>
+            <h2 className="mx-auto mt-3 max-w-2xl font-display text-3xl font-bold md:text-5xl">
+              Follow PYDAH College on social media
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-[16px] text-white/80">
+              Stay updated with the latest campus events, placements, achievements and news.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              {[
+                { label: "YouTube", Icon: Youtube, href: "https://youtube.com/@pydahgroupkakinada?si=clu6RvdjVrrDsCso" },
+                { label: "Instagram", Icon: Instagram, href: "https://www.instagram.com/pydahgroupkakinada?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                { label: "Facebook", Icon: Facebook, href: "https://www.facebook.com/PydahCollegeOfEngineering" },
+                { label: "LinkedIn", Icon: Linkedin, href: "https://www.linkedin.com/company/pydahengineering/" },
+              ].map(({ label, Icon, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={label}
+                  className="group inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-primary"
+                >
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-white/20 transition group-hover:bg-accent group-hover:text-white">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  {label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
       {/* ═══════════════════════════════════ FINAL CTA */}
       <section className="mx-auto max-w-7xl px-6 py-28">
         <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary via-secondary to-accent p-12 text-center text-white shadow-[0_40px_120px_-30px_rgba(0,102,255,0.55)] md:p-20">
