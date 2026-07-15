@@ -109,6 +109,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     return () => {
       unsubscribe();
       try { vrButton.remove(); } catch { /* ignore */ }
+      document.getElementById("vr-entry-btn-style")?.remove();
       engine.dispose();
       engineRef.current = null;
     };
