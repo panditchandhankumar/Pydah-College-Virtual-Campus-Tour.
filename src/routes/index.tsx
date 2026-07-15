@@ -570,14 +570,11 @@ function Landing() {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  aria-label={label}
+                  aria-label={`Open PYDAH ${label} in a new tab`}
                   onClick={(e) => {
-                    // Preview iframes may block target="_blank"; force a top-level open as fallback.
                     e.preventDefault();
-                    const win = window.open(href, "_blank", "noopener,noreferrer");
-                    if (!win) {
-                      window.top ? (window.top.location.href = href) : (window.location.href = href);
-                    }
+                    e.stopPropagation();
+                    window.open(href, "_blank", "noopener,noreferrer");
                   }}
                   className="group inline-flex cursor-pointer items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-primary"
                 >
