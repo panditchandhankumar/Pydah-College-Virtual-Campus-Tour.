@@ -569,9 +569,17 @@ function Landing() {
                   key={label}
                   href={href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer nofollow"
                   aria-label={label}
-                  className="group inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-primary"
+                  onClick={(e) => {
+                    // Preview iframes may block target="_blank"; force a top-level open as fallback.
+                    e.preventDefault();
+                    const win = window.open(href, "_blank", "noopener,noreferrer");
+                    if (!win) {
+                      window.top ? (window.top.location.href = href) : (window.location.href = href);
+                    }
+                  }}
+                  className="group inline-flex cursor-pointer items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-primary"
                 >
                   <span className="grid h-9 w-9 place-items-center rounded-full bg-white/20 transition group-hover:bg-accent group-hover:text-white">
                     <Icon className="h-4 w-4" />
