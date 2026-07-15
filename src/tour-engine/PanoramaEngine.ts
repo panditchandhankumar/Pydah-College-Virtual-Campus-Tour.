@@ -133,7 +133,10 @@ export class PanoramaEngine {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(mount.clientWidth, mount.clientHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // NoToneMapping for equirect panoramas — ACES darkens them heavily in
+    // WebXR (Quest 3 / 3S) framebuffers and can render as a black view.
+    this.renderer.toneMapping = THREE.NoToneMapping;
+    this.renderer.toneMappingExposure = 1;
     if (this.xr) {
       this.renderer.xr.enabled = true;
       try {
