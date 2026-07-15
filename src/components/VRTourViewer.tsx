@@ -58,7 +58,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     vrButton.style.setProperty("box-shadow", "0 8px 32px rgba(0, 0, 0, 0.55)", "important");
     vrButton.style.setProperty("text-transform", "uppercase", "important");
     vrButton.style.setProperty("letter-spacing", "0.04em", "important");
-    vrButton.style.setProperty("white-space", "normal", "important");
+    vrButton.style.setProperty("white-space", "nowrap", "important");
+    vrButton.style.setProperty("overflow", "hidden", "important");
+    vrButton.style.setProperty("text-overflow", "clip", "important");
     vrButton.style.setProperty("text-align", "center", "important");
     vrButton.style.setProperty("line-height", "1.25", "important");
     vrButton.style.setProperty("cursor", "pointer", "important");
@@ -99,7 +101,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       {/* Dedicated, always-centered VR button container kept above the locations drawer. */}
       <div
         ref={vrButtonRef}
-        className="pointer-events-auto absolute bottom-4 left-1/2 z-50 w-full max-w-full -translate-x-1/2 px-4 text-center"
+        className="pointer-events-auto absolute bottom-4 left-1/2 z-50 w-fit max-w-[min(90vw,360px)] -translate-x-1/2 px-4 text-center"
         aria-label="VR button container"
       />
 
