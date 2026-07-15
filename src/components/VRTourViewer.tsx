@@ -38,14 +38,25 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       onDebug: setDebugState,
     });
 
-    // Mount the official Three.js Enter-VR button (bottom-center, above overlays).
+    // Mount the official Three.js Enter-VR button (bottom-center, clearly visible).
     const vrButton = VRButton.createButton(engine.renderer);
     vrButton.style.setProperty("position", "absolute", "important");
-    vrButton.style.setProperty("bottom", "28px", "important");
+    vrButton.style.setProperty("bottom", "12px", "important");
     vrButton.style.setProperty("left", "50%", "important");
     vrButton.style.setProperty("right", "auto", "important");
     vrButton.style.setProperty("transform", "translateX(-50%)", "important");
-    vrButton.style.setProperty("z-index", "50", "important");
+    vrButton.style.setProperty("z-index", "9999", "important");
+    vrButton.style.setProperty("font-size", "16px", "important");
+    vrButton.style.setProperty("font-weight", "700", "important");
+    vrButton.style.setProperty("padding", "14px 28px", "important");
+    vrButton.style.setProperty("border-radius", "9999px", "important");
+    vrButton.style.setProperty("background", "rgba(0, 33, 71, 0.92)", "important");
+    vrButton.style.setProperty("color", "#ffffff", "important");
+    vrButton.style.setProperty("border", "2px solid rgba(255, 255, 255, 0.35)", "important");
+    vrButton.style.setProperty("box-shadow", "0 8px 32px rgba(0, 0, 0, 0.55)", "important");
+    vrButton.style.setProperty("text-transform", "uppercase", "important");
+    vrButton.style.setProperty("letter-spacing", "0.08em", "important");
+    vrButton.style.setProperty("white-space", "nowrap", "important");
     mountRef.current.appendChild(vrButton);
 
     engine.setPanorama(panorama.id, false);
@@ -93,3 +104,4 @@ export function VRTourViewer({ panorama, onChange }: Props) {
 
 // Back-compat alias for the old import name.
 export const VRPanoramaViewer = VRTourViewer;
+
