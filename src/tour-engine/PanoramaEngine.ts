@@ -140,15 +140,30 @@ export class PanoramaEngine {
         this.renderer.xr.setReferenceSpaceType("local-floor");
         this.renderer.xr.setFoveation?.(1);
       } catch { /* ignore */ }
+      // Reset all view state at the moment the headset session starts so we
+      // never enter with a stale desktop rotation / rig offset / opaque fade
+      // overlay (any of which would show as a "black screen" in VR).
+      this.renderer.xr.addEventListener("sessionstart", () => {
+        this.rig.position.set(0, 0, 0);
+        this.rig.rotation.set(0, 0, 0);
+        this.camera.position.set(0, 0, 0);
+        this.camera.rotation.set(0, 0, 0);
+        this.fadeMat.opacity = 0;
+        this.fadeDir = 0;
+        this.pendingId = null;
+        if (this.sphereMat.map) this.sphereMat.color.set(0xffffff);
+      });
     }
     mount.appendChild(this.renderer.domElement);
     this.renderer.domElement.style.touchAction = "none";
     this.renderer.domElement.style.cursor = "grab";
 
-    // Panorama sphere (inverted).
+    // Panorama sphere (inverted). Neutral navy placeholder so if the
+    // headset session opens before the texture arrives, the user sees a
+    // color instead of pure black.
     const geom = new THREE.SphereGeometry(SPHERE_RADIUS, 96, 64);
     geom.scale(-1, 1, 1);
-    this.sphereMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    this.sphereMat = new THREE.MeshBasicMaterial({ color: 0x1a2540 });
     this.sphere = new THREE.Mesh(geom, this.sphereMat);
     this.scene.add(this.sphere);
 
@@ -161,15 +176,20 @@ export class PanoramaEngine {
     this.debugGroup.visible = false;
 
     // Fade overlay attached to camera (in front, screen-space).
+    // IMPORTANT: only mount it in 2D/desktop mode. In WebXR a 2m plane
+    // sitting 0.5m in front of the base camera fills the entire headset FOV
+    // and any non-zero opacity (mid-transition) blacks out the view.
     const fadeGeom = new THREE.PlaneGeometry(2, 2);
     this.fadeMat = new THREE.MeshBasicMaterial({
       color: 0x000000, transparent: true, opacity: 0,
       depthTest: false, depthWrite: false,
     });
-    const fade = new THREE.Mesh(fadeGeom, this.fadeMat);
-    fade.position.z = -0.5;
-    fade.renderOrder = 999;
-    this.camera.add(fade);
+    if (!this.xr) {
+      const fade = new THREE.Mesh(fadeGeom, this.fadeMat);
+      fade.position.z = -0.5;
+      fade.renderOrder = 999;
+      this.camera.add(fade);
+    }
 
     // XR controllers (harmless when session never starts).
     if (this.xr) this.setupControllers();
