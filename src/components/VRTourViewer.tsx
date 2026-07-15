@@ -45,17 +45,24 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     const vrButton = VRButton.createButton(engine.renderer);
     vrButton.style.setProperty("position", "static", "important");
     vrButton.style.setProperty("display", "inline-block", "important");
-    vrButton.style.setProperty("font-size", "16px", "important");
+    vrButton.style.setProperty("width", "auto", "important");
+    vrButton.style.setProperty("min-width", "auto", "important");
+    vrButton.style.setProperty("max-width", "min(90vw, 360px)", "important");
+    vrButton.style.setProperty("font-size", "15px", "important");
     vrButton.style.setProperty("font-weight", "700", "important");
-    vrButton.style.setProperty("padding", "14px 28px", "important");
+    vrButton.style.setProperty("padding", "12px 22px", "important");
     vrButton.style.setProperty("border-radius", "9999px", "important");
     vrButton.style.setProperty("background", "rgba(0, 33, 71, 0.92)", "important");
     vrButton.style.setProperty("color", "#ffffff", "important");
     vrButton.style.setProperty("border", "2px solid rgba(255, 255, 255, 0.35)", "important");
     vrButton.style.setProperty("box-shadow", "0 8px 32px rgba(0, 0, 0, 0.55)", "important");
     vrButton.style.setProperty("text-transform", "uppercase", "important");
-    vrButton.style.setProperty("letter-spacing", "0.08em", "important");
+    vrButton.style.setProperty("letter-spacing", "0.04em", "important");
     vrButton.style.setProperty("white-space", "nowrap", "important");
+    vrButton.style.setProperty("overflow", "hidden", "important");
+    vrButton.style.setProperty("text-overflow", "clip", "important");
+    vrButton.style.setProperty("text-align", "center", "important");
+    vrButton.style.setProperty("line-height", "1.25", "important");
     vrButton.style.setProperty("cursor", "pointer", "important");
     vrButtonRef.current?.appendChild(vrButton);
 
@@ -94,7 +101,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       {/* Dedicated, always-centered VR button container kept above the locations drawer. */}
       <div
         ref={vrButtonRef}
-        className="pointer-events-auto absolute bottom-3 left-1/2 z-50 -translate-x-1/2"
+        className="pointer-events-auto absolute bottom-4 left-1/2 z-50 w-fit max-w-[min(90vw,360px)] -translate-x-1/2 px-4 text-center"
         aria-label="VR button container"
       />
 
