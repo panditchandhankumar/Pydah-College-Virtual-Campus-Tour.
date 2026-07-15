@@ -38,14 +38,11 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       onDebug: setDebugState,
     });
 
-    // Mount the official Three.js Enter-VR button (bottom-center, clearly visible).
+    // Mount the official Three.js Enter-VR button into its own dedicated container
+    // so it stays centered and never overlaps with the locations drawer.
     const vrButton = VRButton.createButton(engine.renderer);
-    vrButton.style.setProperty("position", "absolute", "important");
-    vrButton.style.setProperty("bottom", "12px", "important");
-    vrButton.style.setProperty("left", "50%", "important");
-    vrButton.style.setProperty("right", "auto", "important");
-    vrButton.style.setProperty("transform", "translateX(-50%)", "important");
-    vrButton.style.setProperty("z-index", "9999", "important");
+    vrButton.style.setProperty("position", "static", "important");
+    vrButton.style.setProperty("display", "inline-block", "important");
     vrButton.style.setProperty("font-size", "16px", "important");
     vrButton.style.setProperty("font-weight", "700", "important");
     vrButton.style.setProperty("padding", "14px 28px", "important");
@@ -57,7 +54,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     vrButton.style.setProperty("text-transform", "uppercase", "important");
     vrButton.style.setProperty("letter-spacing", "0.08em", "important");
     vrButton.style.setProperty("white-space", "nowrap", "important");
-    mountRef.current.appendChild(vrButton);
+    vrButton.style.setProperty("cursor", "pointer", "important");
+    vrButtonRef.current?.appendChild(vrButton);
+
 
     engine.setPanorama(panorama.id, false);
     engine.setHotspots(useHotspotStore.getState().getHotspots(panorama.id));
