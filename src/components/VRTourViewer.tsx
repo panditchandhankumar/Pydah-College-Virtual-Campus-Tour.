@@ -19,11 +19,13 @@ interface Props {
  */
 export function VRTourViewer({ panorama, onChange }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const vrButtonRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<PanoramaEngine | null>(null);
   const navigate = useNavigate();
   const [status, setStatus] = useState("Loading campus…");
   const [debugOn, setDebugOn] = useDebugMode();
   const [debugState, setDebugState] = useState<DebugState | null>(null);
+
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -38,14 +40,11 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       onDebug: setDebugState,
     });
 
-    // Mount the official Three.js Enter-VR button (bottom-center, clearly visible).
+    // Mount the official Three.js Enter-VR button into its own dedicated container
+    // so it stays centered and never overlaps with the locations drawer.
     const vrButton = VRButton.createButton(engine.renderer);
-    vrButton.style.setProperty("position", "absolute", "important");
-    vrButton.style.setProperty("bottom", "12px", "important");
-    vrButton.style.setProperty("left", "50%", "important");
-    vrButton.style.setProperty("right", "auto", "important");
-    vrButton.style.setProperty("transform", "translateX(-50%)", "important");
-    vrButton.style.setProperty("z-index", "9999", "important");
+    vrButton.style.setProperty("position", "static", "important");
+    vrButton.style.setProperty("display", "inline-block", "important");
     vrButton.style.setProperty("font-size", "16px", "important");
     vrButton.style.setProperty("font-weight", "700", "important");
     vrButton.style.setProperty("padding", "14px 28px", "important");
@@ -57,7 +56,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     vrButton.style.setProperty("text-transform", "uppercase", "important");
     vrButton.style.setProperty("letter-spacing", "0.08em", "important");
     vrButton.style.setProperty("white-space", "nowrap", "important");
-    mountRef.current.appendChild(vrButton);
+    vrButton.style.setProperty("cursor", "pointer", "important");
+    vrButtonRef.current?.appendChild(vrButton);
+
 
     engine.setPanorama(panorama.id, false);
     engine.setHotspots(useHotspotStore.getState().getHotspots(panorama.id));
@@ -89,6 +90,14 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   return (
     <div className="relative h-full w-full">
       <div ref={mountRef} className="h-full w-full" />
+
+      {/* Dedicated, always-centered VR button container kept above the locations drawer. */}
+      <div
+        ref={vrButtonRef}
+        className="pointer-events-auto absolute bottom-3 left-1/2 z-50 -translate-x-1/2"
+        aria-label="VR button container"
+      />
+
       {status && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black/50 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3 text-white">
@@ -100,6 +109,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       <DebugHUD open={debugOn} onToggle={() => setDebugOn(!debugOn)} state={debugState} />
     </div>
   );
+
 }
 
 // Back-compat alias for the old import name.
