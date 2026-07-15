@@ -19,11 +19,13 @@ interface Props {
  */
 export function VRTourViewer({ panorama, onChange }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const vrButtonRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<PanoramaEngine | null>(null);
   const navigate = useNavigate();
   const [status, setStatus] = useState("Loading campus…");
   const [debugOn, setDebugOn] = useDebugMode();
   const [debugState, setDebugState] = useState<DebugState | null>(null);
+
 
   useEffect(() => {
     if (!mountRef.current) return;
