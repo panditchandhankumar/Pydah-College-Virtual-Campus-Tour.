@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
         content: "A cinematic 360° tour of every department, lab and green space at PYDAH College of Engineering.",
       },
     ],
-    links: [{ rel: "preload", as: "image", href: campusAsset.url, fetchpriority: "high" }],
+    links: [{ rel: "preload", as: "image", href: campusAsset.url, fetchPriority: "high" }],
   }),
   component: Landing,
 });
@@ -571,11 +571,6 @@ function Landing() {
                   target="_blank"
                   rel="noopener noreferrer nofollow"
                   aria-label={`Open PYDAH ${label} in a new tab`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.open(href, "_blank", "noopener,noreferrer");
-                  }}
                   className="group inline-flex cursor-pointer items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-primary"
                 >
                   <span className="grid h-9 w-9 place-items-center rounded-full bg-white/20 transition group-hover:bg-accent group-hover:text-white">

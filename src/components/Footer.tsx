@@ -1,6 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 
+const SOCIAL_LINKS = [
+  { Icon: Facebook, href: "https://www.facebook.com/PydahCollegeOfEngineering", label: "Facebook" },
+  {
+    Icon: Instagram,
+    href: "https://www.instagram.com/pydahgroupkakinada?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+    label: "Instagram",
+  },
+  { Icon: Linkedin, href: "https://www.linkedin.com/company/pydahengineering/", label: "LinkedIn" },
+  { Icon: Youtube, href: "https://youtube.com/@pydahgroupkakinada?si=clu6RvdjVrrDsCso", label: "YouTube" },
+];
+
 export function Footer() {
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -97,15 +108,12 @@ export function Footer() {
             </p>
 
             <div className="mt-6 flex items-center gap-3">
-              {[
-                { Icon: Facebook, href: "#", label: "Facebook" },
-                { Icon: Instagram, href: "#", label: "Instagram" },
-                { Icon: Linkedin, href: "#", label: "LinkedIn" },
-                { Icon: Youtube, href: "#", label: "YouTube" },
-              ].map(({ Icon, href, label }) => (
+              {SOCIAL_LINKS.map(({ Icon, href, label }) => (
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
                   aria-label={label}
                   className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition hover:bg-accent hover:text-accent-foreground"
                 >
