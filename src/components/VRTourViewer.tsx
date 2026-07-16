@@ -152,7 +152,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       setVrText(window.isSecureContext ? "VR NOT AVAILABLE" : "WEBXR NEEDS HTTPS");
       setVrDisabled(true);
     } else {
-      withTimeout(xr.isSessionSupported("immersive-vr"), 6_000, "VR support check")
+      withTimeout<boolean>(xr.isSessionSupported("immersive-vr") as Promise<boolean>, 6_000, "VR support check")
         .then((supported: boolean) => {
           if (cancelled) return;
           canStartVrRef.current = supported;
