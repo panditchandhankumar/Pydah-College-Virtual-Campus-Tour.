@@ -11,8 +11,8 @@
   "locomotion": {
     "smoothEnabled": true,
     "smoothSpeed": 2.2,
-    "snapTurnEnabled": true,
-    "snapTurnDegrees": 30,
+    "snapTurnEnabled": false,
+    "snapTurnDegrees": 0,
     "teleportEnabled": true,
     "comfortVignette": true
   },
