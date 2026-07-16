@@ -9,6 +9,7 @@ const HOTSPOT_RADIUS = 6;
 const DEFAULT_DISC = 1.4;
 const DEFAULT_LABEL_H = 0.6;
 const FADE_SPEED = 1.6;
+const PANORAMA_LOAD_TIMEOUT_MS = 12_000;
 
 const ICON_GLYPH: Record<string, string> = {
   arrow: "", building: "🏫", gate: "🏠", cse: "💻", ece: "📡",
@@ -182,6 +183,8 @@ export class PanoramaEngine {
   private loader = new THREE.TextureLoader();
   private readonly xrYawSpeed = THREE.MathUtils.degToRad(90);
   private disposables: (() => void)[] = [];
+  private panoramaLoadSeq = 0;
+  private panoramaLoadTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ─── Quality / diagnostics ──────────────────────────────────────────
   private qualityPreset: QualityPreset = "auto";
@@ -281,6 +284,28 @@ export class PanoramaEngine {
     this.renderer.domElement.style.touchAction = "none";
     this.renderer.domElement.style.cursor = "grab";
 
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      this.loading = false;
+      this.loadingLabel = "";
+      this.xrSessionStarting = false;
+      this.xrSessionActive = false;
+      this.fadeDir = 0;
+      this.pendingId = null;
+      if (import.meta.env.DEV) console.warn("WebGL context lost during panorama/VR rendering");
+      this.cb.onLoadError?.();
+    };
+    const onContextRestored = () => {
+      if (import.meta.env.DEV) console.info("WebGL context restored; reloading panorama texture");
+      if (this.currentPanoramaId) this.applyPanorama(this.currentPanoramaId);
+    };
+    this.renderer.domElement.addEventListener("webglcontextlost", onContextLost, false);
+    this.renderer.domElement.addEventListener("webglcontextrestored", onContextRestored, false);
+    this.disposables.push(() => {
+      this.renderer.domElement.removeEventListener("webglcontextlost", onContextLost, false);
+      this.renderer.domElement.removeEventListener("webglcontextrestored", onContextRestored, false);
+    });
+
     // Panorama sphere (inverted). Neutral navy placeholder so if the
     // headset session opens before the texture arrives, the user sees a
     // color instead of pure black.
@@ -362,13 +387,55 @@ export class PanoramaEngine {
 
   private applyPanorama(id: string) {
     const p = getPanorama(id);
-    if (!p) return;
+    if (!p) {
+      this.loading = false;
+      this.loadingLabel = "";
+      this.cb.onLoadError?.();
+      return;
+    }
+
+    const loadSeq = ++this.panoramaLoadSeq;
+    if (this.panoramaLoadTimer) {
+      clearTimeout(this.panoramaLoadTimer);
+      this.panoramaLoadTimer = null;
+    }
+
     this.loading = true;
     this.loadingLabel = p.title;
     this.cb.onLoadStart?.(p.title);
+
+    const clearLoadTimer = () => {
+      if (this.panoramaLoadTimer) {
+        clearTimeout(this.panoramaLoadTimer);
+        this.panoramaLoadTimer = null;
+      }
+    };
+
+    const failLoad = (reason?: unknown) => {
+      if (loadSeq !== this.panoramaLoadSeq || this.disposed) return;
+      clearLoadTimer();
+      this.loading = false;
+      this.loadingLabel = "";
+      this.fadeDir = 0;
+      this.pendingId = null;
+      this.fadeMat.opacity = 0;
+      if (import.meta.env.DEV && reason) console.warn("Panorama load failed", { id, reason });
+      this.cb.onLoadError?.();
+    };
+
+    this.panoramaLoadTimer = setTimeout(
+      () => failLoad(new Error(`Panorama load timed out after ${PANORAMA_LOAD_TIMEOUT_MS}ms`)),
+      PANORAMA_LOAD_TIMEOUT_MS,
+    );
+
     this.loader.load(
       p.panorama,
       (tex) => {
+        if (loadSeq !== this.panoramaLoadSeq || this.disposed) {
+          tex.dispose();
+          return;
+        }
+        clearLoadTimer();
         tex.colorSpace = THREE.SRGBColorSpace;
         this.applyTextureQuality(tex);
         const img = tex.image as HTMLImageElement | ImageBitmap | undefined;
@@ -382,13 +449,11 @@ export class PanoramaEngine {
         this.currentPanoramaId = id;
         this.rebuildHotspots();
         this.loading = false;
+        this.loadingLabel = "";
         this.cb.onLoadEnd?.();
       },
       undefined,
-      () => {
-        this.loading = false;
-        this.cb.onLoadError?.();
-      },
+      (err) => failLoad(err),
     );
   }
 
@@ -1116,9 +1181,25 @@ export class PanoramaEngine {
 
   dispose() {
     this.disposed = true;
+    this.panoramaLoadSeq++;
+    if (this.panoramaLoadTimer) {
+      clearTimeout(this.panoramaLoadTimer);
+      this.panoramaLoadTimer = null;
+    }
+    this.disposeVRPanel();
     this.renderer.setAnimationLoop(null);
     for (const fn of this.disposables) fn();
     this.disposables = [];
+    this.sphereMat.map?.dispose();
+    this.sphere.geometry.dispose();
+    this.sphereMat.dispose();
+    while (this.hotspotGroup.children.length) {
+      const child = this.hotspotGroup.children.pop() as THREE.Mesh;
+      child.geometry?.dispose?.();
+      const material = child.material as THREE.Material & { map?: THREE.Texture };
+      material?.map?.dispose?.();
+      material?.dispose?.();
+    }
     try { this.mount.removeChild(this.renderer.domElement); } catch { /* ignore */ }
     this.renderer.dispose();
   }
