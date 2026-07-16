@@ -584,31 +584,39 @@ export class PanoramaEngine {
   }
 
   // ─── Locomotion (VR) ─────────────────────────────────────────────────
+  // Continuous, frame-rate-independent joystick handling. Both sticks drive
+  // smooth motion while held — no snap-turn, no single-step input.
+  //   Left stick  : yaw (X) + pitch (Y) look — the natural "look around the
+  //                 360° panorama" gesture; you're inside a sphere so
+  //                 translating the rig has no visible effect.
+  //   Right stick : yaw (X) continuous turn with adjustable sensitivity.
   private pollXRControllers(dt: number) {
     const session = this.renderer.xr.getSession();
     if (!session) return;
+    const DEAD = 0.15;
+    const YAW_SPEED = THREE.MathUtils.degToRad(90);   // deg/sec at full deflection
+    const PITCH_SPEED = THREE.MathUtils.degToRad(60);
+    const applyCurve = (v: number) => {
+      const a = Math.abs(v);
+      if (a < DEAD) return 0;
+      const t = (a - DEAD) / (1 - DEAD);
+      return Math.sign(v) * t * t; // quadratic ease → smooth accel/decel
+    };
     for (const source of session.inputSources) {
       const gp = source.gamepad;
       if (!gp) continue;
-      const x = gp.axes[2] ?? gp.axes[0] ?? 0;
-      const y = gp.axes[3] ?? gp.axes[1] ?? 0;
+      const x = applyCurve(gp.axes[2] ?? gp.axes[0] ?? 0);
+      const y = applyCurve(gp.axes[3] ?? gp.axes[1] ?? 0);
+      if (x === 0 && y === 0) continue;
       if (source.handedness === "right") {
-        if (Math.abs(x) > 0.75 && this.snapReady) {
-          this.rig.rotation.y -= Math.sign(x) * THREE.MathUtils.degToRad(this.locoState.snapDeg);
-          this.snapReady = false;
-        } else if (Math.abs(x) < 0.3) this.snapReady = true;
-      }
-      if (source.handedness === "left") {
-        const dz = 0.2;
-        if (Math.abs(x) > dz || Math.abs(y) > dz) {
-          const fwd = new THREE.Vector3();
-          this.camera.getWorldDirection(fwd);
-          fwd.y = 0; fwd.normalize();
-          const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0));
-          this.rig.position
-            .addScaledVector(fwd, -y * this.locoState.smoothSpeed * dt)
-            .addScaledVector(right, x * this.locoState.smoothSpeed * dt);
-        }
+        this.rig.rotation.y -= x * YAW_SPEED * dt;
+      } else if (source.handedness === "left") {
+        this.rig.rotation.y -= x * YAW_SPEED * dt;
+        this.rig.rotation.x = THREE.MathUtils.clamp(
+          this.rig.rotation.x - y * PITCH_SPEED * dt,
+          -Math.PI / 3,
+          Math.PI / 3,
+        );
       }
     }
   }
