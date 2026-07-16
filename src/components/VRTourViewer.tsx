@@ -274,7 +274,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       {status && (
         <div className={`${vrError ? "pointer-events-auto" : "pointer-events-none"} absolute inset-0 grid place-items-center bg-black/50 backdrop-blur-sm`}>
           <div className="flex max-w-[min(92vw,420px)] flex-col items-center gap-3 rounded-2xl bg-black/55 px-6 py-5 text-center text-white ring-1 ring-white/15">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-accent" />
+            {!vrError && <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-accent" />}
             <p className="text-sm">{status}</p>
             {vrError && (
               <button
