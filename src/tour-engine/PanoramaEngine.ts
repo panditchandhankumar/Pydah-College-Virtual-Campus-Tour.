@@ -323,15 +323,17 @@ export class PanoramaEngine {
   private applyPanorama(id: string) {
     const p = getPanorama(id);
     if (!p) return;
+    this.loading = true;
+    this.loadingLabel = p.title;
     this.cb.onLoadStart?.(p.title);
     this.loader.load(
       p.panorama,
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
-        tex.generateMipmaps = true;
-        tex.minFilter = THREE.LinearMipmapLinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+        this.applyTextureQuality(tex);
+        const img = tex.image as HTMLImageElement | ImageBitmap | undefined;
+        this.texWidth = (img as { width?: number })?.width ?? 0;
+        this.texHeight = (img as { height?: number })?.height ?? 0;
         const old = this.sphereMat.map;
         this.sphereMat.map = tex;
         this.sphereMat.color.set(0xffffff);
@@ -339,11 +341,26 @@ export class PanoramaEngine {
         old?.dispose();
         this.currentPanoramaId = id;
         this.rebuildHotspots();
+        this.loading = false;
         this.cb.onLoadEnd?.();
       },
       undefined,
-      () => this.cb.onLoadError?.(),
+      () => {
+        this.loading = false;
+        this.cb.onLoadError?.();
+      },
     );
+  }
+
+  private applyTextureQuality(tex: THREE.Texture) {
+    const row = QUALITY_TABLE[this.effectivePreset];
+    tex.generateMipmaps = row.mipmaps;
+    tex.minFilter = row.mipmaps
+      ? (row.minFilter === "mipmap-linear" ? THREE.LinearMipmapLinearFilter : THREE.LinearMipmapNearestFilter)
+      : THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = Math.max(1, Math.round(this.maxAnisotropy * row.anisoFactor));
+    tex.needsUpdate = true;
   }
 
   // ─── Hotspots ────────────────────────────────────────────────────────
