@@ -569,8 +569,7 @@ function Landing() {
                   key={label}
                   href={href}
                   target="_blank"
-                  rel="noopener noreferrer nofollow"
-                  referrerPolicy="no-referrer"
+                  rel="noopener noreferrer"
                   aria-label={`Open PYDAH ${label} in a new tab`}
                   className="group inline-flex cursor-pointer items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white hover:text-primary"
                 >
