@@ -212,13 +212,19 @@ export class PanoramaEngine {
     if (this.xr) {
       const preventJoystickUiFocus = (event: KeyboardEvent) => {
         if (!this.renderer.xr.isPresenting) return;
-        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Spacebar"].includes(event.key)) {
+        if (
+          ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Spacebar"].includes(
+            event.key,
+          )
+        ) {
           event.preventDefault();
           event.stopPropagation();
         }
       };
       document.addEventListener("keydown", preventJoystickUiFocus, true);
-      this.disposables.push(() => document.removeEventListener("keydown", preventJoystickUiFocus, true));
+      this.disposables.push(() =>
+        document.removeEventListener("keydown", preventJoystickUiFocus, true),
+      );
     }
   }
 
@@ -616,9 +622,7 @@ export class PanoramaEngine {
       const gp = source.gamepad;
       if (!gp) continue;
       const axes = gp.axes ?? [];
-      const thumbX = Math.abs(axes[2] ?? 0) > Math.abs(axes[0] ?? 0)
-        ? axes[2]
-        : axes[0];
+      const thumbX = Math.abs(axes[2] ?? 0) > Math.abs(axes[0] ?? 0) ? axes[2] : axes[0];
       yawAxis = applyCurve(thumbX ?? 0);
       break;
     }
