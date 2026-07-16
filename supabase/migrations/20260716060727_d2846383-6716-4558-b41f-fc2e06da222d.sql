@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can upsert hotspot overrides" ON public.hotspot_overrides;
