@@ -93,7 +93,12 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       onNavigate: (id) => onChange(id),
       onLoadStart: (t) => setStatus(`Loading ${t}…`),
       onLoadEnd: () => setStatus(""),
-      onLoadError: () => setStatus("Failed to load panorama."),
+      onLoadError: () => {
+        setStatus("Panorama image could not load. Showing fallback scene.");
+        window.setTimeout(() => {
+          if (!cancelled) setStatus("");
+        }, 2500);
+      },
       onDebug: setDebugState,
       onDiagnostics: setDiag,
     });
@@ -147,7 +152,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       setVrText(window.isSecureContext ? "VR NOT AVAILABLE" : "WEBXR NEEDS HTTPS");
       setVrDisabled(true);
     } else {
-      xr.isSessionSupported("immersive-vr")
+      withTimeout(xr.isSessionSupported("immersive-vr"), 6_000, "VR support check")
         .then((supported: boolean) => {
           if (cancelled) return;
           canStartVrRef.current = supported;
