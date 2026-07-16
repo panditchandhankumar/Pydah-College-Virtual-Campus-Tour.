@@ -107,8 +107,7 @@ export class PanoramaEngine {
   private lastDebugEmit = 0;
 
   private loader = new THREE.TextureLoader();
-  private snapReady = true;
-  private locoState = { smoothSpeed: 2.2, snapDeg: 30 };
+  private readonly xrYawSpeed = THREE.MathUtils.degToRad(90);
   private disposables: (() => void)[] = [];
 
   constructor(mount: HTMLElement, opts: EngineOptions = {}) {
@@ -148,6 +147,7 @@ export class PanoramaEngine {
       // never enter with a stale desktop rotation / rig offset / opaque fade
       // overlay (any of which would show as a "black screen" in VR).
       this.renderer.xr.addEventListener("sessionstart", () => {
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         this.rig.position.set(0, 0, 0);
         this.rig.rotation.set(0, 0, 0);
         this.camera.position.set(0, 0, 0);
@@ -208,6 +208,24 @@ export class PanoramaEngine {
     };
     window.addEventListener("resize", onResize);
     this.disposables.push(() => window.removeEventListener("resize", onResize));
+
+    if (this.xr) {
+      const preventJoystickUiFocus = (event: KeyboardEvent) => {
+        if (!this.renderer.xr.isPresenting) return;
+        if (
+          ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Spacebar"].includes(
+            event.key,
+          )
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      };
+      document.addEventListener("keydown", preventJoystickUiFocus, true);
+      this.disposables.push(() =>
+        document.removeEventListener("keydown", preventJoystickUiFocus, true),
+      );
+    }
   }
 
   setCallbacks(cb: EngineCallbacks) { this.cb = cb; }
@@ -584,41 +602,34 @@ export class PanoramaEngine {
   }
 
   // ─── Locomotion (VR) ─────────────────────────────────────────────────
-  // Continuous, frame-rate-independent joystick handling. Both sticks drive
-  // smooth motion while held — no snap-turn, no single-step input.
-  //   Left stick  : yaw (X) + pitch (Y) look — the natural "look around the
-  //                 360° panorama" gesture; you're inside a sphere so
-  //                 translating the rig has no visible effect.
-  //   Right stick : yaw (X) continuous turn with adjustable sensitivity.
+  // Continuous, frame-rate-independent joystick handling for Meta Quest.
+  // Only the LEFT thumbstick X axis is used, and it only changes yaw.
+  // Pitch / roll are locked so the panorama never tilts or steps.
   private pollXRControllers(dt: number) {
     const session = this.renderer.xr.getSession();
     if (!session) return;
     const DEAD = 0.15;
-    const YAW_SPEED = THREE.MathUtils.degToRad(90);   // deg/sec at full deflection
-    const PITCH_SPEED = THREE.MathUtils.degToRad(60);
     const applyCurve = (v: number) => {
       const a = Math.abs(v);
       if (a < DEAD) return 0;
       const t = (a - DEAD) / (1 - DEAD);
       return Math.sign(v) * t * t; // quadratic ease → smooth accel/decel
     };
+
+    let yawAxis = 0;
     for (const source of session.inputSources) {
+      if (source.handedness !== "left") continue;
       const gp = source.gamepad;
       if (!gp) continue;
-      const x = applyCurve(gp.axes[2] ?? gp.axes[0] ?? 0);
-      const y = applyCurve(gp.axes[3] ?? gp.axes[1] ?? 0);
-      if (x === 0 && y === 0) continue;
-      if (source.handedness === "right") {
-        this.rig.rotation.y -= x * YAW_SPEED * dt;
-      } else if (source.handedness === "left") {
-        this.rig.rotation.y -= x * YAW_SPEED * dt;
-        this.rig.rotation.x = THREE.MathUtils.clamp(
-          this.rig.rotation.x - y * PITCH_SPEED * dt,
-          -Math.PI / 3,
-          Math.PI / 3,
-        );
-      }
+      const axes = gp.axes ?? [];
+      const thumbX = Math.abs(axes[2] ?? 0) > Math.abs(axes[0] ?? 0) ? axes[2] : axes[0];
+      yawAxis = applyCurve(thumbX ?? 0);
+      break;
     }
+
+    if (yawAxis !== 0) this.rig.rotation.y -= yawAxis * this.xrYawSpeed * dt;
+    this.rig.rotation.x = 0;
+    this.rig.rotation.z = 0;
   }
 
   // ─── Debug ───────────────────────────────────────────────────────────

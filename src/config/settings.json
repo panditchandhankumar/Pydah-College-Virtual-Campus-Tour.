@@ -6,7 +6,7 @@
   "vr": {
     "walkingSpeed": 2.2,
     "comfortMode": true,
-    "snapTurnDegrees": 30,
+    "snapTurnDegrees": 0,
     "dominantHand": "right"
   }
 }
