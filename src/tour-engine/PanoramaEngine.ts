@@ -194,18 +194,13 @@ export class PanoramaEngine {
     // WebXR (Quest 3 / 3S) framebuffers and can render as a black view.
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.renderer.toneMappingExposure = 1;
+    this.maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy?.() ?? 1;
     if (this.xr) {
       this.renderer.xr.enabled = true;
       // Prefer local-floor; if the runtime rejects it (some Quest browser
       // builds), fall back to "local" so the session still renders.
       try { this.renderer.xr.setReferenceSpaceType("local-floor"); }
       catch { try { this.renderer.xr.setReferenceSpaceType("local"); } catch { /* ignore */ } }
-      // Foveation 0 = full resolution edge-to-edge (sharpest panorama).
-      // A value of 1 heavily blurs the periphery which looks like a low-res image.
-      try { this.renderer.xr.setFoveation?.(0); } catch { /* ignore */ }
-      // Render at higher-than-native resolution in the headset for crisp text
-      // and panorama detail. Quest 3/3S handle 1.5x comfortably on a single sphere.
-      try { this.renderer.xr.setFramebufferScaleFactor?.(1.5); } catch { /* ignore */ }
       // Force the underlying GL context to be XR-compatible up front. Without
       // this, some Quest browser builds accept the session request but fail
       // to bind the framebuffer, producing a completely black view.
@@ -215,9 +210,9 @@ export class PanoramaEngine {
         };
         gl.makeXRCompatible?.();
       } catch { /* ignore */ }
-      // Reset all view state at the moment the headset session starts so we
-      // never enter with a stale desktop rotation / rig offset / opaque fade
-      // overlay (any of which would show as a "black screen" in VR).
+      // Apply initial highest-quality preset before session starts so the very
+      // first frame in the headset is already crisp (no "wait for downgrade").
+      this.applyQuality("crisp");
       this.renderer.xr.addEventListener("sessionstart", () => {
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         this.rig.position.set(0, 0, 0);
@@ -227,11 +222,19 @@ export class PanoramaEngine {
         this.fadeMat.opacity = 0;
         this.fadeDir = 0;
         this.pendingId = null;
-        // Always show a lit sphere on session start — even if the panorama
-        // texture hasn't finished decoding, the user sees the navy fallback
-        // instead of a fully black headset view.
+        // Always show a lit sphere on session start.
         this.sphereMat.color.set(this.sphereMat.map ? 0xffffff : 0x1a2540);
         this.sphereMat.needsUpdate = true;
+        // Re-assert the target preset — some runtimes reset scale on session start.
+        this.autoDowngraded = false;
+        this.fpsSamples = [];
+        this.lastAutoCheck = performance.now();
+        const target = this.qualityPreset === "auto" ? "crisp" : this.qualityPreset;
+        this.applyQuality(target);
+        this.buildVRPanel();
+      });
+      this.renderer.xr.addEventListener("sessionend", () => {
+        this.disposeVRPanel();
       });
     }
     mount.appendChild(this.renderer.domElement);
