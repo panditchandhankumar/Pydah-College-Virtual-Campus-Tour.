@@ -146,6 +146,27 @@ export class PanoramaEngine {
   private readonly xrYawSpeed = THREE.MathUtils.degToRad(90);
   private disposables: (() => void)[] = [];
 
+  // ─── Quality / diagnostics ──────────────────────────────────────────
+  private qualityPreset: QualityPreset = "auto";
+  private effectivePreset: Exclude<QualityPreset, "auto"> = "crisp";
+  private autoDowngraded = false;
+  private maxAnisotropy = 1;
+  private fpsSamples: number[] = [];
+  private lastAutoCheck = 0;
+  private loading = false;
+  private loadingLabel = "";
+  private lastDiagEmit = 0;
+  private texWidth = 0;
+  private texHeight = 0;
+  // In-VR quality/diagnostics panel (canvas texture on left controller).
+  private vrPanel: THREE.Mesh | null = null;
+  private vrPanelCanvas: HTMLCanvasElement | null = null;
+  private vrPanelTex: THREE.CanvasTexture | null = null;
+  private vrPanelVisible = true;
+  private vrPanelLastDraw = 0;
+  // Debounce controller grip presses.
+  private lastGripPress: Record<string, number> = {};
+
   constructor(mount: HTMLElement, opts: EngineOptions = {}) {
     this.mount = mount;
     this.xr = !!opts.xr;
