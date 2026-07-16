@@ -39,6 +39,27 @@ export interface DebugState {
   hotspots: DebugHotspotInfo[];
 }
 
+export type QualityPreset = "crisp" | "balanced" | "performance" | "auto";
+
+export interface DiagnosticsState {
+  presenting: boolean;
+  preset: QualityPreset;
+  effectivePreset: Exclude<QualityPreset, "auto">;
+  framebufferScale: number;
+  foveation: number;
+  anisotropy: number;
+  maxAnisotropy: number;
+  mipmaps: boolean;
+  minFilter: string;
+  textureWidth: number;
+  textureHeight: number;
+  loading: boolean;
+  loadingLabel: string;
+  fps: number;
+  avgFps: number;
+  autoDowngraded: boolean;
+}
+
 export interface EngineCallbacks {
   onNavigate?: (targetId: string) => void;
   onSelect?: (index: number | null) => void;
@@ -49,7 +70,22 @@ export interface EngineCallbacks {
   onLoadEnd?: () => void;
   onLoadError?: () => void;
   onDebug?: (state: DebugState) => void;
+  onDiagnostics?: (state: DiagnosticsState) => void;
 }
+
+interface QualityRow {
+  framebufferScale: number;
+  foveation: number;
+  mipmaps: boolean;
+  minFilter: "mipmap-linear" | "mipmap-nearest";
+  anisoFactor: number; // multiplied by GPU max
+}
+
+const QUALITY_TABLE: Record<Exclude<QualityPreset, "auto">, QualityRow> = {
+  crisp:       { framebufferScale: 1.7, foveation: 0.0, mipmaps: true, minFilter: "mipmap-linear",  anisoFactor: 1.0  },
+  balanced:    { framebufferScale: 1.3, foveation: 0.3, mipmaps: true, minFilter: "mipmap-linear",  anisoFactor: 0.5  },
+  performance: { framebufferScale: 1.0, foveation: 0.6, mipmaps: true, minFilter: "mipmap-nearest", anisoFactor: 0.25 },
+};
 
 export interface EngineOptions {
   /** Enable WebGL renderer.xr — required for VR wrapper. */
