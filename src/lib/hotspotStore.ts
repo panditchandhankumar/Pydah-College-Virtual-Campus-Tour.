@@ -54,18 +54,19 @@ async function fetchOverridesFromDB(): Promise<Overrides> {
 }
 
 async function upsertSceneToDB(sceneId: string, hotspots: Hotspot[]) {
-  const { error } = await supabase
-    .from("hotspot_overrides")
-    .upsert(
-      { scene_id: sceneId, hotspots: hotspots as unknown as any, updated_at: new Date().toISOString() },
-      { onConflict: "scene_id" },
-    );
-  if (error) throw error;
+  await upsertHotspotOverride({
+    data: {
+      sceneId,
+      hotspots: hotspots as unknown as Array<{ yaw: number; pitch: number }>,
+      adminToken: ADMIN_TOKEN,
+    },
+  });
 }
 
 async function deleteSceneFromDB(sceneId: string) {
-  const { error } = await supabase.from("hotspot_overrides").delete().eq("scene_id", sceneId);
-  if (error) throw error;
+  await deleteHotspotOverride({
+    data: { sceneId, adminToken: ADMIN_TOKEN },
+  });
 }
 
 // ─── Store ────────────────────────────────────────────────────────────
