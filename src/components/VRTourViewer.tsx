@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
-import { PanoramaEngine, type DebugState } from "@/tour-engine/PanoramaEngine";
+import { PanoramaEngine, type DebugState, type DiagnosticsState, type QualityPreset } from "@/tour-engine/PanoramaEngine";
 import type { Panorama } from "@/data/panoramas";
 import { useHotspotStore } from "@/lib/hotspotStore";
 import { DebugHUD, useDebugMode } from "./DebugHUD";
+import { Gauge, Sliders, X } from "lucide-react";
 
 interface Props {
   panorama: Panorama;
