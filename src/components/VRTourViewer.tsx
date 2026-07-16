@@ -37,13 +37,14 @@ function VRIcon({ className }: { className?: string }) {
  * renderer.xr). Hotspots, sphere, raycaster and scene graph are literally
  * the same objects.
  *
- * The visible VR button is our own styled UI; the Three.js VRButton is kept
- * off-screen as the functional controller so session lifecycle still works.
+ * The visible VR button starts WebXR directly so we can keep Quest session
+ * options stable and avoid black-screen XR layer paths.
  */
 export function VRTourViewer({ panorama, onChange }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const visibleBtnRef = useRef<HTMLButtonElement>(null);
   const xrSessionRef = useRef<any>(null);
+  const canStartVrRef = useRef(false);
   const engineRef = useRef<PanoramaEngine | null>(null);
   const navigate = useNavigate();
   const [status, setStatus] = useState("Loading campus…");
@@ -78,35 +79,40 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       xrSessionRef.current = null;
       engine.cancelXRSessionRequest();
       if (!cancelled) {
+        canStartVrRef.current = true;
         setVrText("ENTER VR");
         setVrDisabled(false);
       }
     };
 
     if (!xr) {
+      canStartVrRef.current = false;
       setVrText(window.isSecureContext ? "VR NOT AVAILABLE" : "WEBXR NEEDS HTTPS");
       setVrDisabled(true);
     } else {
       xr.isSessionSupported("immersive-vr")
         .then((supported: boolean) => {
           if (cancelled) return;
+          canStartVrRef.current = supported;
           setVrText(supported ? "ENTER VR" : "VR NOT SUPPORTED");
           setVrDisabled(!supported);
         })
         .catch(() => {
           if (cancelled) return;
+          canStartVrRef.current = false;
           setVrText("VR NOT ALLOWED");
           setVrDisabled(true);
         });
     }
 
     const onVisibleClick = async () => {
-      if (!xr || vrDisabled) return;
+      if (!xr || !canStartVrRef.current) return;
       if (xrSessionRef.current) {
         try { await xrSessionRef.current.end(); } catch { /* ignore */ }
         return;
       }
 
+      canStartVrRef.current = false;
       setVrDisabled(true);
       setVrText("OPENING VR…");
       setStatus("Opening VR…");
@@ -124,6 +130,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
         xrSessionRef.current = session;
         await engine.renderer.xr.setSession(session);
         if (cancelled) return;
+        canStartVrRef.current = true;
         setVrText("EXIT VR");
         setVrDisabled(false);
         setStatus("");
@@ -133,6 +140,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
         xrSessionRef.current = null;
         try { await session?.end?.(); } catch { /* ignore */ }
         if (!cancelled) {
+          canStartVrRef.current = true;
           setVrText("ENTER VR");
           setVrDisabled(false);
           setStatus("VR could not start. Please try again.");
