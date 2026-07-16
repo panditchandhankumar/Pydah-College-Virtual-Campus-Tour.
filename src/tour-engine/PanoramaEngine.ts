@@ -82,7 +82,7 @@ interface QualityRow {
 }
 
 const QUALITY_TABLE: Record<Exclude<QualityPreset, "auto">, QualityRow> = {
-  crisp:       { framebufferScale: 1.7, foveation: 0.0, mipmaps: true, minFilter: "mipmap-linear",  anisoFactor: 1.0  },
+  crisp:       { framebufferScale: 1.35, foveation: 0.0, mipmaps: true, minFilter: "mipmap-linear",  anisoFactor: 1.0  },
   balanced:    { framebufferScale: 1.3, foveation: 0.3, mipmaps: true, minFilter: "mipmap-linear",  anisoFactor: 0.5  },
   performance: { framebufferScale: 1.0, foveation: 0.6, mipmaps: true, minFilter: "mipmap-nearest", anisoFactor: 0.25 },
 };
@@ -158,6 +158,8 @@ export class PanoramaEngine {
   private lastDiagEmit = 0;
   private texWidth = 0;
   private texHeight = 0;
+  private xrSessionActive = false;
+  private xrSessionStarting = false;
   // In-VR quality/diagnostics panel (canvas texture on left controller).
   private vrPanel: THREE.Mesh | null = null;
   private vrPanelCanvas: HTMLCanvasElement | null = null;
@@ -201,19 +203,12 @@ export class PanoramaEngine {
       // builds), fall back to "local" so the session still renders.
       try { this.renderer.xr.setReferenceSpaceType("local-floor"); }
       catch { try { this.renderer.xr.setReferenceSpaceType("local"); } catch { /* ignore */ } }
-      // Force the underlying GL context to be XR-compatible up front. Without
-      // this, some Quest browser builds accept the session request but fail
-      // to bind the framebuffer, producing a completely black view.
-      try {
-        const gl = this.renderer.getContext() as WebGL2RenderingContext & {
-          makeXRCompatible?: () => Promise<void>;
-        };
-        gl.makeXRCompatible?.();
-      } catch { /* ignore */ }
       // Apply initial highest-quality preset before session starts so the very
       // first frame in the headset is already crisp (no "wait for downgrade").
       this.applyQuality("crisp");
       this.renderer.xr.addEventListener("sessionstart", () => {
+        this.xrSessionStarting = false;
+        this.xrSessionActive = true;
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         this.rig.position.set(0, 0, 0);
         this.rig.rotation.set(0, 0, 0);
@@ -225,15 +220,20 @@ export class PanoramaEngine {
         // Always show a lit sphere on session start.
         this.sphereMat.color.set(this.sphereMat.map ? 0xffffff : 0x1a2540);
         this.sphereMat.needsUpdate = true;
-        // Re-assert the target preset — some runtimes reset scale on session start.
+        // Re-assert only values that are legal during an active XR session.
+        // Three.js/WebXR cannot change framebufferScaleFactor after the XR layer
+        // is created; doing so on Quest can leave the headset with a black layer.
         this.autoDowngraded = false;
         this.fpsSamples = [];
         this.lastAutoCheck = performance.now();
         const target = this.qualityPreset === "auto" ? "crisp" : this.qualityPreset;
-        this.applyQuality(target);
+        this.effectivePreset = target;
+        this.applySessionSafeQuality(target);
         this.buildVRPanel();
       });
       this.renderer.xr.addEventListener("sessionend", () => {
+        this.xrSessionActive = false;
+        this.xrSessionStarting = false;
         this.disposeVRPanel();
       });
     }
@@ -840,7 +840,23 @@ export class PanoramaEngine {
     this.effectivePreset = next;
     const row = QUALITY_TABLE[next];
     if (this.xr) {
-      try { this.renderer.xr.setFramebufferScaleFactor?.(row.framebufferScale); } catch { /* ignore */ }
+      // setFramebufferScaleFactor MUST be called before renderer.xr.setSession().
+      // During/after session start it is explicitly unsupported by Three.js and
+      // can produce a blank Meta Quest view. Use it only before entering VR.
+      if (!this.xrSessionActive && !this.xrSessionStarting && !this.renderer.xr.isPresenting) {
+        try { this.renderer.xr.setFramebufferScaleFactor?.(row.framebufferScale); } catch { /* ignore */ }
+      }
+      try { this.renderer.xr.setFoveation?.(row.foveation); } catch { /* ignore */ }
+    }
+    if (this.sphereMat?.map) {
+      this.applyTextureQuality(this.sphereMat.map);
+      this.sphereMat.needsUpdate = true;
+    }
+  }
+
+  private applySessionSafeQuality(next: Exclude<QualityPreset, "auto">) {
+    const row = QUALITY_TABLE[next];
+    if (this.xr) {
       try { this.renderer.xr.setFoveation?.(row.foveation); } catch { /* ignore */ }
     }
     if (this.sphereMat?.map) {
