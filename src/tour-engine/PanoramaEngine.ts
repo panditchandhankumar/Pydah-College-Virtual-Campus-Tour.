@@ -184,7 +184,7 @@ export class PanoramaEngine {
     // Panorama sphere (inverted). Neutral navy placeholder so if the
     // headset session opens before the texture arrives, the user sees a
     // color instead of pure black.
-    const geom = new THREE.SphereGeometry(SPHERE_RADIUS, 96, 64);
+    const geom = new THREE.SphereGeometry(SPHERE_RADIUS, 128, 96);
     geom.scale(-1, 1, 1);
     this.sphereMat = new THREE.MeshBasicMaterial({ color: 0x1a2540 });
     this.sphere = new THREE.Mesh(geom, this.sphereMat);
