@@ -826,7 +826,7 @@ export class PanoramaEngine {
       try { this.renderer.xr.setFramebufferScaleFactor?.(row.framebufferScale); } catch { /* ignore */ }
       try { this.renderer.xr.setFoveation?.(row.foveation); } catch { /* ignore */ }
     }
-    if (this.sphereMat.map) {
+    if (this.sphereMat?.map) {
       this.applyTextureQuality(this.sphereMat.map);
       this.sphereMat.needsUpdate = true;
     }
