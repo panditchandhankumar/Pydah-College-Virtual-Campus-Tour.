@@ -11,6 +11,30 @@ interface Props {
   onChange: (id: string) => void;
 }
 
+const VR_START_TIMEOUT_MS = 15_000;
+
+function getVrErrorMessage(error: unknown) {
+  const name = error instanceof DOMException || error instanceof Error ? error.name : "";
+  if (name === "NotSupportedError") return "This browser or headset does not support WebXR VR.";
+  if (name === "SecurityError") return "VR permission was blocked. Open this page in a secure Quest browser tab.";
+  if (name === "NotAllowedError") return "VR permission was denied. Please allow VR and try again.";
+  if (name === "AbortError") return "VR startup was cancelled. Please retry.";
+  if (error instanceof Error && error.message.includes("timed out")) {
+    return "VR startup timed out. Please retry from the headset browser.";
+  }
+  return "VR could not start. Please retry.";
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string) {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 function VRIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -45,6 +69,8 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   const visibleBtnRef = useRef<HTMLButtonElement>(null);
   const xrSessionRef = useRef<any>(null);
   const canStartVrRef = useRef(false);
+  const vrStartInFlightRef = useRef(false);
+  const vrStartAttemptRef = useRef(0);
   const engineRef = useRef<PanoramaEngine | null>(null);
   const navigate = useNavigate();
   const [status, setStatus] = useState("Loading campus…");
@@ -55,6 +81,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   const [diag, setDiag] = useState<DiagnosticsState | null>(null);
   const [qPanelOpen, setQPanelOpen] = useState(false);
   const [preset, setPreset] = useState<QualityPreset>("auto");
+  const [vrError, setVrError] = useState(false);
 
 
   useEffect(() => {
@@ -74,14 +101,44 @@ export function VRTourViewer({ panorama, onChange }: Props) {
 
     const xr = (navigator as Navigator & { xr?: any }).xr;
     let cancelled = false;
+    let removeCurrentSessionEndListener: (() => void) | null = null;
+
+    const setReadyToEnter = () => {
+      canStartVrRef.current = true;
+      vrStartInFlightRef.current = false;
+      setVrText("ENTER VR");
+      setVrDisabled(false);
+    };
+
+    const clearSessionEndListener = () => {
+      removeCurrentSessionEndListener?.();
+      removeCurrentSessionEndListener = null;
+    };
+
+    const recoverFromFailedStart = async (message: string, session?: any) => {
+      vrStartAttemptRef.current += 1;
+      vrStartInFlightRef.current = false;
+      canStartVrRef.current = false;
+      clearSessionEndListener();
+      engine.cancelXRSessionRequest();
+      xrSessionRef.current = null;
+      try { await session?.end?.(); } catch { /* ignore */ }
+      if (!cancelled) {
+        setVrError(true);
+        setStatus(message);
+        setReadyToEnter();
+      }
+    };
 
     const onSessionEnded = () => {
+      clearSessionEndListener();
       xrSessionRef.current = null;
       engine.cancelXRSessionRequest();
+      vrStartInFlightRef.current = false;
       if (!cancelled) {
-        canStartVrRef.current = true;
-        setVrText("ENTER VR");
-        setVrDisabled(false);
+        setVrError(false);
+        setStatus("");
+        setReadyToEnter();
       }
     };
 
@@ -106,16 +163,20 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     }
 
     const onVisibleClick = async () => {
-      if (!xr || !canStartVrRef.current) return;
+      if (!xr || !canStartVrRef.current || vrStartInFlightRef.current) return;
       if (xrSessionRef.current) {
         try { await xrSessionRef.current.end(); } catch { /* ignore */ }
         return;
       }
 
+      const attemptId = vrStartAttemptRef.current + 1;
+      vrStartAttemptRef.current = attemptId;
+      vrStartInFlightRef.current = true;
       canStartVrRef.current = false;
       setVrDisabled(true);
       setVrText("OPENING VR…");
       setStatus("Opening VR…");
+      setVrError(false);
       engine.beginXRSessionRequest();
 
       let session: any = null;
@@ -123,29 +184,36 @@ export function VRTourViewer({ panorama, onChange }: Props) {
         // Do not request the WebXR Layers feature here. Three.js' stock VRButton
         // adds it by default, which forces XRProjectionLayer on Quest Browser;
         // that path is the common cause of accepted sessions rendering black.
-        session = await xr.requestSession("immersive-vr", {
-          optionalFeatures: ["bounded-floor", "hand-tracking"],
+        const requestSession = xr.requestSession("immersive-vr", {
+          optionalFeatures: ["local-floor", "bounded-floor", "hand-tracking"],
+        }).then((startedSession: any) => {
+          if (cancelled || attemptId !== vrStartAttemptRef.current) {
+            try { startedSession?.end?.(); } catch { /* ignore */ }
+            throw new DOMException("VR start was cancelled", "AbortError");
+          }
+          return startedSession;
         });
+        requestSession.catch(() => { /* consumed by timeout race */ });
+        session = await withTimeout(requestSession, VR_START_TIMEOUT_MS, "VR session request");
+
+        clearSessionEndListener();
         session.addEventListener("end", onSessionEnded, { once: true });
+        removeCurrentSessionEndListener = () => session?.removeEventListener?.("end", onSessionEnded);
         xrSessionRef.current = session;
-        await engine.renderer.xr.setSession(session);
-        if (cancelled) return;
+        await withTimeout(engine.renderer.xr.setSession(session), VR_START_TIMEOUT_MS, "VR renderer setup");
+        if (cancelled || attemptId !== vrStartAttemptRef.current) {
+          await recoverFromFailedStart("VR startup was cancelled. Please retry.", session);
+          return;
+        }
+        vrStartInFlightRef.current = false;
         canStartVrRef.current = true;
         setVrText("EXIT VR");
         setVrDisabled(false);
         setStatus("");
+        setVrError(false);
       } catch (err) {
-        console.warn("Unable to start WebXR session", err);
-        engine.cancelXRSessionRequest();
-        xrSessionRef.current = null;
-        try { await session?.end?.(); } catch { /* ignore */ }
-        if (!cancelled) {
-          canStartVrRef.current = true;
-          setVrText("ENTER VR");
-          setVrDisabled(false);
-          setStatus("VR could not start. Please try again.");
-          window.setTimeout(() => setStatus(""), 1800);
-        }
+        if (import.meta.env.DEV) console.warn("Unable to start WebXR session", err);
+        await recoverFromFailedStart(getVrErrorMessage(err), session);
       }
     };
     visibleBtnRef.current?.addEventListener("click", onVisibleClick);
@@ -163,6 +231,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
 
     return () => {
       cancelled = true;
+      vrStartAttemptRef.current += 1;
+      vrStartInFlightRef.current = false;
+      clearSessionEndListener();
       visibleBtnRef.current?.removeEventListener("click", onVisibleClick);
       unsubscribe();
       try { xrSessionRef.current?.end?.(); } catch { /* ignore */ }
@@ -201,10 +272,18 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       </div>
 
       {status && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black/50 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-3 text-white">
+        <div className={`${vrError ? "pointer-events-auto" : "pointer-events-none"} absolute inset-0 grid place-items-center bg-black/50 backdrop-blur-sm`}>
+          <div className="flex max-w-[min(92vw,420px)] flex-col items-center gap-3 rounded-2xl bg-black/55 px-6 py-5 text-center text-white ring-1 ring-white/15">
             <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-accent" />
             <p className="text-sm">{status}</p>
+            {vrError && (
+              <button
+                onClick={() => visibleBtnRef.current?.click()}
+                className="mt-1 rounded-full bg-cyan-400 px-5 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-cyan-300"
+              >
+                Retry VR
+              </button>
+            )}
           </div>
         </div>
       )}
