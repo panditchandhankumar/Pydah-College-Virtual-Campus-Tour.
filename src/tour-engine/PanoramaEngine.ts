@@ -128,7 +128,8 @@ export class PanoramaEngine {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
-    });
+      xrCompatible: true,
+    } as THREE.WebGLRendererParameters);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(mount.clientWidth, mount.clientHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -143,6 +144,15 @@ export class PanoramaEngine {
       try { this.renderer.xr.setReferenceSpaceType("local-floor"); }
       catch { try { this.renderer.xr.setReferenceSpaceType("local"); } catch { /* ignore */ } }
       try { this.renderer.xr.setFoveation?.(1); } catch { /* ignore */ }
+      // Force the underlying GL context to be XR-compatible up front. Without
+      // this, some Quest browser builds accept the session request but fail
+      // to bind the framebuffer, producing a completely black view.
+      try {
+        const gl = this.renderer.getContext() as WebGL2RenderingContext & {
+          makeXRCompatible?: () => Promise<void>;
+        };
+        gl.makeXRCompatible?.();
+      } catch { /* ignore */ }
       // Reset all view state at the moment the headset session starts so we
       // never enter with a stale desktop rotation / rig offset / opaque fade
       // overlay (any of which would show as a "black screen" in VR).
@@ -155,7 +165,11 @@ export class PanoramaEngine {
         this.fadeMat.opacity = 0;
         this.fadeDir = 0;
         this.pendingId = null;
-        if (this.sphereMat.map) this.sphereMat.color.set(0xffffff);
+        // Always show a lit sphere on session start — even if the panorama
+        // texture hasn't finished decoding, the user sees the navy fallback
+        // instead of a fully black headset view.
+        this.sphereMat.color.set(this.sphereMat.map ? 0xffffff : 0x1a2540);
+        this.sphereMat.needsUpdate = true;
       });
     }
     mount.appendChild(this.renderer.domElement);

@@ -79,10 +79,24 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     hiddenBtn.style.setProperty("z-index", "-1", "important");
     mountRef.current.appendChild(hiddenBtn);
 
-    const syncText = () => setVrText(hiddenBtn.textContent || "VR NOT SUPPORTED");
+    const syncText = () => {
+      const text = hiddenBtn.textContent || "VR NOT SUPPORTED";
+      setVrText(text);
+      // Mirror the disabled state onto the visible button so users on
+      // non-XR browsers can see the button is inactive instead of clicking
+      // it and getting no response (which reads as a "black screen").
+      const disabled = hiddenBtn.hasAttribute("disabled") ||
+        /not (allowed|supported|found)/i.test(text) ||
+        /https?:/i.test(text);
+      if (visibleBtnRef.current) {
+        visibleBtnRef.current.disabled = disabled;
+        visibleBtnRef.current.style.opacity = disabled ? "0.55" : "1";
+        visibleBtnRef.current.style.cursor = disabled ? "not-allowed" : "pointer";
+      }
+    };
     syncText();
     const textObserver = new MutationObserver(syncText);
-    textObserver.observe(hiddenBtn, { childList: true, subtree: true, characterData: true });
+    textObserver.observe(hiddenBtn, { childList: true, subtree: true, characterData: true, attributes: true });
 
     const onVisibleClick = () => hiddenBtn.click();
     visibleBtnRef.current?.addEventListener("click", onVisibleClick);
