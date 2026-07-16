@@ -284,6 +284,28 @@ export class PanoramaEngine {
     this.renderer.domElement.style.touchAction = "none";
     this.renderer.domElement.style.cursor = "grab";
 
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      this.loading = false;
+      this.loadingLabel = "";
+      this.xrSessionStarting = false;
+      this.xrSessionActive = false;
+      this.fadeDir = 0;
+      this.pendingId = null;
+      if (import.meta.env.DEV) console.warn("WebGL context lost during panorama/VR rendering");
+      this.cb.onLoadError?.();
+    };
+    const onContextRestored = () => {
+      if (import.meta.env.DEV) console.info("WebGL context restored; reloading panorama texture");
+      if (this.currentPanoramaId) this.applyPanorama(this.currentPanoramaId);
+    };
+    this.renderer.domElement.addEventListener("webglcontextlost", onContextLost, false);
+    this.renderer.domElement.addEventListener("webglcontextrestored", onContextRestored, false);
+    this.disposables.push(() => {
+      this.renderer.domElement.removeEventListener("webglcontextlost", onContextLost, false);
+      this.renderer.domElement.removeEventListener("webglcontextrestored", onContextRestored, false);
+    });
+
     // Panorama sphere (inverted). Neutral navy placeholder so if the
     // headset session opens before the texture arrives, the user sees a
     // color instead of pure black.
