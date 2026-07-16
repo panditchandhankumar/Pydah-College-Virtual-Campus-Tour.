@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
-import { PanoramaEngine, type DebugState } from "@/tour-engine/PanoramaEngine";
+import { PanoramaEngine, type DebugState, type DiagnosticsState, type QualityPreset } from "@/tour-engine/PanoramaEngine";
 import type { Panorama } from "@/data/panoramas";
 import { useHotspotStore } from "@/lib/hotspotStore";
 import { DebugHUD, useDebugMode } from "./DebugHUD";
+import { Gauge, Sliders, X } from "lucide-react";
 
 interface Props {
   panorama: Panorama;
@@ -50,6 +51,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   const [debugOn, setDebugOn] = useDebugMode();
   const [debugState, setDebugState] = useState<DebugState | null>(null);
   const [vrText, setVrText] = useState("VR NOT SUPPORTED");
+  const [diag, setDiag] = useState<DiagnosticsState | null>(null);
+  const [qPanelOpen, setQPanelOpen] = useState(false);
+  const [preset, setPreset] = useState<QualityPreset>("auto");
 
 
   useEffect(() => {
@@ -63,7 +67,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       onLoadEnd: () => setStatus(""),
       onLoadError: () => setStatus("Failed to load panorama."),
       onDebug: setDebugState,
+      onDiagnostics: setDiag,
     });
+    engine.setQualityPreset("auto");
 
     // Create the official Three.js VR button but keep it hidden. We render our
     // own styled button and proxy clicks to it, so Three.js can't clobber our UI.
@@ -158,6 +164,78 @@ export function VRTourViewer({ panorama, onChange }: Props) {
         </div>
       )}
       <DebugHUD open={debugOn} onToggle={() => setDebugOn(!debugOn)} state={debugState} />
+
+      {/* Quality / diagnostics launcher */}
+      <button
+        onClick={() => setQPanelOpen((v) => !v)}
+        title="VR quality & diagnostics"
+        className="absolute right-3 top-3 z-40 inline-flex items-center gap-2 rounded-full bg-black/70 px-3 py-2 text-xs font-semibold text-white ring-1 ring-white/20 backdrop-blur hover:bg-black/85"
+      >
+        <Gauge className="h-4 w-4 text-cyan-300" />
+        <span>{diag ? `${diag.fps}fps · ${diag.effectivePreset}` : "Quality"}</span>
+      </button>
+
+      {qPanelOpen && (
+        <div className="absolute right-3 top-14 z-40 w-[300px] max-w-[92vw] rounded-xl border border-white/15 bg-black/85 p-3 text-[12px] text-white shadow-2xl backdrop-blur-xl">
+          <div className="mb-2 flex items-center justify-between border-b border-white/10 pb-2">
+            <p className="flex items-center gap-1.5 font-bold text-cyan-300">
+              <Sliders className="h-3.5 w-3.5" /> VR Quality
+            </p>
+            <button onClick={() => setQPanelOpen(false)} className="grid h-6 w-6 place-items-center rounded-full hover:bg-white/10">
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+
+          <div className="mb-3 grid grid-cols-4 gap-1">
+            {(["auto", "crisp", "balanced", "performance"] as QualityPreset[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => { setPreset(p); engineRef.current?.setQualityPreset(p); }}
+                className={`rounded-md px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition ${
+                  preset === p
+                    ? "bg-cyan-500 text-black"
+                    : "bg-white/10 text-white/80 hover:bg-white/20"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+
+          {diag ? (
+            <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-[11px]">
+              <span className="text-white/50">Mode</span>
+              <span>{diag.presenting ? "In VR" : "Preview"}</span>
+              <span className="text-white/50">FPS</span>
+              <span>{diag.fps} <span className="text-white/40">(avg {diag.avgFps})</span></span>
+              <span className="text-white/50">FB scale</span>
+              <span>{diag.framebufferScale.toFixed(2)}×</span>
+              <span className="text-white/50">Foveation</span>
+              <span>{diag.foveation.toFixed(2)} {diag.foveation === 0 ? "(off)" : ""}</span>
+              <span className="text-white/50">Anisotropy</span>
+              <span>{diag.anisotropy}/{diag.maxAnisotropy}</span>
+              <span className="text-white/50">Mipmaps</span>
+              <span>{diag.mipmaps ? "on" : "off"} · {diag.minFilter}</span>
+              <span className="text-white/50">Texture</span>
+              <span>{diag.textureWidth}×{diag.textureHeight}</span>
+              <span className="text-white/50">Loading</span>
+              <span>{diag.loading ? (diag.loadingLabel || "…") : "idle"}</span>
+              {diag.autoDowngraded && (
+                <>
+                  <span className="text-amber-300">Auto</span>
+                  <span className="text-amber-300">downgraded → {diag.effectivePreset}</span>
+                </>
+              )}
+            </div>
+          ) : (
+            <p className="text-white/60">Waiting for engine frame…</p>
+          )}
+
+          <p className="mt-3 border-t border-white/10 pt-2 text-[10px] leading-relaxed text-white/50">
+            In headset: <b>Left grip</b> toggles the in-VR panel · <b>Right grip</b> cycles presets.
+          </p>
+        </div>
+      )}
     </div>
   );
 

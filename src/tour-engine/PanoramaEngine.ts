@@ -39,6 +39,27 @@ export interface DebugState {
   hotspots: DebugHotspotInfo[];
 }
 
+export type QualityPreset = "crisp" | "balanced" | "performance" | "auto";
+
+export interface DiagnosticsState {
+  presenting: boolean;
+  preset: QualityPreset;
+  effectivePreset: Exclude<QualityPreset, "auto">;
+  framebufferScale: number;
+  foveation: number;
+  anisotropy: number;
+  maxAnisotropy: number;
+  mipmaps: boolean;
+  minFilter: string;
+  textureWidth: number;
+  textureHeight: number;
+  loading: boolean;
+  loadingLabel: string;
+  fps: number;
+  avgFps: number;
+  autoDowngraded: boolean;
+}
+
 export interface EngineCallbacks {
   onNavigate?: (targetId: string) => void;
   onSelect?: (index: number | null) => void;
@@ -49,7 +70,22 @@ export interface EngineCallbacks {
   onLoadEnd?: () => void;
   onLoadError?: () => void;
   onDebug?: (state: DebugState) => void;
+  onDiagnostics?: (state: DiagnosticsState) => void;
 }
+
+interface QualityRow {
+  framebufferScale: number;
+  foveation: number;
+  mipmaps: boolean;
+  minFilter: "mipmap-linear" | "mipmap-nearest";
+  anisoFactor: number; // multiplied by GPU max
+}
+
+const QUALITY_TABLE: Record<Exclude<QualityPreset, "auto">, QualityRow> = {
+  crisp:       { framebufferScale: 1.7, foveation: 0.0, mipmaps: true, minFilter: "mipmap-linear",  anisoFactor: 1.0  },
+  balanced:    { framebufferScale: 1.3, foveation: 0.3, mipmaps: true, minFilter: "mipmap-linear",  anisoFactor: 0.5  },
+  performance: { framebufferScale: 1.0, foveation: 0.6, mipmaps: true, minFilter: "mipmap-nearest", anisoFactor: 0.25 },
+};
 
 export interface EngineOptions {
   /** Enable WebGL renderer.xr — required for VR wrapper. */
@@ -110,6 +146,27 @@ export class PanoramaEngine {
   private readonly xrYawSpeed = THREE.MathUtils.degToRad(90);
   private disposables: (() => void)[] = [];
 
+  // ─── Quality / diagnostics ──────────────────────────────────────────
+  private qualityPreset: QualityPreset = "auto";
+  private effectivePreset: Exclude<QualityPreset, "auto"> = "crisp";
+  private autoDowngraded = false;
+  private maxAnisotropy = 1;
+  private fpsSamples: number[] = [];
+  private lastAutoCheck = 0;
+  private loading = false;
+  private loadingLabel = "";
+  private lastDiagEmit = 0;
+  private texWidth = 0;
+  private texHeight = 0;
+  // In-VR quality/diagnostics panel (canvas texture on left controller).
+  private vrPanel: THREE.Mesh | null = null;
+  private vrPanelCanvas: HTMLCanvasElement | null = null;
+  private vrPanelTex: THREE.CanvasTexture | null = null;
+  private vrPanelVisible = true;
+  private vrPanelLastDraw = 0;
+  // Debounce controller grip presses.
+  private lastGripPress: Record<string, number> = {};
+
   constructor(mount: HTMLElement, opts: EngineOptions = {}) {
     this.mount = mount;
     this.xr = !!opts.xr;
@@ -137,18 +194,13 @@ export class PanoramaEngine {
     // WebXR (Quest 3 / 3S) framebuffers and can render as a black view.
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.renderer.toneMappingExposure = 1;
+    this.maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy?.() ?? 1;
     if (this.xr) {
       this.renderer.xr.enabled = true;
       // Prefer local-floor; if the runtime rejects it (some Quest browser
       // builds), fall back to "local" so the session still renders.
       try { this.renderer.xr.setReferenceSpaceType("local-floor"); }
       catch { try { this.renderer.xr.setReferenceSpaceType("local"); } catch { /* ignore */ } }
-      // Foveation 0 = full resolution edge-to-edge (sharpest panorama).
-      // A value of 1 heavily blurs the periphery which looks like a low-res image.
-      try { this.renderer.xr.setFoveation?.(0); } catch { /* ignore */ }
-      // Render at higher-than-native resolution in the headset for crisp text
-      // and panorama detail. Quest 3/3S handle 1.5x comfortably on a single sphere.
-      try { this.renderer.xr.setFramebufferScaleFactor?.(1.5); } catch { /* ignore */ }
       // Force the underlying GL context to be XR-compatible up front. Without
       // this, some Quest browser builds accept the session request but fail
       // to bind the framebuffer, producing a completely black view.
@@ -158,9 +210,9 @@ export class PanoramaEngine {
         };
         gl.makeXRCompatible?.();
       } catch { /* ignore */ }
-      // Reset all view state at the moment the headset session starts so we
-      // never enter with a stale desktop rotation / rig offset / opaque fade
-      // overlay (any of which would show as a "black screen" in VR).
+      // Apply initial highest-quality preset before session starts so the very
+      // first frame in the headset is already crisp (no "wait for downgrade").
+      this.applyQuality("crisp");
       this.renderer.xr.addEventListener("sessionstart", () => {
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         this.rig.position.set(0, 0, 0);
@@ -170,11 +222,19 @@ export class PanoramaEngine {
         this.fadeMat.opacity = 0;
         this.fadeDir = 0;
         this.pendingId = null;
-        // Always show a lit sphere on session start — even if the panorama
-        // texture hasn't finished decoding, the user sees the navy fallback
-        // instead of a fully black headset view.
+        // Always show a lit sphere on session start.
         this.sphereMat.color.set(this.sphereMat.map ? 0xffffff : 0x1a2540);
         this.sphereMat.needsUpdate = true;
+        // Re-assert the target preset — some runtimes reset scale on session start.
+        this.autoDowngraded = false;
+        this.fpsSamples = [];
+        this.lastAutoCheck = performance.now();
+        const target = this.qualityPreset === "auto" ? "crisp" : this.qualityPreset;
+        this.applyQuality(target);
+        this.buildVRPanel();
+      });
+      this.renderer.xr.addEventListener("sessionend", () => {
+        this.disposeVRPanel();
       });
     }
     mount.appendChild(this.renderer.domElement);
@@ -263,15 +323,17 @@ export class PanoramaEngine {
   private applyPanorama(id: string) {
     const p = getPanorama(id);
     if (!p) return;
+    this.loading = true;
+    this.loadingLabel = p.title;
     this.cb.onLoadStart?.(p.title);
     this.loader.load(
       p.panorama,
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
-        tex.generateMipmaps = true;
-        tex.minFilter = THREE.LinearMipmapLinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+        this.applyTextureQuality(tex);
+        const img = tex.image as HTMLImageElement | ImageBitmap | undefined;
+        this.texWidth = (img as { width?: number })?.width ?? 0;
+        this.texHeight = (img as { height?: number })?.height ?? 0;
         const old = this.sphereMat.map;
         this.sphereMat.map = tex;
         this.sphereMat.color.set(0xffffff);
@@ -279,11 +341,26 @@ export class PanoramaEngine {
         old?.dispose();
         this.currentPanoramaId = id;
         this.rebuildHotspots();
+        this.loading = false;
         this.cb.onLoadEnd?.();
       },
       undefined,
-      () => this.cb.onLoadError?.(),
+      () => {
+        this.loading = false;
+        this.cb.onLoadError?.();
+      },
     );
+  }
+
+  private applyTextureQuality(tex: THREE.Texture) {
+    const row = QUALITY_TABLE[this.effectivePreset];
+    tex.generateMipmaps = row.mipmaps;
+    tex.minFilter = row.mipmaps
+      ? (row.minFilter === "mipmap-linear" ? THREE.LinearMipmapLinearFilter : THREE.LinearMipmapNearestFilter)
+      : THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = Math.max(1, Math.round(this.maxAnisotropy * row.anisoFactor));
+    tex.needsUpdate = true;
   }
 
   // ─── Hotspots ────────────────────────────────────────────────────────
@@ -731,6 +808,181 @@ export class PanoramaEngine {
     });
   }
 
+  // ─── Quality / Diagnostics ───────────────────────────────────────────
+  setQualityPreset(preset: QualityPreset) {
+    this.qualityPreset = preset;
+    this.autoDowngraded = false;
+    this.fpsSamples = [];
+    const target = preset === "auto" ? "crisp" : preset;
+    this.applyQuality(target);
+  }
+
+  getQualityPreset(): QualityPreset { return this.qualityPreset; }
+
+  private applyQuality(next: Exclude<QualityPreset, "auto">) {
+    this.effectivePreset = next;
+    const row = QUALITY_TABLE[next];
+    if (this.xr) {
+      try { this.renderer.xr.setFramebufferScaleFactor?.(row.framebufferScale); } catch { /* ignore */ }
+      try { this.renderer.xr.setFoveation?.(row.foveation); } catch { /* ignore */ }
+    }
+    if (this.sphereMat.map) {
+      this.applyTextureQuality(this.sphereMat.map);
+      this.sphereMat.needsUpdate = true;
+    }
+  }
+
+  private checkAutoDowngrade(now: number) {
+    if (this.qualityPreset !== "auto") return;
+    if (!this.renderer.xr.isPresenting) return;
+    if (this.autoDowngraded) return;
+    if (now - this.lastAutoCheck < 500) return;
+    this.lastAutoCheck = now;
+    // Sustained low FPS → drop one tier.
+    const avg = this.fpsSamples.length
+      ? this.fpsSamples.reduce((a, b) => a + b, 0) / this.fpsSamples.length
+      : 0;
+    if (this.fpsSamples.length >= 90) { // ~1.5s of samples
+      const drop = this.effectivePreset === "crisp" && avg < 60
+        ? "balanced"
+        : this.effectivePreset === "balanced" && avg < 45
+        ? "performance"
+        : null;
+      if (drop) {
+        this.autoDowngraded = true;
+        this.applyQuality(drop);
+        this.fpsSamples = [];
+      }
+    }
+  }
+
+  private buildDiagnostics(): DiagnosticsState {
+    const row = QUALITY_TABLE[this.effectivePreset];
+    const tex = this.sphereMat.map;
+    const now = performance.now();
+    const fps = this.lastFrameT ? 1000 / Math.max(1, now - this.lastFrameT) : 0;
+    const avg = this.fpsSamples.length
+      ? this.fpsSamples.reduce((a, b) => a + b, 0) / this.fpsSamples.length
+      : fps;
+    return {
+      presenting: this.renderer.xr.isPresenting,
+      preset: this.qualityPreset,
+      effectivePreset: this.effectivePreset,
+      framebufferScale: row.framebufferScale,
+      foveation: row.foveation,
+      anisotropy: tex?.anisotropy ?? Math.round(this.maxAnisotropy * row.anisoFactor),
+      maxAnisotropy: this.maxAnisotropy,
+      mipmaps: row.mipmaps,
+      minFilter: row.minFilter,
+      textureWidth: this.texWidth,
+      textureHeight: this.texHeight,
+      loading: this.loading,
+      loadingLabel: this.loadingLabel,
+      fps: +fps.toFixed(0),
+      avgFps: +avg.toFixed(0),
+      autoDowngraded: this.autoDowngraded,
+    };
+  }
+
+  // In-VR quality/diagnostics panel — attaches a canvas texture to the LEFT
+  // controller so the user can see live tuning info inside the headset.
+  private buildVRPanel() {
+    this.disposeVRPanel();
+    const c = this.controllers[0];
+    if (!c) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = 512; canvas.height = 320;
+    this.vrPanelCanvas = canvas;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    this.vrPanelTex = tex;
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex, transparent: true, opacity: 0.95,
+      depthTest: false, depthWrite: false, side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.175), mat);
+    // Sit above the controller, angled toward the user's face.
+    mesh.position.set(0, 0.12, -0.15);
+    mesh.rotation.set(-Math.PI / 4, 0, 0);
+    mesh.renderOrder = 500;
+    mesh.visible = this.vrPanelVisible;
+    c.add(mesh);
+    this.vrPanel = mesh;
+  }
+
+  private disposeVRPanel() {
+    if (!this.vrPanel) return;
+    this.vrPanel.parent?.remove(this.vrPanel);
+    (this.vrPanel.material as THREE.Material)?.dispose?.();
+    this.vrPanel.geometry?.dispose?.();
+    this.vrPanelTex?.dispose?.();
+    this.vrPanel = null;
+    this.vrPanelCanvas = null;
+    this.vrPanelTex = null;
+  }
+
+  private drawVRPanel(diag: DiagnosticsState) {
+    if (!this.vrPanelCanvas || !this.vrPanelTex || !this.vrPanel) return;
+    if (!this.vrPanelVisible) { this.vrPanel.visible = false; return; }
+    this.vrPanel.visible = true;
+    const ctx = this.vrPanelCanvas.getContext("2d");
+    if (!ctx) return;
+    const W = this.vrPanelCanvas.width, H = this.vrPanelCanvas.height;
+    ctx.fillStyle = "rgba(4, 12, 28, 0.92)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "#28c7fa"; ctx.lineWidth = 4; ctx.strokeRect(2, 2, W - 4, H - 4);
+    ctx.fillStyle = "#28c7fa"; ctx.font = "bold 26px system-ui"; ctx.textBaseline = "top";
+    ctx.fillText("VR Diagnostics", 16, 12);
+    ctx.font = "18px ui-monospace, Menlo, monospace"; ctx.fillStyle = "#e6f3ff";
+    const rows: [string, string][] = [
+      ["Preset", `${diag.preset}${diag.preset === "auto" ? ` → ${diag.effectivePreset}` : ""}`],
+      ["FB Scale", `${diag.framebufferScale.toFixed(2)}x`],
+      ["Foveation", diag.foveation.toFixed(2)],
+      ["Aniso", `${diag.anisotropy}/${diag.maxAnisotropy}`],
+      ["Mipmap", `${diag.mipmaps ? "on" : "off"} · ${diag.minFilter}`],
+      ["Texture", `${diag.textureWidth}×${diag.textureHeight}`],
+      ["Loading", diag.loading ? diag.loadingLabel || "…" : "idle"],
+      ["FPS", `${diag.fps} (avg ${diag.avgFps})${diag.autoDowngraded ? " ⬇" : ""}`],
+    ];
+    let y = 52;
+    for (const [k, v] of rows) {
+      ctx.fillStyle = "#7fb1d9"; ctx.fillText(k, 20, y);
+      ctx.fillStyle = "#ffffff"; ctx.fillText(v, 170, y);
+      y += 30;
+    }
+    ctx.fillStyle = "#7fb1d9"; ctx.font = "14px ui-monospace";
+    ctx.fillText("L-grip: toggle · R-grip: cycle preset", 20, H - 24);
+    this.vrPanelTex.needsUpdate = true;
+  }
+
+  // Poll controller grip (button 1) for panel toggle / preset cycling.
+  private pollXRButtons() {
+    const session = this.renderer.xr.getSession();
+    if (!session) return;
+    for (const src of session.inputSources) {
+      const gp = src.gamepad;
+      if (!gp) continue;
+      const grip = gp.buttons?.[1];
+      const key = src.handedness ?? "unknown";
+      const now = performance.now();
+      if (grip?.pressed) {
+        if (!this.lastGripPress[key] || now - this.lastGripPress[key] > 400) {
+          this.lastGripPress[key] = now;
+          if (src.handedness === "left") {
+            this.vrPanelVisible = !this.vrPanelVisible;
+          } else if (src.handedness === "right") {
+            const order: QualityPreset[] = ["auto", "crisp", "balanced", "performance"];
+            const i = order.indexOf(this.qualityPreset);
+            this.setQualityPreset(order[(i + 1) % order.length]);
+          }
+        }
+      } else if (this.lastGripPress[key]) {
+        // release resets debounce quickly
+        if (now - this.lastGripPress[key] > 400) this.lastGripPress[key] = 0;
+      }
+    }
+  }
+
   // ─── Render loop ─────────────────────────────────────────────────────
   private startLoop() {
     const clock = new THREE.Clock();
@@ -748,12 +1000,31 @@ export class PanoramaEngine {
           this.fadeDir = 0;
         }
       }
-      if (this.xr) this.pollXRControllers(dt);
+      if (this.xr) {
+        this.pollXRControllers(dt);
+        if (this.renderer.xr.isPresenting) this.pollXRButtons();
+      }
       this.renderer.render(this.scene, this.camera);
       const now = performance.now();
+
+      // FPS sampling for auto-downgrade + diagnostics.
+      if (this.lastFrameT) {
+        const fps = 1000 / Math.max(1, now - this.lastFrameT);
+        this.fpsSamples.push(fps);
+        if (this.fpsSamples.length > 120) this.fpsSamples.shift();
+      }
+      this.checkAutoDowngrade(now);
+
       if (this.debugEnabled && now - this.lastDebugEmit > 100) {
         this.emitDebug();
         this.lastDebugEmit = now;
+      }
+      // Diagnostics + in-VR panel refresh (~4Hz).
+      if (now - this.lastDiagEmit > 250) {
+        const diag = this.buildDiagnostics();
+        this.cb.onDiagnostics?.(diag);
+        if (this.renderer.xr.isPresenting) this.drawVRPanel(diag);
+        this.lastDiagEmit = now;
       }
       this.lastFrameT = now;
     });
