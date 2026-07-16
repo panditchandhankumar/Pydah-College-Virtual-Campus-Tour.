@@ -268,7 +268,8 @@ export class PanoramaEngine {
       p.panorama,
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
-        tex.minFilter = THREE.LinearFilter;
+        tex.generateMipmaps = true;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
         tex.magFilter = THREE.LinearFilter;
         tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
         const old = this.sphereMat.map;
