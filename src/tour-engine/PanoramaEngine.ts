@@ -808,6 +808,181 @@ export class PanoramaEngine {
     });
   }
 
+  // ─── Quality / Diagnostics ───────────────────────────────────────────
+  setQualityPreset(preset: QualityPreset) {
+    this.qualityPreset = preset;
+    this.autoDowngraded = false;
+    this.fpsSamples = [];
+    const target = preset === "auto" ? "crisp" : preset;
+    this.applyQuality(target);
+  }
+
+  getQualityPreset(): QualityPreset { return this.qualityPreset; }
+
+  private applyQuality(next: Exclude<QualityPreset, "auto">) {
+    this.effectivePreset = next;
+    const row = QUALITY_TABLE[next];
+    if (this.xr) {
+      try { this.renderer.xr.setFramebufferScaleFactor?.(row.framebufferScale); } catch { /* ignore */ }
+      try { this.renderer.xr.setFoveation?.(row.foveation); } catch { /* ignore */ }
+    }
+    if (this.sphereMat.map) {
+      this.applyTextureQuality(this.sphereMat.map);
+      this.sphereMat.needsUpdate = true;
+    }
+  }
+
+  private checkAutoDowngrade(now: number) {
+    if (this.qualityPreset !== "auto") return;
+    if (!this.renderer.xr.isPresenting) return;
+    if (this.autoDowngraded) return;
+    if (now - this.lastAutoCheck < 500) return;
+    this.lastAutoCheck = now;
+    // Sustained low FPS → drop one tier.
+    const avg = this.fpsSamples.length
+      ? this.fpsSamples.reduce((a, b) => a + b, 0) / this.fpsSamples.length
+      : 0;
+    if (this.fpsSamples.length >= 90) { // ~1.5s of samples
+      const drop = this.effectivePreset === "crisp" && avg < 60
+        ? "balanced"
+        : this.effectivePreset === "balanced" && avg < 45
+        ? "performance"
+        : null;
+      if (drop) {
+        this.autoDowngraded = true;
+        this.applyQuality(drop);
+        this.fpsSamples = [];
+      }
+    }
+  }
+
+  private buildDiagnostics(): DiagnosticsState {
+    const row = QUALITY_TABLE[this.effectivePreset];
+    const tex = this.sphereMat.map;
+    const now = performance.now();
+    const fps = this.lastFrameT ? 1000 / Math.max(1, now - this.lastFrameT) : 0;
+    const avg = this.fpsSamples.length
+      ? this.fpsSamples.reduce((a, b) => a + b, 0) / this.fpsSamples.length
+      : fps;
+    return {
+      presenting: this.renderer.xr.isPresenting,
+      preset: this.qualityPreset,
+      effectivePreset: this.effectivePreset,
+      framebufferScale: row.framebufferScale,
+      foveation: row.foveation,
+      anisotropy: tex?.anisotropy ?? Math.round(this.maxAnisotropy * row.anisoFactor),
+      maxAnisotropy: this.maxAnisotropy,
+      mipmaps: row.mipmaps,
+      minFilter: row.minFilter,
+      textureWidth: this.texWidth,
+      textureHeight: this.texHeight,
+      loading: this.loading,
+      loadingLabel: this.loadingLabel,
+      fps: +fps.toFixed(0),
+      avgFps: +avg.toFixed(0),
+      autoDowngraded: this.autoDowngraded,
+    };
+  }
+
+  // In-VR quality/diagnostics panel — attaches a canvas texture to the LEFT
+  // controller so the user can see live tuning info inside the headset.
+  private buildVRPanel() {
+    this.disposeVRPanel();
+    const c = this.controllers[0];
+    if (!c) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = 512; canvas.height = 320;
+    this.vrPanelCanvas = canvas;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    this.vrPanelTex = tex;
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex, transparent: true, opacity: 0.95,
+      depthTest: false, depthWrite: false, side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.175), mat);
+    // Sit above the controller, angled toward the user's face.
+    mesh.position.set(0, 0.12, -0.15);
+    mesh.rotation.set(-Math.PI / 4, 0, 0);
+    mesh.renderOrder = 500;
+    mesh.visible = this.vrPanelVisible;
+    c.add(mesh);
+    this.vrPanel = mesh;
+  }
+
+  private disposeVRPanel() {
+    if (!this.vrPanel) return;
+    this.vrPanel.parent?.remove(this.vrPanel);
+    (this.vrPanel.material as THREE.Material)?.dispose?.();
+    this.vrPanel.geometry?.dispose?.();
+    this.vrPanelTex?.dispose?.();
+    this.vrPanel = null;
+    this.vrPanelCanvas = null;
+    this.vrPanelTex = null;
+  }
+
+  private drawVRPanel(diag: DiagnosticsState) {
+    if (!this.vrPanelCanvas || !this.vrPanelTex || !this.vrPanel) return;
+    if (!this.vrPanelVisible) { this.vrPanel.visible = false; return; }
+    this.vrPanel.visible = true;
+    const ctx = this.vrPanelCanvas.getContext("2d");
+    if (!ctx) return;
+    const W = this.vrPanelCanvas.width, H = this.vrPanelCanvas.height;
+    ctx.fillStyle = "rgba(4, 12, 28, 0.92)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "#28c7fa"; ctx.lineWidth = 4; ctx.strokeRect(2, 2, W - 4, H - 4);
+    ctx.fillStyle = "#28c7fa"; ctx.font = "bold 26px system-ui"; ctx.textBaseline = "top";
+    ctx.fillText("VR Diagnostics", 16, 12);
+    ctx.font = "18px ui-monospace, Menlo, monospace"; ctx.fillStyle = "#e6f3ff";
+    const rows: [string, string][] = [
+      ["Preset", `${diag.preset}${diag.preset === "auto" ? ` → ${diag.effectivePreset}` : ""}`],
+      ["FB Scale", `${diag.framebufferScale.toFixed(2)}x`],
+      ["Foveation", diag.foveation.toFixed(2)],
+      ["Aniso", `${diag.anisotropy}/${diag.maxAnisotropy}`],
+      ["Mipmap", `${diag.mipmaps ? "on" : "off"} · ${diag.minFilter}`],
+      ["Texture", `${diag.textureWidth}×${diag.textureHeight}`],
+      ["Loading", diag.loading ? diag.loadingLabel || "…" : "idle"],
+      ["FPS", `${diag.fps} (avg ${diag.avgFps})${diag.autoDowngraded ? " ⬇" : ""}`],
+    ];
+    let y = 52;
+    for (const [k, v] of rows) {
+      ctx.fillStyle = "#7fb1d9"; ctx.fillText(k, 20, y);
+      ctx.fillStyle = "#ffffff"; ctx.fillText(v, 170, y);
+      y += 30;
+    }
+    ctx.fillStyle = "#7fb1d9"; ctx.font = "14px ui-monospace";
+    ctx.fillText("L-grip: toggle · R-grip: cycle preset", 20, H - 24);
+    this.vrPanelTex.needsUpdate = true;
+  }
+
+  // Poll controller grip (button 1) for panel toggle / preset cycling.
+  private pollXRButtons() {
+    const session = this.renderer.xr.getSession();
+    if (!session) return;
+    for (const src of session.inputSources) {
+      const gp = src.gamepad;
+      if (!gp) continue;
+      const grip = gp.buttons?.[1];
+      const key = src.handedness ?? "unknown";
+      const now = performance.now();
+      if (grip?.pressed) {
+        if (!this.lastGripPress[key] || now - this.lastGripPress[key] > 400) {
+          this.lastGripPress[key] = now;
+          if (src.handedness === "left") {
+            this.vrPanelVisible = !this.vrPanelVisible;
+          } else if (src.handedness === "right") {
+            const order: QualityPreset[] = ["auto", "crisp", "balanced", "performance"];
+            const i = order.indexOf(this.qualityPreset);
+            this.setQualityPreset(order[(i + 1) % order.length]);
+          }
+        }
+      } else if (this.lastGripPress[key]) {
+        // release resets debounce quickly
+        if (now - this.lastGripPress[key] > 400) this.lastGripPress[key] = 0;
+      }
+    }
+  }
+
   // ─── Render loop ─────────────────────────────────────────────────────
   private startLoop() {
     const clock = new THREE.Clock();
@@ -825,12 +1000,31 @@ export class PanoramaEngine {
           this.fadeDir = 0;
         }
       }
-      if (this.xr) this.pollXRControllers(dt);
+      if (this.xr) {
+        this.pollXRControllers(dt);
+        if (this.renderer.xr.isPresenting) this.pollXRButtons();
+      }
       this.renderer.render(this.scene, this.camera);
       const now = performance.now();
+
+      // FPS sampling for auto-downgrade + diagnostics.
+      if (this.lastFrameT) {
+        const fps = 1000 / Math.max(1, now - this.lastFrameT);
+        this.fpsSamples.push(fps);
+        if (this.fpsSamples.length > 120) this.fpsSamples.shift();
+      }
+      this.checkAutoDowngrade(now);
+
       if (this.debugEnabled && now - this.lastDebugEmit > 100) {
         this.emitDebug();
         this.lastDebugEmit = now;
+      }
+      // Diagnostics + in-VR panel refresh (~4Hz).
+      if (now - this.lastDiagEmit > 250) {
+        const diag = this.buildDiagnostics();
+        this.cb.onDiagnostics?.(diag);
+        if (this.renderer.xr.isPresenting) this.drawVRPanel(diag);
+        this.lastDiagEmit = now;
       }
       this.lastFrameT = now;
     });
