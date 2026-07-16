@@ -714,19 +714,36 @@ export class PanoramaEngine {
     };
 
     let yawAxis = 0;
+    let zoomAxis = 0;
     for (const source of session.inputSources) {
-      if (source.handedness !== "left") continue;
       const gp = source.gamepad;
       if (!gp) continue;
       const axes = gp.axes ?? [];
-      const thumbX = Math.abs(axes[2] ?? 0) > Math.abs(axes[0] ?? 0) ? axes[2] : axes[0];
-      yawAxis = applyCurve(thumbX ?? 0);
-      break;
+      // WebXR standard mapping: axes[2]=stick X, axes[3]=stick Y (fallback 0/1).
+      const stickX = Math.abs(axes[2] ?? 0) > Math.abs(axes[0] ?? 0) ? (axes[2] ?? 0) : (axes[0] ?? 0);
+      const stickY = Math.abs(axes[3] ?? 0) > Math.abs(axes[1] ?? 0) ? (axes[3] ?? 0) : (axes[1] ?? 0);
+      if (source.handedness === "left") {
+        yawAxis = applyCurve(stickX);
+      } else if (source.handedness === "right") {
+        zoomAxis = applyCurve(stickY);
+      }
     }
 
+    // Left stick X → continuous yaw only.
     if (yawAxis !== 0) this.rig.rotation.y -= yawAxis * this.xrYawSpeed * dt;
+    // Lock pitch & roll — no vertical camera tilt, ever.
     this.rig.rotation.x = 0;
     this.rig.rotation.z = 0;
+
+    // Right stick Y → smooth FOV zoom (up = zoom in / smaller FOV).
+    if (zoomAxis !== 0) {
+      const ZOOM_SPEED = 40; // deg/sec at full deflection
+      const MIN_FOV = 30;
+      const MAX_FOV = 100;
+      this.fov = Math.max(MIN_FOV, Math.min(MAX_FOV, this.fov + zoomAxis * ZOOM_SPEED * dt));
+      this.camera.fov = this.fov;
+      this.camera.updateProjectionMatrix();
+    }
   }
 
   // ─── Debug ───────────────────────────────────────────────────────────
