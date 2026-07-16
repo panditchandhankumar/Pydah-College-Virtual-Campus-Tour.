@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { PANORAMAS, type Hotspot, type Panorama } from "@/data/panoramas";
 import { supabase } from "@/integrations/supabase/client";
+import { upsertHotspotOverride, deleteHotspotOverride } from "@/lib/hotspotAdmin.functions";
+
+const ADMIN_TOKEN =
+  (import.meta.env.VITE_ADMIN_PASSWORD as string | undefined) ?? "pydah@admin";
 
 const LS_KEY = "pydah-hotspot-overrides-v1";
 const AUTOSAVE_KEY = "pydah-hotspot-autosave-v1";
