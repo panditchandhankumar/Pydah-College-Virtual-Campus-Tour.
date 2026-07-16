@@ -199,10 +199,10 @@ export class PanoramaEngine {
     this.maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy?.() ?? 1;
     if (this.xr) {
       this.renderer.xr.enabled = true;
-      // Prefer local-floor; if the runtime rejects it (some Quest browser
-      // builds), fall back to "local" so the session still renders.
-      try { this.renderer.xr.setReferenceSpaceType("local-floor"); }
-      catch { try { this.renderer.xr.setReferenceSpaceType("local"); } catch { /* ignore */ } }
+      // Use "local" for the tour viewer. It is the most reliable Meta Quest
+      // reference space for seated/standing panoramas and avoids session-start
+      // failures that otherwise appear as a black headset view.
+      try { this.renderer.xr.setReferenceSpaceType("local"); } catch { /* ignore */ }
       // Apply initial highest-quality preset before session starts so the very
       // first frame in the headset is already crisp (no "wait for downgrade").
       this.applyQuality("crisp");
@@ -835,6 +835,17 @@ export class PanoramaEngine {
   }
 
   getQualityPreset(): QualityPreset { return this.qualityPreset; }
+
+  beginXRSessionRequest() {
+    const target = this.qualityPreset === "auto" ? "crisp" : this.qualityPreset;
+    this.xrSessionStarting = false;
+    this.applyQuality(target);
+    this.xrSessionStarting = true;
+  }
+
+  cancelXRSessionRequest() {
+    this.xrSessionStarting = false;
+  }
 
   private applyQuality(next: Exclude<QualityPreset, "auto">) {
     this.effectivePreset = next;

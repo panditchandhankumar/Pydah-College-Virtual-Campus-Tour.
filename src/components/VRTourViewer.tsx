@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 import { PanoramaEngine, type DebugState, type DiagnosticsState, type QualityPreset } from "@/tour-engine/PanoramaEngine";
 import type { Panorama } from "@/data/panoramas";
 import { useHotspotStore } from "@/lib/hotspotStore";
@@ -44,13 +43,14 @@ function VRIcon({ className }: { className?: string }) {
 export function VRTourViewer({ panorama, onChange }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const visibleBtnRef = useRef<HTMLButtonElement>(null);
-  const hiddenBtnRef = useRef<HTMLButtonElement | null>(null);
+  const xrSessionRef = useRef<any>(null);
   const engineRef = useRef<PanoramaEngine | null>(null);
   const navigate = useNavigate();
   const [status, setStatus] = useState("Loading campus…");
   const [debugOn, setDebugOn] = useDebugMode();
   const [debugState, setDebugState] = useState<DebugState | null>(null);
-  const [vrText, setVrText] = useState("VR NOT SUPPORTED");
+  const [vrText, setVrText] = useState("CHECKING VR…");
+  const [vrDisabled, setVrDisabled] = useState(true);
   const [diag, setDiag] = useState<DiagnosticsState | null>(null);
   const [qPanelOpen, setQPanelOpen] = useState(false);
   const [preset, setPreset] = useState<QualityPreset>("auto");
@@ -71,40 +71,75 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     });
     engine.setQualityPreset("auto");
 
-    // Create the official Three.js VR button but keep it hidden. We render our
-    // own styled button and proxy clicks to it, so Three.js can't clobber our UI.
-    const hiddenBtn = VRButton.createButton(engine.renderer) as HTMLButtonElement;
-    hiddenBtnRef.current = hiddenBtn;
-    hiddenBtn.style.setProperty("display", "none", "important");
-    hiddenBtn.style.setProperty("position", "fixed", "important");
-    hiddenBtn.style.setProperty("inset", "auto", "important");
-    hiddenBtn.style.setProperty("bottom", "0", "important");
-    hiddenBtn.style.setProperty("left", "0", "important");
-    hiddenBtn.style.setProperty("opacity", "0", "important");
-    hiddenBtn.style.setProperty("pointer-events", "none", "important");
-    hiddenBtn.style.setProperty("z-index", "-1", "important");
-    mountRef.current.appendChild(hiddenBtn);
+    const xr = (navigator as Navigator & { xr?: any }).xr;
+    let cancelled = false;
 
-    const syncText = () => {
-      const text = hiddenBtn.textContent || "VR NOT SUPPORTED";
-      setVrText(text);
-      // Mirror the disabled state onto the visible button so users on
-      // non-XR browsers can see the button is inactive instead of clicking
-      // it and getting no response (which reads as a "black screen").
-      const disabled = hiddenBtn.hasAttribute("disabled") ||
-        /not (allowed|supported|found)/i.test(text) ||
-        /https?:/i.test(text);
-      if (visibleBtnRef.current) {
-        visibleBtnRef.current.disabled = disabled;
-        visibleBtnRef.current.style.opacity = disabled ? "0.55" : "1";
-        visibleBtnRef.current.style.cursor = disabled ? "not-allowed" : "pointer";
+    const onSessionEnded = () => {
+      xrSessionRef.current = null;
+      engine.cancelXRSessionRequest();
+      if (!cancelled) {
+        setVrText("ENTER VR");
+        setVrDisabled(false);
       }
     };
-    syncText();
-    const textObserver = new MutationObserver(syncText);
-    textObserver.observe(hiddenBtn, { childList: true, subtree: true, characterData: true, attributes: true });
 
-    const onVisibleClick = () => hiddenBtn.click();
+    if (!xr) {
+      setVrText(window.isSecureContext ? "VR NOT AVAILABLE" : "WEBXR NEEDS HTTPS");
+      setVrDisabled(true);
+    } else {
+      xr.isSessionSupported("immersive-vr")
+        .then((supported: boolean) => {
+          if (cancelled) return;
+          setVrText(supported ? "ENTER VR" : "VR NOT SUPPORTED");
+          setVrDisabled(!supported);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setVrText("VR NOT ALLOWED");
+          setVrDisabled(true);
+        });
+    }
+
+    const onVisibleClick = async () => {
+      if (!xr || vrDisabled) return;
+      if (xrSessionRef.current) {
+        try { await xrSessionRef.current.end(); } catch { /* ignore */ }
+        return;
+      }
+
+      setVrDisabled(true);
+      setVrText("OPENING VR…");
+      setStatus("Opening VR…");
+      engine.beginXRSessionRequest();
+
+      let session: any = null;
+      try {
+        // Do not request the WebXR Layers feature here. Three.js' stock VRButton
+        // adds it by default, which forces XRProjectionLayer on Quest Browser;
+        // that path is the common cause of accepted sessions rendering black.
+        session = await xr.requestSession("immersive-vr", {
+          optionalFeatures: ["bounded-floor", "hand-tracking"],
+        });
+        session.addEventListener("end", onSessionEnded, { once: true });
+        xrSessionRef.current = session;
+        await engine.renderer.xr.setSession(session);
+        if (cancelled) return;
+        setVrText("EXIT VR");
+        setVrDisabled(false);
+        setStatus("");
+      } catch (err) {
+        console.warn("Unable to start WebXR session", err);
+        engine.cancelXRSessionRequest();
+        xrSessionRef.current = null;
+        try { await session?.end?.(); } catch { /* ignore */ }
+        if (!cancelled) {
+          setVrText("ENTER VR");
+          setVrDisabled(false);
+          setStatus("VR could not start. Please try again.");
+          window.setTimeout(() => setStatus(""), 1800);
+        }
+      }
+    };
     visibleBtnRef.current?.addEventListener("click", onVisibleClick);
 
     engine.setPanorama(panorama.id, false);
@@ -119,13 +154,13 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     });
 
     return () => {
-      textObserver.disconnect();
+      cancelled = true;
       visibleBtnRef.current?.removeEventListener("click", onVisibleClick);
       unsubscribe();
-      try { hiddenBtn.remove(); } catch { /* ignore */ }
+      try { xrSessionRef.current?.end?.(); } catch { /* ignore */ }
       engine.dispose();
       engineRef.current = null;
-      hiddenBtnRef.current = null;
+      xrSessionRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -148,7 +183,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       >
         <button
           ref={visibleBtnRef}
+          disabled={vrDisabled}
           className="inline-flex items-center justify-center gap-2.5 rounded-full border-2 border-white/35 bg-[rgba(0,33,71,0.92)] px-6 py-3 text-[15px] font-bold uppercase tracking-wider text-white shadow-[0_8px_32px_rgba(0,0,0,0.55)] transition hover:opacity-90 active:scale-95 whitespace-nowrap"
+          style={{ opacity: vrDisabled ? 0.55 : 1, cursor: vrDisabled ? "not-allowed" : "pointer" }}
         >
           <VRIcon className="h-[22px] w-[22px] flex-shrink-0" />
           {vrText}
