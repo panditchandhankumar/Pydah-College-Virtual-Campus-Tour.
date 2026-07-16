@@ -87,6 +87,43 @@ const QUALITY_TABLE: Record<Exclude<QualityPreset, "auto">, QualityRow> = {
   performance: { framebufferScale: 1.0, foveation: 0.6, mipmaps: true, minFilter: "mipmap-nearest", anisoFactor: 0.25 },
 };
 
+function createQuestStableRenderer(params: THREE.WebGLRendererParameters) {
+  const win = window as Window & { XRWebGLBinding?: unknown };
+  const originalDescriptor = Object.getOwnPropertyDescriptor(win, "XRWebGLBinding");
+  const originalValue = win.XRWebGLBinding;
+  let masked = false;
+
+  // Quest Browser can expose WebXR Layers but still return a black projection
+  // layer after refresh/re-entry. Three.js decides between XRProjectionLayer and
+  // XRWebGLLayer when WebGLRenderer is constructed, so mask XRWebGLBinding only
+  // for this constructor call and force the stable XRWebGLLayer path.
+  if (originalValue) {
+    try {
+      Object.defineProperty(win, "XRWebGLBinding", {
+        configurable: true,
+        writable: true,
+        value: undefined,
+      });
+      masked = true;
+    } catch {
+      masked = false;
+    }
+  }
+
+  try {
+    return new THREE.WebGLRenderer(params);
+  } finally {
+    if (masked) {
+      try {
+        if (originalDescriptor) Object.defineProperty(win, "XRWebGLBinding", originalDescriptor);
+        else win.XRWebGLBinding = originalValue;
+      } catch {
+        try { win.XRWebGLBinding = originalValue; } catch { /* ignore */ }
+      }
+    }
+  }
+}
+
 export interface EngineOptions {
   /** Enable WebGL renderer.xr — required for VR wrapper. */
   xr?: boolean;
@@ -184,11 +221,14 @@ export class PanoramaEngine {
     this.rig.add(this.camera);
     this.scene.add(this.rig);
 
-    this.renderer = new THREE.WebGLRenderer({
+    const rendererParams = {
       antialias: true,
       powerPreference: "high-performance",
       xrCompatible: true,
-    } as THREE.WebGLRendererParameters);
+    } as THREE.WebGLRendererParameters & { xrCompatible: boolean };
+    this.renderer = this.xr
+      ? createQuestStableRenderer(rendererParams)
+      : new THREE.WebGLRenderer(rendererParams);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(mount.clientWidth, mount.clientHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -246,7 +286,7 @@ export class PanoramaEngine {
     // color instead of pure black.
     const geom = new THREE.SphereGeometry(SPHERE_RADIUS, 128, 96);
     geom.scale(-1, 1, 1);
-    this.sphereMat = new THREE.MeshBasicMaterial({ color: 0x1a2540 });
+    this.sphereMat = new THREE.MeshBasicMaterial({ color: 0x1a2540, side: THREE.DoubleSide });
     this.sphere = new THREE.Mesh(geom, this.sphereMat);
     this.scene.add(this.sphere);
 
