@@ -147,6 +147,7 @@ export class PanoramaEngine {
       // never enter with a stale desktop rotation / rig offset / opaque fade
       // overlay (any of which would show as a "black screen" in VR).
       this.renderer.xr.addEventListener("sessionstart", () => {
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         this.rig.position.set(0, 0, 0);
         this.rig.rotation.set(0, 0, 0);
         this.camera.position.set(0, 0, 0);
@@ -207,6 +208,18 @@ export class PanoramaEngine {
     };
     window.addEventListener("resize", onResize);
     this.disposables.push(() => window.removeEventListener("resize", onResize));
+
+    if (this.xr) {
+      const preventJoystickUiFocus = (event: KeyboardEvent) => {
+        if (!this.renderer.xr.isPresenting) return;
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "Spacebar"].includes(event.key)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      };
+      document.addEventListener("keydown", preventJoystickUiFocus, true);
+      this.disposables.push(() => document.removeEventListener("keydown", preventJoystickUiFocus, true));
+    }
   }
 
   setCallbacks(cb: EngineCallbacks) { this.cb = cb; }
