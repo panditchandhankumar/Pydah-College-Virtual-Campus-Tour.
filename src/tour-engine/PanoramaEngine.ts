@@ -221,11 +221,11 @@ export class PanoramaEngine {
     this.rig.add(this.camera);
     this.scene.add(this.rig);
 
-    const rendererParams: THREE.WebGLRendererParameters = {
+    const rendererParams = {
       antialias: true,
       powerPreference: "high-performance",
       xrCompatible: true,
-    };
+    } as THREE.WebGLRendererParameters & { xrCompatible: boolean };
     this.renderer = this.xr
       ? createQuestStableRenderer(rendererParams)
       : new THREE.WebGLRenderer(rendererParams);
