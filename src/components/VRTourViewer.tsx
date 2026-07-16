@@ -51,6 +51,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   const [debugOn, setDebugOn] = useDebugMode();
   const [debugState, setDebugState] = useState<DebugState | null>(null);
   const [vrText, setVrText] = useState("VR NOT SUPPORTED");
+  const [diag, setDiag] = useState<DiagnosticsState | null>(null);
+  const [qPanelOpen, setQPanelOpen] = useState(false);
+  const [preset, setPreset] = useState<QualityPreset>("auto");
 
 
   useEffect(() => {
@@ -64,7 +67,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       onLoadEnd: () => setStatus(""),
       onLoadError: () => setStatus("Failed to load panorama."),
       onDebug: setDebugState,
+      onDiagnostics: setDiag,
     });
+    engine.setQualityPreset("auto");
 
     // Create the official Three.js VR button but keep it hidden. We render our
     // own styled button and proxy clicks to it, so Three.js can't clobber our UI.
