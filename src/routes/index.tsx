@@ -37,10 +37,10 @@ export const Route = createFileRoute("/")({
         content:
           "Walk through PYDAH College in cinematic 360°. Explore departments, labs, hostels, and green spaces from anywhere in the world.",
       },
-      { property: "og:title", content: "PYDAH College — Immersive Virtual Campus Tour" },
+      { property: "og:title", content: "PYDAH College — Immersive 360° Virtual Campus Tour" },
       {
         property: "og:description",
-        content: "A cinematic 360° tour of every department, lab and green space at PYDAH College of Engineering.",
+        content: "Walk through PYDAH College in cinematic 360°. Explore departments, labs, hostels, and green spaces from anywhere in the world.",
       },
     ],
     links: [{ rel: "preload", as: "image", href: campusAsset.url, fetchPriority: "high" }],
