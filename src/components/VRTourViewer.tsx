@@ -136,21 +136,24 @@ export function VRTourViewer({ panorama, onChange }: Props) {
     };
 
     const recoverFromFailedStart = async (message: string, session?: any) => {
+      vrLog("error", `Recovering: ${message}`);
       vrStartAttemptRef.current += 1;
       vrStartInFlightRef.current = false;
       canStartVrRef.current = false;
       clearSessionEndListener();
       engine.cancelXRSessionRequest();
       xrSessionRef.current = null;
-      try { await session?.end?.(); } catch { /* ignore */ }
+      try { await session?.end?.(); vrLog("info", "Prior session ended cleanly"); } catch (e) { vrLog("warn", `session.end() threw: ${(e as Error)?.message ?? e}`); }
       if (!cancelled) {
         setVrError(true);
         setStatus(message);
         setReadyToEnter();
+        vrLog("info", "Retry VR is now available");
       }
     };
 
     const onSessionEnded = () => {
+      vrLog("info", "XR session ended");
       clearSessionEndListener();
       xrSessionRef.current = null;
       engine.cancelXRSessionRequest();
@@ -164,28 +167,37 @@ export function VRTourViewer({ panorama, onChange }: Props) {
 
     if (!xr) {
       canStartVrRef.current = false;
-      setVrText(window.isSecureContext ? "VR NOT AVAILABLE" : "WEBXR NEEDS HTTPS");
+      const label = window.isSecureContext ? "VR NOT AVAILABLE" : "WEBXR NEEDS HTTPS";
+      setVrText(label);
       setVrDisabled(true);
+      vrLog("warn", `navigator.xr unavailable → ${label}`);
     } else {
+      vrLog("info", "Checking immersive-vr support…");
       withTimeout<boolean>(xr.isSessionSupported("immersive-vr") as Promise<boolean>, 6_000, "VR support check")
         .then((supported: boolean) => {
           if (cancelled) return;
           canStartVrRef.current = supported;
           setVrText(supported ? "ENTER VR" : "VR NOT SUPPORTED");
           setVrDisabled(!supported);
+          vrLog(supported ? "info" : "warn", `isSessionSupported → ${supported}`);
         })
-        .catch(() => {
+        .catch((e) => {
           if (cancelled) return;
           canStartVrRef.current = false;
           setVrText("VR NOT ALLOWED");
           setVrDisabled(true);
+          vrLog("error", `Support check failed: ${(e as Error)?.message ?? e}`);
         });
     }
 
     const onVisibleClick = async () => {
-      if (!xr || !canStartVrRef.current || vrStartInFlightRef.current) return;
+      if (!xr || !canStartVrRef.current || vrStartInFlightRef.current) {
+        vrLog("warn", `Click ignored (xr=${!!xr} canStart=${canStartVrRef.current} inFlight=${vrStartInFlightRef.current})`);
+        return;
+      }
       if (xrSessionRef.current) {
-        try { await xrSessionRef.current.end(); } catch { /* ignore */ }
+        vrLog("info", "Exit VR requested — ending session");
+        try { await xrSessionRef.current.end(); } catch (e) { vrLog("warn", `end() failed: ${(e as Error)?.message ?? e}`); }
         return;
       }
 
@@ -198,15 +210,14 @@ export function VRTourViewer({ panorama, onChange }: Props) {
       setStatus("Opening VR…");
       setVrError(false);
       engine.beginXRSessionRequest();
+      vrLog("info", `Attempt #${attemptId}: requesting XR session (timeout ${VR_START_TIMEOUT_MS}ms)`);
 
       let session: any = null;
       try {
-        // Do not request the WebXR Layers feature here. Three.js' stock VRButton
-        // adds it by default, which forces XRProjectionLayer on Quest Browser;
-        // that path is the common cause of accepted sessions rendering black.
         const requestSession = xr.requestSession("immersive-vr", {
           optionalFeatures: ["local-floor", "bounded-floor", "hand-tracking"],
         }).then((startedSession: any) => {
+          vrLog("info", "Browser resolved requestSession()");
           if (cancelled || attemptId !== vrStartAttemptRef.current) {
             try { startedSession?.end?.(); } catch { /* ignore */ }
             throw new DOMException("VR start was cancelled", "AbortError");
@@ -215,6 +226,7 @@ export function VRTourViewer({ panorama, onChange }: Props) {
         });
         requestSession.catch(() => { /* consumed by timeout race */ });
         session = await withTimeout(requestSession, VR_START_TIMEOUT_MS, "VR session request");
+        vrLog("info", "Session acquired — attaching to renderer");
 
         clearSessionEndListener();
         session.addEventListener("end", onSessionEnded, { once: true });
@@ -225,9 +237,11 @@ export function VRTourViewer({ panorama, onChange }: Props) {
           await recoverFromFailedStart("VR startup was cancelled. Please retry.", session);
           return;
         }
+        vrLog("info", "VR renderer attached — entering headset");
         vrStartInFlightRef.current = false;
         canStartVrRef.current = true;
         setVrText("EXIT VR");
+
         setVrDisabled(false);
         setStatus("");
         setVrError(false);
