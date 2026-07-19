@@ -85,9 +85,19 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   const [qPanelOpen, setQPanelOpen] = useState(false);
   const [preset, setPreset] = useState<QualityPreset>("auto");
   const [vrError, setVrError] = useState(false);
+  const [vrLogs, setVrLogs] = useState<VrLog[]>([]);
+  const [logsOpen, setLogsOpen] = useState(false);
+  const logRef = useRef<(level: VrLog["level"], msg: string) => void>(() => {});
+  logRef.current = (level, msg) => {
+    const entry: VrLog = { ts: Date.now(), level, msg };
+    setVrLogs((prev) => [...prev.slice(-49), entry]);
+    const line = `[VR] ${msg}`;
+    if (level === "error") console.error(line);
+    else if (level === "warn") console.warn(line);
+    else console.info(line);
+  };
+  const vrLog = (level: VrLog["level"], msg: string) => logRef.current(level, msg);
 
-
-  useEffect(() => {
     if (!mountRef.current) return;
     const engine = new PanoramaEngine(mountRef.current, { xr: true });
     engineRef.current = engine;
