@@ -409,7 +409,54 @@ export function VRTourViewer({ panorama, onChange }: Props) {
           </p>
         </div>
       )}
+
+      {/* VR diagnostics log launcher */}
+      <button
+        onClick={() => setLogsOpen((v) => !v)}
+        title="VR startup logs"
+        className="absolute right-3 top-14 z-40 inline-flex items-center gap-2 rounded-full bg-black/70 px-3 py-2 text-[11px] font-semibold text-white ring-1 ring-white/20 backdrop-blur hover:bg-black/85"
+      >
+        <Terminal className="h-3.5 w-3.5 text-emerald-300" />
+        <span>Logs ({vrLogs.length})</span>
+      </button>
+
+      {logsOpen && (
+        <div className="absolute right-3 top-[100px] z-40 w-[360px] max-w-[92vw] rounded-xl border border-white/15 bg-black/90 p-3 text-[11px] text-white shadow-2xl backdrop-blur-xl">
+          <div className="mb-2 flex items-center justify-between border-b border-white/10 pb-2">
+            <p className="flex items-center gap-1.5 font-bold text-emerald-300">
+              <Terminal className="h-3.5 w-3.5" /> VR Diagnostics
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setVrLogs([])}
+                className="rounded-md bg-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider hover:bg-white/20"
+              >
+                Clear
+              </button>
+              <button onClick={() => setLogsOpen(false)} className="grid h-6 w-6 place-items-center rounded-full hover:bg-white/10">
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto font-mono leading-snug">
+            {vrLogs.length === 0 ? (
+              <p className="py-6 text-center text-white/50">No VR events yet. Tap Enter VR to begin.</p>
+            ) : (
+              vrLogs.map((l, i) => {
+                const color = l.level === "error" ? "text-red-300" : l.level === "warn" ? "text-amber-300" : "text-white/85";
+                const time = new Date(l.ts).toLocaleTimeString(undefined, { hour12: false });
+                return (
+                  <div key={i} className={`${color} border-b border-white/5 py-1`}>
+                    <span className="text-white/40">{time}</span> {l.msg}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
+
   );
 
 }
