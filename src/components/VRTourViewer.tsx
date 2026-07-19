@@ -4,12 +4,15 @@ import { PanoramaEngine, type DebugState, type DiagnosticsState, type QualityPre
 import type { Panorama } from "@/data/panoramas";
 import { useHotspotStore } from "@/lib/hotspotStore";
 import { DebugHUD, useDebugMode } from "./DebugHUD";
-import { Gauge, Sliders, X } from "lucide-react";
+import { Gauge, Sliders, X, Terminal } from "lucide-react";
 
 interface Props {
   panorama: Panorama;
   onChange: (id: string) => void;
 }
+
+type VrLog = { ts: number; level: "info" | "warn" | "error"; msg: string };
+
 
 const VR_START_TIMEOUT_MS = 15_000;
 
