@@ -311,13 +311,28 @@ export function VRTourViewer({ panorama, onChange }: Props) {
             {!vrError && <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-accent" />}
             <p className="text-sm">{status}</p>
             {vrError && (
-              <button
-                onClick={() => visibleBtnRef.current?.click()}
-                className="mt-1 rounded-full bg-cyan-400 px-5 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-cyan-300"
-              >
-                Retry VR
-              </button>
+              <div className="flex flex-col items-stretch gap-2">
+                <button
+                  onClick={() => {
+                    setVrError(false);
+                    setStatus("");
+                    vrLog("info", "User tapped Retry VR");
+                    // Defer to next tick so state resets before the click re-fires.
+                    setTimeout(() => visibleBtnRef.current?.click(), 0);
+                  }}
+                  className="rounded-full bg-cyan-400 px-5 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-cyan-300"
+                >
+                  Retry VR
+                </button>
+                <button
+                  onClick={() => setLogsOpen(true)}
+                  className="rounded-full bg-white/10 px-5 py-2 text-[11px] font-semibold uppercase tracking-wider text-white/90 hover:bg-white/20"
+                >
+                  View diagnostics
+                </button>
+              </div>
             )}
+
           </div>
         </div>
       )}
