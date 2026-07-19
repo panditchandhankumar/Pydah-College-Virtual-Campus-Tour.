@@ -98,7 +98,9 @@ export function VRTourViewer({ panorama, onChange }: Props) {
   };
   const vrLog = (level: VrLog["level"], msg: string) => logRef.current(level, msg);
 
+  useEffect(() => {
     if (!mountRef.current) return;
+
     const engine = new PanoramaEngine(mountRef.current, { xr: true });
     engineRef.current = engine;
 
